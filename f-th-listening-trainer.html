@@ -323,6 +323,32 @@
   }
   .next-btn.secondary:hover { background: #eff6ff; }
 
+  /* Replay button (during quiz) */
+  .replay-quiz-btn {
+    display: block;
+    margin: 8px auto 4px;
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .replay-quiz-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Preview actions row */
+  .preview-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 6px;
+  }
+
   /* Progress bar */
   .progress-wrap {
     width: 100%;
@@ -586,8 +612,10 @@
       <p class="preview-label">🎧 暖耳：先聽一遍本回合會出現的單詞</p>
       <div class="preview-word" id="previewWord"></div>
       <button class="play-btn" id="previewPlayBtn" title="Play word">▶</button>
-      <p style="font-size:0.72rem;color:var(--text-muted)">Space 播放　Enter 下一詞</p>
       <p class="preview-progress" id="previewProgress"></p>
+      <div class="preview-actions">
+        <button class="next-btn" id="previewNextBtn">下一詞 →</button>
+      </div>
       <button class="skip-preview-btn" id="skipPreviewBtn">跳過暖耳，直接開始</button>
     </div>
 
@@ -604,6 +632,8 @@
     <div class="progress-wrap" id="progressWrap" style="display:none">
       <div class="progress-fill" id="progressFill" style="width:0%"></div>
     </div>
+
+    <button class="replay-quiz-btn" id="replayQuizBtn" style="display:none">🔁 重播</button>
 
     <div class="answer-buttons" id="answerButtons" style="display:none">
       <button class="answer-btn f-btn" id="fBtn" disabled>
@@ -738,6 +768,8 @@ const playSection = $('playSection');
 const previewSection = $('previewSection');
 const previewWord = $('previewWord');
 const previewPlayBtn = $('previewPlayBtn');
+const previewNextBtn = $('previewNextBtn');
+const replayQuizBtn = $('replayQuizBtn');
 const previewProgress = $('previewProgress');
 const skipPreviewBtn = $('skipPreviewBtn');
 const exportReportBtn = $('exportReportBtn');
@@ -1019,6 +1051,7 @@ function showPlayState() {
   revealBtn.style.display = 'none';
   reviewSection.style.display = 'none';
   summary.style.display = 'none';
+  replayQuizBtn.style.display = 'none';
   playBtn.classList.remove('playing');
   fBtn.disabled = true;
   thBtn.disabled = true;
@@ -1056,6 +1089,7 @@ async function handlePlay() {
     progressWrap.style.display = 'block';
     updateProgress();
     answerButtons.style.display = 'flex';
+    replayQuizBtn.style.display = 'block';
     answeredHint.style.display = 'none';
     nextBtn.style.display = 'none';
     revealBtn.style.display = 'none';
@@ -1134,6 +1168,7 @@ function handleReveal() {
   roundInfo.style.display = 'none';
   progressWrap.style.display = 'none';
   answerButtons.style.display = 'none';
+  replayQuizBtn.style.display = 'none';
   answeredHint.style.display = 'none';
   nextBtn.style.display = 'none';
   revealBtn.style.display = 'none';
@@ -1481,6 +1516,8 @@ function switchStage(stage) {
 // ============================================================
 playBtn.addEventListener('click', handlePlay);
 previewPlayBtn.addEventListener('click', handlePreviewPlay);
+previewNextBtn.addEventListener('click', handlePreviewNext);
+replayQuizBtn.addEventListener('click', handlePlay);
 skipPreviewBtn.addEventListener('click', skipPreview);
 fBtn.addEventListener('click', () => handleAnswer('f'));
 thBtn.addEventListener('click', () => handleAnswer('th'));
