@@ -719,6 +719,7 @@ let state = {
   currentItem: null,
   hasPlayed: false,
   hasAnswered: false,
+  currentSelection: null,
   roundAnswers: [],
   roundRevealed: false,
   voicePool: [],
@@ -924,6 +925,7 @@ function startRound() {
   state.roundRevealed = false;
   state.hasPlayed = false;
   state.hasAnswered = false;
+  state.currentSelection = null;
 
   // Build preview: unique words from this round + bonus difficult pairs
   const seen = new Set();
@@ -1047,58 +1049,74 @@ async function handlePlay() {
   playBtn.classList.remove('playing');
   playHint.textContent = '點擊重播';
 
-  playSection.style.display = 'none';
-  roundInfo.style.display = 'block';
-  roundNum.textContent = state.currentIndex + 1;
-  progressWrap.style.display = 'block';
-  updateProgress();
-  answerButtons.style.display = 'flex';
-  answeredHint.style.display = 'none';
-  nextBtn.style.display = 'none';
-  revealBtn.style.display = 'none';
-  fBtn.disabled = false;
-  thBtn.disabled = false;
-  fBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
-  thBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
-  state.hasPlayed = true;
-  state.hasAnswered = false;
+  if (!state.hasPlayed) {
+    playSection.style.display = 'none';
+    roundInfo.style.display = 'block';
+    roundNum.textContent = state.currentIndex + 1;
+    progressWrap.style.display = 'block';
+    updateProgress();
+    answerButtons.style.display = 'flex';
+    answeredHint.style.display = 'none';
+    nextBtn.style.display = 'none';
+    revealBtn.style.display = 'none';
+    fBtn.disabled = false;
+    thBtn.disabled = false;
+    fBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+    thBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+    state.currentSelection = null;
+    state.hasPlayed = true;
+  }
 }
 
 function handleAnswer(choice) {
-  if (!state.hasPlayed || state.hasAnswered || state.roundRevealed) return;
-  state.hasAnswered = true;
+  if (!state.hasPlayed || state.roundRevealed) return;
 
-  const item = state.currentItem;
-  const isCorrect = (choice === item.sound);
-  state.roundAnswers.push({ choice, correct: isCorrect, item });
-
-  fBtn.disabled = true;
-  thBtn.disabled = true;
-  if (choice === 'f') {
-    fBtn.classList.add('selected-choice');
-    thBtn.classList.add('unselected-choice');
-  } else {
-    thBtn.classList.add('selected-choice');
-    fBtn.classList.add('unselected-choice');
-  }
-  answeredHint.style.display = 'block';
-
-  if (state.currentIndex >= ROUND_SIZE - 1) {
-    revealBtn.style.display = 'inline-block';
-    revealBtn.textContent = '公布答案';
+  if (state.currentSelection === choice) {
+    // Clicking same button → deselect
+    state.currentSelection = null;
+    fBtn.classList.remove('selected-choice', 'unselected-choice');
+    thBtn.classList.remove('selected-choice', 'unselected-choice');
+    answeredHint.style.display = 'none';
     nextBtn.style.display = 'none';
-    progressFill.style.width = '100%';
-  } else {
-    nextBtn.style.display = 'inline-block';
     revealBtn.style.display = 'none';
+  } else {
+    // Select this choice (first select, or switch from other)
+    state.currentSelection = choice;
+    if (choice === 'f') {
+      fBtn.classList.add('selected-choice');
+      fBtn.classList.remove('unselected-choice');
+      thBtn.classList.remove('selected-choice');
+      thBtn.classList.add('unselected-choice');
+    } else {
+      thBtn.classList.add('selected-choice');
+      thBtn.classList.remove('unselected-choice');
+      fBtn.classList.remove('selected-choice');
+      fBtn.classList.add('unselected-choice');
+    }
+    answeredHint.style.display = 'block';
+
+    if (state.currentIndex >= ROUND_SIZE - 1) {
+      revealBtn.style.display = 'inline-block';
+      revealBtn.textContent = '公布答案';
+      nextBtn.style.display = 'none';
+      progressFill.style.width = '100%';
+    } else {
+      nextBtn.style.display = 'inline-block';
+      revealBtn.style.display = 'none';
+    }
   }
 }
 
 function handleNext() {
+  if (state.currentSelection) {
+    const item = state.currentItem;
+    const isCorrect = (state.currentSelection === item.sound);
+    state.roundAnswers.push({ choice: state.currentSelection, correct: isCorrect, item });
+  }
   state.currentIndex++;
   state.hasPlayed = false;
-  state.hasAnswered = false;
   state.currentItem = null;
+  state.currentSelection = null;
   showPlayState();
 }
 
@@ -1106,6 +1124,11 @@ function handleNext() {
 // Reveal & Review
 // ============================================================
 function handleReveal() {
+  if (state.currentSelection) {
+    const item = state.currentItem;
+    const isCorrect = (state.currentSelection === item.sound);
+    state.roundAnswers.push({ choice: state.currentSelection, correct: isCorrect, item });
+  }
   state.roundRevealed = true;
   playSection.style.display = 'none';
   roundInfo.style.display = 'none';
@@ -1502,20 +1525,20 @@ document.addEventListener('keydown', (e) => {
     if (state.roundRevealed) return;
     handlePlay();
   }
-  if (e.key === 'ArrowLeft' && state.hasPlayed && !state.hasAnswered) {
+  if (e.key === 'ArrowLeft' && state.hasPlayed) {
     e.preventDefault();
     handleAnswer('f');
   }
-  if (e.key === 'ArrowRight' && state.hasPlayed && !state.hasAnswered) {
+  if (e.key === 'ArrowRight' && state.hasPlayed) {
     e.preventDefault();
     handleAnswer('th');
   }
   if (e.key === 'Enter') {
     e.preventDefault();
     if (state.roundRevealed) return;
-    if (state.hasAnswered && state.currentIndex < ROUND_SIZE - 1) {
+    if (state.currentSelection && state.currentIndex < ROUND_SIZE - 1) {
       handleNext();
-    } else if (state.hasAnswered && state.currentIndex >= ROUND_SIZE - 1 && !state.roundRevealed) {
+    } else if (state.currentSelection && state.currentIndex >= ROUND_SIZE - 1 && !state.roundRevealed) {
       handleReveal();
     }
   }
