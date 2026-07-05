@@ -217,6 +217,11 @@
     font-weight: 400;
     margin-left: 6px;
   }
+  .preview-word .target-word {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 2px;
+  }
   .preview-progress {
     font-size: 0.75rem;
     color: var(--text-muted);
@@ -1012,7 +1017,8 @@ function showPreviewState() {
   previewPlayBtn.classList.remove('playing');
 
   const w = state.previewWords[state.previewIndex];
-  const label = w.sentence || `${w.word} <span class="ipa-sub">${w.ipa}</span>`;
+  const isStage3 = state.stage === 3 && w.sentence;
+  const label = isStage3 ? highlightTargetWord(w.sentence, w.word) : (w.sentence || `${w.word} <span class="ipa-sub">${w.ipa}</span>`);
   previewWord.innerHTML = label;
   previewProgress.textContent = `${state.previewIndex + 1} / ${state.previewWords.length}`;
 }
@@ -1064,6 +1070,13 @@ function showPlayState() {
 function updateProgress() {
   const pct = Math.round((state.currentIndex / ROUND_SIZE) * 100);
   progressFill.style.width = `${pct}%`;
+}
+
+// Highlight target word in sentence for Stage 3 preview
+function highlightTargetWord(sentence, word) {
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+  return sentence.replace(regex, match => `<span class="target-word">${match}</span>`);
 }
 
 // ============================================================
