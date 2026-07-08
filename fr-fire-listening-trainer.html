@@ -414,6 +414,33 @@
     color: var(--text-muted);
     font-weight: 400;
   }
+  .review-play-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    cursor: pointer;
+    font-size: 0.75rem;
+    margin-left: 6px;
+    vertical-align: middle;
+    transition: all 0.15s;
+    padding: 0;
+    color: var(--text-muted);
+  }
+  .review-play-btn:hover {
+    border-color: var(--accent);
+    background: #eff6ff;
+    color: var(--accent);
+  }
+  .review-play-btn.playing-review {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #f59e0b;
+  }
 
   /* Summary */
   .summary {
@@ -1192,7 +1219,7 @@ function handleReveal() {
 
   let html = '<h3>本輪回顧</h3>';
   html += '<table class="review-table"><thead><tr>';
-  html += '<th>#</th><th>播放內容</th><th>實際</th><th>你的答案</th><th></th>';
+  html += '<th>#</th><th>播放內容</th><th></th><th>實際</th><th>你的答案</th><th></th>';
   html += '</tr></thead><tbody>';
 
   state.roundAnswers.forEach((a, i) => {
@@ -1208,6 +1235,7 @@ function handleReveal() {
     html += `<tr class="${rowClass}">`;
     html += `<td>${i + 1}</td>`;
     html += `<td><span class="word-cell">${wordLabel}</span>${ipaLabel}</td>`;
+    html += `<td><button class="review-play-btn" data-play-text="${(item.sentence || item.word).replace(/"/g, '&quot;')}">▶</button></td>`;
     html += `<td style="font-weight:600">${actualSound}</td>`;
     html += `<td>${yourSound}</td>`;
     html += `<td class="result-icon" style="color:${a.correct ? 'var(--correct)' : 'var(--incorrect)'}">${icon}</td>`;
@@ -1593,6 +1621,18 @@ document.addEventListener('keydown', (e) => {
       handleReveal();
     }
   }
+});
+
+// Review play buttons — event delegation
+reviewSection.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.review-play-btn');
+  if (!btn) return;
+  const text = btn.dataset.playText;
+  btn.classList.add('playing-review');
+  btn.textContent = '⏳';
+  await speak(text);
+  btn.classList.remove('playing-review');
+  btn.textContent = '▶';
 });
 
 // ============================================================
