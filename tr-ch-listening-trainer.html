@@ -442,6 +442,66 @@
     color: #f59e0b;
   }
 
+  /* Contrast toggle */
+  .contrast-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+  }
+  .contrast-toggle-wrap label {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .contrast-toggle-wrap input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: var(--accent);
+  }
+  .contrast-col { display: none; }
+  .review-section.show-contrast .contrast-col { display: table-cell; }
+  .contrast-word {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    opacity: 0.70;
+    white-space: nowrap;
+  }
+  .contrast-play-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    cursor: pointer;
+    font-size: 0.65rem;
+    margin-right: 4px;
+    vertical-align: middle;
+    transition: all 0.15s;
+    padding: 0;
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+  .contrast-play-btn:hover {
+    border-color: var(--accent);
+    background: #eff6ff;
+    color: var(--accent);
+    opacity: 1;
+  }
+  .contrast-play-btn.playing-review {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #f59e0b;
+    opacity: 1;
+  }
+
   /* Summary */
   .summary {
     text-align: center;
@@ -765,6 +825,19 @@ const WORD_BANKS = {
     { sentence: 'He is a friendly chap from London.', sound: 'ch', word: 'chap' },
   ],
 };
+
+// Build contrast-pair map from adjacent entries in word banks
+const CONTRAST_MAP = {};
+(function buildContrastMap() {
+  for (const stageData of Object.values(WORD_BANKS)) {
+    for (let i = 0; i < stageData.length - 1; i += 2) {
+      const a = stageData[i], b = stageData[i + 1];
+      if (a.sound === b.sound) continue;
+      CONTRAST_MAP[a.word] = { word: b.word, ipa: b.ipa || '', sentence: b.sentence || '' };
+      CONTRAST_MAP[b.word] = { word: a.word, ipa: a.ipa || '', sentence: a.sentence || '' };
+    }
+  }
+})();
 
 const ROUND_SIZE = 10;
 const UNLOCK_THRESHOLD = 0.8;
@@ -1245,8 +1318,9 @@ function handleReveal() {
   const correctCount = state.roundAnswers.filter(a => a.correct).length;
 
   let html = '<h3>本輪回顧</h3>';
+  html += '<div class="contrast-toggle-wrap"><label><input type="checkbox" id="contrastToggle" onchange="toggleContrast()"> 顯示對比詞</label></div>';
   html += '<table class="review-table"><thead><tr>';
-  html += '<th>#</th><th>播放內容</th><th></th><th>實際</th><th>你的答案</th><th></th>';
+  html += '<th>#</th><th>播放內容</th><th></th><th class="contrast-col"></th><th>實際</th><th>你的答案</th><th></th>';
   html += '</tr></thead><tbody>';
 
   state.roundAnswers.forEach((a, i) => {
@@ -1263,6 +1337,11 @@ function handleReveal() {
     html += `<td>${i + 1}</td>`;
     html += `<td><span class="word-cell">${wordLabel}</span>${ipaLabel}</td>`;
     html += `<td><button class="review-play-btn" data-play-text="${(item.sentence || item.word).replace(/"/g, '&quot;')}">▶</button></td>`;
+    const contrast = CONTRAST_MAP[item.word];
+    const contrastHtml = contrast
+      ? `<button class="contrast-play-btn" data-play-text="${contrast.word.replace(/"/g, '&quot;')}">▶</button> <span class="contrast-word">${contrast.word} <span class="ipa-cell">${contrast.ipa}</span></span>`
+      : '';
+    html += `<td class="contrast-col">${contrastHtml}</td>`;
     html += `<td style="font-weight:600">${actualSound}</td>`;
     html += `<td>${yourSound}</td>`;
     html += `<td class="result-icon" style="color:${a.correct ? 'var(--correct)' : 'var(--incorrect)'}">${icon}</td>`;
@@ -1665,7 +1744,7 @@ document.addEventListener('keydown', (e) => {
 
 // Review play buttons — event delegation (play twice, different voices)
 reviewSection.addEventListener('click', async (e) => {
-  const btn = e.target.closest('.review-play-btn');
+  const btn = e.target.closest('.review-play-btn, .contrast-play-btn');
   if (!btn) return;
   if (btn.classList.contains('playing-review')) return;
   const text = btn.dataset.playText;
@@ -1679,6 +1758,11 @@ reviewSection.addEventListener('click', async (e) => {
   btn.classList.remove('playing-review');
   btn.textContent = '▶';
 });
+
+// Contrast toggle
+function toggleContrast() {
+  reviewSection.classList.toggle('show-contrast');
+}
 
 // ============================================================
 // Init
