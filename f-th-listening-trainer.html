@@ -861,6 +861,7 @@ let state = {
   previewMode: false,
   previewWords: [],
   previewIndex: 0,
+  lastReviewVoice: null,   // track last voice for variety across clicks
 };
 
 // ============================================================
@@ -950,6 +951,15 @@ function pickVoice() {
   if (state.voicePool.length === 0) return null;
   const idx = Math.floor(Math.random() * state.voicePool.length);
   return state.voicePool[idx];
+}
+
+function pickVoiceDifferentFromLast() {
+  if (state.voicePool.length === 0) return null;
+  if (state.voicePool.length === 1) return state.voicePool[0];
+  const candidates = state.voicePool.filter(v => v !== state.lastReviewVoice);
+  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+  state.lastReviewVoice = chosen;
+  return chosen;
 }
 
 function updateVoiceLabel() {
@@ -1701,14 +1711,15 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Review play buttons — event delegation (play twice, different voices)
+// Review play buttons — event delegation (different voice per click)
 reviewSection.addEventListener('click', async (e) => {
   const btn = e.target.closest('.review-play-btn, .contrast-play-btn');
   if (!btn) return;
   if (btn.classList.contains('playing-review')) return;
   const text = btn.dataset.playText;
   btn.classList.add('playing-review');
-  await speak(text);
+  const voice = pickVoiceDifferentFromLast();
+  await speak(text, voice);
   btn.classList.remove('playing-review');
   btn.textContent = '▶';
 });
