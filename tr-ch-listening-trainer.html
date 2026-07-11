@@ -959,17 +959,6 @@ function pickVoice() {
   return state.voicePool[idx];
 }
 
-function pickTwoVoices() {
-  if (state.voicePool.length === 0) return [null, null];
-  if (state.voicePool.length === 1) return [state.voicePool[0], state.voicePool[0]];
-  const pool = [...state.voicePool];
-  const i = Math.floor(Math.random() * pool.length);
-  const v1 = pool[i];
-  pool.splice(i, 1);
-  const v2 = pool[Math.floor(Math.random() * pool.length)];
-  return [v1, v2];
-}
-
 function updateVoiceLabel() {
   if (state.voicePool.length === 0) {
     voiceInfo.innerHTML = '語音引擎載入中...';
@@ -1749,12 +1738,7 @@ reviewSection.addEventListener('click', async (e) => {
   if (btn.classList.contains('playing-review')) return;
   const text = btn.dataset.playText;
   btn.classList.add('playing-review');
-  const [v1, v2] = pickTwoVoices();
-  btn.textContent = '1';
-  await speak(text, v1);
-  await new Promise(r => setTimeout(r, 400));
-  btn.textContent = '2';
-  await speak(text, v2);
+  await speak(text);
   btn.classList.remove('playing-review');
   btn.textContent = '▶';
 });
