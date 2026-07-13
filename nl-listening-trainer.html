@@ -670,13 +670,13 @@
       <div class="stage-icon">🔀</div>
       <div class="stage-title">8 組混合詞對</div>
       <div class="stage-desc">nap·name·net<br>nine·nose·knot …</div>
-      <div class="stage-lock">🔒 第1關 80% 解鎖</div>
+      <div class="stage-lock">🔒 第1關 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊 強制解鎖</span></div>
     </button>
     <button class="stage-card locked" data-stage="3">
       <div class="stage-icon">📻</div>
       <div class="stage-title">完整句子辨識</div>
       <div class="stage-desc">句中找出<br>/n/ 或 /l/ 音</div>
-      <div class="stage-lock">🔒 第2關 80% 解鎖</div>
+      <div class="stage-lock">🔒 第2關 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊 強制解鎖</span></div>
     </button>
   </div>
 
@@ -1637,7 +1637,13 @@ function exportReport() {
 // ============================================================
 // Stage switching
 // ============================================================
-function switchStage(stage) {
+function switchStage(stage, force) {
+  if (force && !state.unlockedStages.includes(stage)) {
+    state.unlockedStages.push(stage);
+    state.unlockedStages.sort();
+    saveData();
+    updateStageButtons();
+  }
   if (!state.unlockedStages.includes(stage)) return;
   state.stage = stage;
   saveData();
@@ -1672,7 +1678,7 @@ stageSelector.addEventListener('click', (e) => {
   const card = e.target.closest('.stage-card');
   if (!card) return;
   const stage = parseInt(card.dataset.stage);
-  switchStage(stage);
+  switchStage(stage, e.shiftKey);
 });
 
 // Keyboard shortcuts: Space=play, ←=/n/, →=/l/, Enter=next/reveal
