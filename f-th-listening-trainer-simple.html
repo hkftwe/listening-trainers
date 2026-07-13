@@ -43,16 +43,16 @@
 
   .header {
     text-align: center;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
   }
   .header h1 {
-    font-size: 1.3rem;
+    font-size: 1.35rem;
     font-weight: 700;
     letter-spacing: -0.01em;
     margin-bottom: 2px;
   }
   .header .subtitle {
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
   }
 
@@ -62,7 +62,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     font-size: 0.76rem;
     color: var(--text-muted);
   }
@@ -89,7 +89,7 @@
   /* Stats bar */
   .stats-bar {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     margin-bottom: 16px;
     font-size: 0.8rem;
     color: var(--text-muted);
@@ -103,12 +103,12 @@
     text-align: center;
   }
   .stat-value {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--text);
   }
   .stat-label {
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-top: 2px;
@@ -123,15 +123,21 @@
     text-align: center;
     box-shadow: var(--shadow);
     margin-bottom: 16px;
-    min-height: 280px;
+    min-height: 260px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: 18px;
   }
 
   /* Play button */
+  .play-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
   .play-btn {
     width: 72px;
     height: 72px;
@@ -181,7 +187,7 @@
     color: var(--text);
   }
   .preview-word .ipa-sub {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
     font-weight: 400;
     margin-left: 6px;
@@ -194,7 +200,7 @@
     display: flex;
     gap: 8px;
     justify-content: center;
-    margin-top: 4px;
+    margin-top: 6px;
   }
   .skip-preview-btn {
     font-size: 0.72rem;
@@ -268,7 +274,7 @@
     color: var(--selected);
   }
   .answer-btn.unselected-choice {
-    opacity: 0.3;
+    opacity: 0.45;
   }
   .answer-btn.was-correct {
     border-color: var(--correct) !important;
@@ -281,14 +287,7 @@
     color: var(--incorrect);
   }
 
-  /* Answered hint */
-  .answered-hint {
-    font-size: 0.82rem;
-    color: var(--selected);
-    font-weight: 600;
-  }
-
-  /* Next button */
+  /* Next / reveal buttons */
   .next-btn {
     padding: 10px 28px;
     border-radius: 8px;
@@ -307,6 +306,31 @@
     border: 1.5px solid var(--accent);
   }
   .next-btn.secondary:hover { background: #eff6ff; }
+
+  /* Replay button (during quiz) */
+  .replay-quiz-btn {
+    display: block;
+    margin: 0 auto;
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .replay-quiz-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Answered hint */
+  .answered-hint {
+    font-size: 0.82rem;
+    color: var(--selected);
+    font-weight: 600;
+  }
 
   /* Review table */
   .review-section {
@@ -342,7 +366,7 @@
   .review-table tr.row-incorrect { background: #fef2f2; }
   .review-table .result-icon {
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
   .review-table .word-cell {
     font-weight: 600;
@@ -387,6 +411,10 @@
     padding: 4px 0;
     width: 100%;
   }
+  .summary h3 {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
   .summary .big-score {
     font-size: 2.4rem;
     font-weight: 800;
@@ -427,8 +455,7 @@
   .history-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
-    margin-bottom: 10px;
+    gap: 6px;
   }
   .history-dot {
     width: 20px;
@@ -448,13 +475,13 @@
     font-style: italic;
   }
   .history-clear {
+    margin-top: 10px;
     font-size: 0.72rem;
     color: var(--text-muted);
     border: none;
     background: none;
     cursor: pointer;
     text-decoration: underline;
-    margin-right: 12px;
   }
   .history-clear:hover { color: var(--incorrect); }
 
@@ -485,7 +512,7 @@
   .report-output {
     margin-top: 10px;
     width: 100%;
-    min-height: 100px;
+    min-height: 120px;
     font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
     font-size: 0.75rem;
     line-height: 1.5;
@@ -513,7 +540,7 @@
     <p class="subtitle">只聽一個音，判斷是 /f/ 還是 /θ/（不看單詞）</p>
   </div>
 
-  <!-- Voice bar — shows current voice, allows re-roll -->
+  <!-- Voice bar -->
   <div class="voice-bar">
     目前語音：<span class="current-voice" id="currentVoiceName">載入中...</span>
     <button class="voice-reroll-btn" id="voiceRerollBtn">🔄 換語音</button>
@@ -550,32 +577,33 @@
       <button class="skip-preview-btn" id="skipPreviewBtn">跳過暖耳，直接開始</button>
     </div>
 
-    <!-- Quiz state -->
-    <div id="quizArea" style="display:none;width:100%;display:flex;flex-direction:column;align-items:center;gap:16px">
-
-      <div class="round-info" id="roundInfo">
-        第 <span class="round-num" id="roundNum">1</span> / 10 題
-      </div>
-
-      <div class="progress-wrap" id="progressWrap">
-        <div class="progress-fill" id="progressFill" style="width:0%"></div>
-      </div>
-
+    <!-- Play state (shown before first play each question) -->
+    <div class="play-section" id="playSection">
       <button class="play-btn" id="playBtn" title="Play word">▶</button>
       <p class="play-hint" id="playHint">點擊播放單詞</p>
-
-      <div class="answer-buttons" id="answerButtons" style="display:none">
-        <button class="answer-btn f-btn" id="fBtn" disabled>/f/</button>
-        <button class="answer-btn th-btn" id="thBtn" disabled>/θ/</button>
-      </div>
-
-      <div class="answered-hint" id="answeredHint" style="display:none">已作答 ✓</div>
-
-      <button class="next-btn" id="nextBtn" style="display:none">下一題 →</button>
-      <button class="next-btn" id="revealBtn" style="display:none">公布答案</button>
     </div>
 
-    <!-- Review state -->
+    <div class="round-info" id="roundInfo" style="display:none">
+      第 <span class="round-num" id="roundNum">1</span> / 10 題
+    </div>
+
+    <div class="progress-wrap" id="progressWrap" style="display:none">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+
+    <button class="replay-quiz-btn" id="replayQuizBtn" style="display:none">🔁 重播</button>
+
+    <div class="answer-buttons" id="answerButtons" style="display:none">
+      <button class="answer-btn f-btn" id="fBtn" disabled>/f/</button>
+      <button class="answer-btn th-btn" id="thBtn" disabled>/θ/</button>
+    </div>
+
+    <div class="answered-hint" id="answeredHint" style="display:none">已作答 ✓</div>
+
+    <button class="next-btn" id="nextBtn" style="display:none">下一題 →</button>
+    <button class="next-btn" id="revealBtn" style="display:none">公布答案</button>
+
+    <!-- Review table -->
     <div class="review-section" id="reviewSection" style="display:none"></div>
 
     <!-- Summary -->
@@ -588,14 +616,14 @@
     <div class="history-list" id="historyList">
       <span class="history-empty">尚未作答</span>
     </div>
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
-      <button class="history-clear" id="historyClear" style="display:none">清除記錄</button>
+    <button class="history-clear" id="historyClear" style="display:none">清除記錄</button>
+    <div class="report-buttons" style="margin-top:10px">
       <button class="report-btn primary" id="exportReportBtn">📋 匯出報告</button>
       <button class="report-btn" id="copyReportBtn" style="display:none">📋 複製到剪貼板</button>
-      <span class="report-copied" id="reportCopied">✅ 已複製到剪貼簿！</span>
     </div>
     <textarea class="report-output" id="reportOutput" style="display:none" readonly
       placeholder="點擊「匯出報告」生成可讀的診斷報告"></textarea>
+    <p class="report-copied" id="reportCopied">✅ 已複製到剪貼簿！直接貼給你的老師即可</p>
   </div>
 
 </div>
@@ -621,10 +649,7 @@ const WORD_BANK = [
   { word: 'thirst', sound: 'th', ipa: '/θɜːrst/' },
 ];
 
-const ROUND_SIZE = 10;
-const STORAGE_KEY = 'f-th-simple-trainer-v2';
-
-// Build contrast-pair map: each word → { f: 'f-word', th: 'th-word' }
+// Build contrast-pair map from adjacent entries
 const CONTRAST_PAIRS = {};
 (function buildContrastPairs() {
   for (let i = 0; i < WORD_BANK.length; i += 2) {
@@ -637,22 +662,26 @@ const CONTRAST_PAIRS = {};
   }
 })();
 
+const ROUND_SIZE = 10;
+const STORAGE_KEY = 'f-th-simple-trainer-v3';
+
 // ============================================================
 // State
 // ============================================================
 let state = {
-  voicePool: [],        // all available English voices
-  currentVoice: null,   // voice for current question
+  voicePool: [],
+  currentVoice: null,
   roundWords: [],
   currentIndex: 0,
   currentItem: null,
   hasPlayed: false,
-  selectedAnswer: null,
+  currentSelection: null,
   roundAnswers: [],
   roundRevealed: false,
   previewMode: false,
   previewWords: [],
   previewIndex: 0,
+  lastReviewVoice: null,
 };
 
 // ============================================================
@@ -661,13 +690,14 @@ let state = {
 const $ = id => document.getElementById(id);
 const playBtn = $('playBtn');
 const playHint = $('playHint');
+const playSection = $('playSection');
 const previewSection = $('previewSection');
 const previewWord = $('previewWord');
 const previewPlayBtn = $('previewPlayBtn');
 const previewNextBtn = $('previewNextBtn');
 const previewProgress = $('previewProgress');
 const skipPreviewBtn = $('skipPreviewBtn');
-const quizArea = $('quizArea');
+const replayQuizBtn = $('replayQuizBtn');
 const roundInfo = $('roundInfo');
 const roundNum = $('roundNum');
 const progressWrap = $('progressWrap');
@@ -694,7 +724,7 @@ const reportCopied = $('reportCopied');
 const copyReportBtn = $('copyReportBtn');
 
 // ============================================================
-// Voice management — random rotation, no manual selection
+// Voice management
 // ============================================================
 function buildVoicePool() {
   const all = speechSynthesis.getVoices();
@@ -704,7 +734,6 @@ function buildVoicePool() {
   const pool = [];
   const names = new Set();
 
-  // Only these 5 voices
   const allowed = ['Karen', 'Daniel', 'Moira', 'Samantha', 'Rocko'];
   for (const name of allowed) {
     const match = english.find(v => v.name === name);
@@ -716,7 +745,6 @@ function buildVoicePool() {
 
   state.voicePool = pool;
 
-  // Pick initial random voice
   if (!state.currentVoice && pool.length > 0) {
     state.currentVoice = pool[Math.floor(Math.random() * pool.length)];
     updateVoiceLabel();
@@ -725,7 +753,6 @@ function buildVoicePool() {
 
 function pickRandomVoice() {
   if (state.voicePool.length === 0) return;
-  // Pick a random voice different from current if possible
   const candidates = state.voicePool.filter(v => v !== state.currentVoice);
   if (candidates.length > 0) {
     state.currentVoice = candidates[Math.floor(Math.random() * candidates.length)];
@@ -733,6 +760,15 @@ function pickRandomVoice() {
     state.currentVoice = state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
   }
   updateVoiceLabel();
+}
+
+function pickVoiceDifferentFromLast() {
+  if (state.voicePool.length === 0) return null;
+  if (state.voicePool.length === 1) return state.voicePool[0];
+  const candidates = state.voicePool.filter(v => v !== state.lastReviewVoice);
+  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+  state.lastReviewVoice = chosen;
+  return chosen;
 }
 
 function rerollVoice() {
@@ -747,20 +783,18 @@ function updateVoiceLabel() {
   }
 }
 
-speechSynthesis.onvoiceschanged = () => {
-  buildVoicePool();
-};
-
+speechSynthesis.onvoiceschanged = () => { buildVoicePool(); };
 buildVoicePool();
 
 // ============================================================
 // Speech helper
 // ============================================================
-function speak(text) {
+function speak(text, voice) {
   return new Promise((resolve) => {
     speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(text);
-    if (state.currentVoice) utt.voice = state.currentVoice;
+    const v = voice || state.currentVoice;
+    if (v) utt.voice = v;
     utt.rate = 0.85;
     utt.pitch = 1;
     utt.onend = resolve;
@@ -787,7 +821,6 @@ function generateRound() {
     pool = pool.concat(shuffle(WORD_BANK));
   }
   pool = pool.slice(0, ROUND_SIZE);
-
   const fCount = pool.filter(w => w.sound === 'f').length;
   if (fCount === 0 || fCount === ROUND_SIZE) {
     const fItems = WORD_BANK.filter(w => w.sound === 'f');
@@ -804,23 +837,18 @@ function startRound() {
   state.roundAnswers = [];
   state.roundRevealed = false;
   state.hasPlayed = false;
-  state.selectedAnswer = null;
+  state.currentSelection = null;
 
-  // Build preview: unique words from this round
   const seen = new Set();
   const unique = [];
   for (const w of state.roundWords) {
-    if (!seen.has(w.word)) {
-      seen.add(w.word);
-      unique.push(w);
-    }
+    if (!seen.has(w.word)) { seen.add(w.word); unique.push(w); }
   }
   state.previewWords = shuffle(unique);
   state.previewIndex = 0;
   state.previewMode = true;
 
   showPreviewState();
-  hideReviewAndSummary();
 }
 
 // ============================================================
@@ -828,8 +856,17 @@ function startRound() {
 // ============================================================
 function showPreviewState() {
   previewSection.style.display = 'flex';
-  quizArea.style.display = 'none';
-  hideReviewAndSummary();
+  playSection.style.display = 'none';
+  roundInfo.style.display = 'none';
+  progressWrap.style.display = 'none';
+  answerButtons.style.display = 'none';
+  replayQuizBtn.style.display = 'none';
+  answeredHint.style.display = 'none';
+  nextBtn.style.display = 'none';
+  revealBtn.style.display = 'none';
+  reviewSection.style.display = 'none';
+  summary.style.display = 'none';
+  previewPlayBtn.classList.remove('playing');
 
   const w = state.previewWords[state.previewIndex];
   previewWord.innerHTML = `${w.word} <span class="ipa-sub">${w.ipa}</span>`;
@@ -848,7 +885,7 @@ function handlePreviewNext() {
   if (state.previewIndex >= state.previewWords.length) {
     state.previewMode = false;
     previewSection.style.display = 'none';
-    showQuizState();
+    showPlayState();
     return;
   }
   showPreviewState();
@@ -857,35 +894,30 @@ function handlePreviewNext() {
 function skipPreview() {
   state.previewMode = false;
   previewSection.style.display = 'none';
-  showQuizState();
+  showPlayState();
 }
 
 // ============================================================
-// Quiz state
+// Play state — matches original trainer structure
 // ============================================================
-function showQuizState() {
-  quizArea.style.display = 'flex';
-  hideReviewAndSummary();
-
-  playBtn.style.display = '';
-  playBtn.classList.remove('playing');
-  playHint.textContent = '點擊播放單詞';
-  playHint.style.display = '';
-
-  roundInfo.style.display = 'block';
-  roundNum.textContent = state.currentIndex + 1;
-  progressWrap.style.display = 'block';
-  updateProgress();
-
+function showPlayState() {
+  playSection.style.display = 'flex';
+  roundInfo.style.display = 'none';
+  progressWrap.style.display = 'none';
   answerButtons.style.display = 'none';
+  replayQuizBtn.style.display = 'none';
   answeredHint.style.display = 'none';
   nextBtn.style.display = 'none';
   revealBtn.style.display = 'none';
-
+  reviewSection.style.display = 'none';
+  summary.style.display = 'none';
+  playBtn.classList.remove('playing');
   fBtn.disabled = true;
   thBtn.disabled = true;
   fBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
   thBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+  playHint.textContent = '點擊播放單詞';
+  progressFill.style.width = '0%';
 }
 
 function updateProgress() {
@@ -905,136 +937,112 @@ async function handlePlay() {
   await speak(state.currentItem.word);
 
   playBtn.classList.remove('playing');
-  playHint.textContent = '🔁 重播';
+  playHint.textContent = '點擊重播';
 
   if (!state.hasPlayed) {
-    state.hasPlayed = true;
+    playSection.style.display = 'none';
+    roundInfo.style.display = 'block';
+    roundNum.textContent = state.currentIndex + 1;
+    progressWrap.style.display = 'block';
+    updateProgress();
     answerButtons.style.display = 'flex';
+    replayQuizBtn.style.display = 'block';
+    answeredHint.style.display = 'none';
+    nextBtn.style.display = 'none';
+    revealBtn.style.display = 'none';
     fBtn.disabled = false;
     thBtn.disabled = false;
     fBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
     thBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
-    answeredHint.style.display = 'none';
-    nextBtn.style.display = 'none';
-    revealBtn.style.display = 'none';
+    state.currentSelection = null;
+    state.hasPlayed = true;
   }
 }
 
-async function handleAnswer(choice) {
+function handleAnswer(choice) {
   if (!state.hasPlayed || state.roundRevealed) return;
 
-  // If clicking the already-selected button → deselect
-  if (state.selectedAnswer === choice) {
-    state.selectedAnswer = null;
+  if (state.currentSelection === choice) {
+    // Deselect
+    state.currentSelection = null;
     fBtn.classList.remove('selected-choice', 'unselected-choice');
     thBtn.classList.remove('selected-choice', 'unselected-choice');
     answeredHint.style.display = 'none';
     nextBtn.style.display = 'none';
     revealBtn.style.display = 'none';
-    return;
-  }
-
-  // Select or switch to this choice
-  state.selectedAnswer = choice;
-
-  // Play the contrast-pair word for this sound based on current question
-  const pair = CONTRAST_PAIRS[state.currentItem.word];
-  const wordToPlay = pair ? (choice === 'f' ? pair.f : pair.th) : state.currentItem.word;
-  await speak(wordToPlay);
-
-  // Visual: highlight selection, dim other
-  if (choice === 'f') {
-    fBtn.classList.add('selected-choice');
-    fBtn.classList.remove('unselected-choice');
-    thBtn.classList.remove('selected-choice');
-    thBtn.classList.add('unselected-choice');
   } else {
-    thBtn.classList.add('selected-choice');
-    thBtn.classList.remove('unselected-choice');
-    fBtn.classList.remove('selected-choice');
-    fBtn.classList.add('unselected-choice');
-  }
+    // Select or switch
+    state.currentSelection = choice;
+    if (choice === 'f') {
+      fBtn.classList.add('selected-choice');
+      fBtn.classList.remove('unselected-choice');
+      thBtn.classList.remove('selected-choice');
+      thBtn.classList.add('unselected-choice');
+    } else {
+      thBtn.classList.add('selected-choice');
+      thBtn.classList.remove('unselected-choice');
+      fBtn.classList.remove('selected-choice');
+      fBtn.classList.add('unselected-choice');
+    }
+    answeredHint.style.display = 'block';
 
-  answeredHint.style.display = 'block';
+    // Play the contrast-pair word for this sound
+    const pair = CONTRAST_PAIRS[state.currentItem.word];
+    const wordToPlay = pair ? (choice === 'f' ? pair.f : pair.th) : state.currentItem.word;
+    speak(wordToPlay); // fire-and-forget — no await
 
-  // Show next or reveal button
-  if (state.currentIndex >= ROUND_SIZE - 1) {
-    revealBtn.style.display = 'inline-block';
-    revealBtn.textContent = '公布答案';
-    nextBtn.style.display = 'none';
-    progressFill.style.width = '100%';
-  } else {
-    nextBtn.style.display = 'inline-block';
-    revealBtn.style.display = 'none';
+    if (state.currentIndex >= ROUND_SIZE - 1) {
+      revealBtn.style.display = 'inline-block';
+      revealBtn.textContent = '公布答案';
+      nextBtn.style.display = 'none';
+      progressFill.style.width = '100%';
+    } else {
+      nextBtn.style.display = 'inline-block';
+      revealBtn.style.display = 'none';
+    }
   }
 }
 
-async function handleNext() {
-  // Play the correct word as audio feedback
-  const item = state.currentItem;
-  await speak(item.word);
-
-  // Record answer
-  if (state.selectedAnswer) {
-    state.roundAnswers.push({
-      choice: state.selectedAnswer,
-      correct: state.selectedAnswer === item.sound,
-      item
-    });
+function handleNext() {
+  if (state.currentSelection) {
+    const item = state.currentItem;
+    const isCorrect = (state.currentSelection === item.sound);
+    state.roundAnswers.push({ choice: state.currentSelection, correct: isCorrect, item });
   }
   state.currentIndex++;
   state.hasPlayed = false;
-  state.selectedAnswer = null;
   state.currentItem = null;
+  state.currentSelection = null;
 
-  // Auto-switch to a different random voice for next question
+  // Auto-switch voice for next question
   pickRandomVoice();
 
-  showQuizState();
+  showPlayState();
 }
 
 // ============================================================
 // Reveal & Review
 // ============================================================
-async function handleReveal() {
-  // Play the correct word as audio feedback
-  if (state.selectedAnswer && !state.roundRevealed) {
+function handleReveal() {
+  if (state.currentSelection) {
     const item = state.currentItem;
-    await speak(item.word);
-    state.roundAnswers.push({
-      choice: state.selectedAnswer,
-      correct: state.selectedAnswer === item.sound,
-      item
-    });
+    const isCorrect = (state.currentSelection === item.sound);
+    state.roundAnswers.push({ choice: state.currentSelection, correct: isCorrect, item });
   }
   state.roundRevealed = true;
-
-  quizArea.style.display = 'none';
+  playSection.style.display = 'none';
+  roundInfo.style.display = 'none';
+  progressWrap.style.display = 'none';
+  answerButtons.style.display = 'none';
+  replayQuizBtn.style.display = 'none';
+  answeredHint.style.display = 'none';
+  nextBtn.style.display = 'none';
+  revealBtn.style.display = 'none';
 
   saveRoundToStorage();
 
-  buildReviewTable();
-  buildSummary();
-}
+  const correctCount = state.roundAnswers.filter(a => a.correct).length;
 
-function saveRoundToStorage() {
-  const today = new Date().toISOString().slice(0, 10);
-  const dailyKey = `fth_simple_daily_${today}`;
-
-  const existing = JSON.parse(localStorage.getItem(dailyKey) || '[]');
-  state.roundAnswers.forEach(a => {
-    existing.push({
-      word: a.item.word,
-      ipa: a.item.ipa,
-      sound: a.item.sound,
-      correct: a.correct,
-      chosen: a.choice,
-    });
-  });
-  localStorage.setItem(dailyKey, JSON.stringify(existing));
-}
-
-function buildReviewTable() {
   let html = '<h3>本輪回顧</h3>';
   html += '<table class="review-table"><thead><tr>';
   html += '<th>#</th><th>單詞</th><th></th><th>實際</th><th>你的答案</th><th></th>';
@@ -1046,7 +1054,6 @@ function buildReviewTable() {
     const yourSound = a.choice === 'f' ? '/f/' : '/θ/';
     const rowClass = a.correct ? 'row-correct' : 'row-incorrect';
     const icon = a.correct ? '✓' : '✗';
-    const iconColor = a.correct ? 'var(--correct)' : 'var(--incorrect)';
 
     html += `<tr class="${rowClass}">`;
     html += `<td>${i + 1}</td>`;
@@ -1054,17 +1061,31 @@ function buildReviewTable() {
     html += `<td><button class="review-play-btn" data-play-word="${item.word}">▶</button></td>`;
     html += `<td style="font-weight:600">${actualSound}</td>`;
     html += `<td>${yourSound}</td>`;
-    html += `<td class="result-icon" style="color:${iconColor}">${icon}</td>`;
+    html += `<td class="result-icon" style="color:${a.correct ? 'var(--correct)' : 'var(--incorrect)'}">${icon}</td>`;
     html += '</tr>';
   });
 
   html += '</tbody></table>';
   reviewSection.innerHTML = html;
   reviewSection.style.display = 'block';
+
+  showSummaryAfterReview(correctCount);
 }
 
-function buildSummary() {
-  const correctCount = state.roundAnswers.filter(a => a.correct).length;
+function saveRoundToStorage() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `fth_simple_daily_${today}`;
+  const existing = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+  state.roundAnswers.forEach(a => {
+    existing.push({
+      word: a.item.word, ipa: a.item.ipa, sound: a.item.sound,
+      correct: a.correct, chosen: a.choice,
+    });
+  });
+  localStorage.setItem(dailyKey, JSON.stringify(existing));
+}
+
+function showSummaryAfterReview(correctCount) {
   const pct = Math.round((correctCount / ROUND_SIZE) * 100);
 
   let streak = 0, maxStreak = 0;
@@ -1093,11 +1114,6 @@ function buildSummary() {
   updateHistoryDisplay();
 }
 
-function hideReviewAndSummary() {
-  reviewSection.style.display = 'none';
-  summary.style.display = 'none';
-}
-
 // ============================================================
 // Replay wrong answers
 // ============================================================
@@ -1112,13 +1128,14 @@ async function replayWrongAnswers() {
   summary.style.display = 'none';
 
   let html = `<h3>重聽錯題（${wrong.length} 題）</h3>`;
-  html += '<div style="text-align:left;font-size:0.85rem;line-height:2;width:100%">';
+  html += '<div style="text-align:left;font-size:0.85rem;line-height:2">';
   wrong.forEach((a, i) => {
     const item = a.item;
     const actualSound = item.sound === 'f' ? '/f/' : '/θ/';
     html += `<p><strong>${i + 1}.</strong> ${item.word} ${item.ipa} — 實際是 <span style="color:var(--correct);font-weight:700">${actualSound}</span></p>`;
   });
   html += '</div>';
+  html += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:8px">點擊下方按鈕逐一重聽</p>';
   html += '<button class="next-btn" id="replayNextBtn" style="margin-top:8px">▶ 重聽第 1 題</button>';
   html += '<br><button class="next-btn secondary" onclick="startRound()" style="margin-top:12px">回到練習</button>';
 
@@ -1181,8 +1198,7 @@ function updateHistoryDisplay() {
 
   historyList.innerHTML = dailyScores.map(s => {
     const cls = s.correct ? 'correct' : 'incorrect';
-    const title = `${s.word} ${s.ipa} → chose ${s.chosen}`;
-    return `<span class="history-dot ${cls}" title="${title}">${s.correct ? '✓' : '✗'}</span>`;
+    return `<span class="history-dot ${cls}" title="${s.word || s.sentence}">${s.correct ? '✓' : '✗'}</span>`;
   }).join('');
   historyClear.style.display = 'inline-block';
 }
@@ -1267,6 +1283,9 @@ function exportReport() {
     for (const [word, info] of topProblems) {
       lines.push(`- ${word}：錯 ${info.count} 次（實際 /${info.sound === 'f' ? 'f' : 'θ'}/）`);
     }
+    if (topProblems.every(([, i]) => i.count < 2)) {
+      lines.push('（無單一詞錯 2 次以上——錯誤分散、無系統性詞對問題）');
+    }
   } else {
     lines.push('## 最需關注的詞');
     lines.push('（無單一詞錯 2 次以上——錯誤分散、無系統性詞對問題）');
@@ -1295,6 +1314,7 @@ playBtn.addEventListener('click', handlePlay);
 previewPlayBtn.addEventListener('click', handlePreviewPlay);
 previewNextBtn.addEventListener('click', handlePreviewNext);
 skipPreviewBtn.addEventListener('click', skipPreview);
+replayQuizBtn.addEventListener('click', handlePlay);
 fBtn.addEventListener('click', () => handleAnswer('f'));
 thBtn.addEventListener('click', () => handleAnswer('th'));
 nextBtn.addEventListener('click', handleNext);
@@ -1311,19 +1331,20 @@ copyReportBtn.addEventListener('click', () => {
   });
 });
 
-// Review play buttons — event delegation
+// Review play buttons — event delegation (different voice per click)
 reviewSection.addEventListener('click', async (e) => {
   const btn = e.target.closest('.review-play-btn');
   if (!btn || btn.classList.contains('playing-review')) return;
-  const word = btn.dataset.playWord;
+  const text = btn.dataset.playWord;
   btn.classList.add('playing-review');
-  await speak(word);
+  const voice = pickVoiceDifferentFromLast();
+  await speak(text, voice);
   btn.classList.remove('playing-review');
 });
 
-// Keyboard shortcuts
+// Keyboard shortcuts: Space=play, ←=f, →=th, Enter=next/reveal
 document.addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  if (e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
 
   if (state.previewMode) {
     if (e.key === ' ') { e.preventDefault(); handlePreviewPlay(); }
@@ -1331,10 +1352,9 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  if (state.roundRevealed) return;
-
   if (e.key === ' ') {
     e.preventDefault();
+    if (state.roundRevealed) return;
     handlePlay();
   }
   if (e.key === 'ArrowLeft' && state.hasPlayed) {
@@ -1345,10 +1365,14 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
     handleAnswer('th');
   }
-  if (e.key === 'Enter' && state.selectedAnswer !== null) {
+  if (e.key === 'Enter') {
     e.preventDefault();
-    if (state.currentIndex < ROUND_SIZE - 1) handleNext();
-    else if (!state.roundRevealed) handleReveal();
+    if (state.roundRevealed) return;
+    if (state.currentSelection && state.currentIndex < ROUND_SIZE - 1) {
+      handleNext();
+    } else if (state.currentSelection && state.currentIndex >= ROUND_SIZE - 1 && !state.roundRevealed) {
+      handleReveal();
+    }
   }
 });
 
