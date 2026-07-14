@@ -88,6 +88,7 @@
     background: #f3f4f6;
   }
   .stage-card.locked:hover { border-color: var(--border); background: #f3f4f6; }
+  .stage-card.locked.pressing { border-color: var(--accent) !important; background: #eff6ff !important; transform: scale(0.97); opacity: 0.75 !important; }
   .stage-card .stage-icon {
     font-size: 1.15rem;
     margin-bottom: 2px;
@@ -670,7 +671,7 @@
       <div class="stage-icon">🔀</div>
       <div class="stage-title">7 組混合詞對</div>
       <div class="stage-desc">four·Fred·thaw·thread<br>first·thirst …</div>
-      <div class="stage-lock">🔒 第1關 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊 強制解鎖</span></div>
+      <div class="stage-lock">🔒 第1關 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
     </button>
     <button class="stage-card locked" data-stage="3">
       <div class="stage-icon">📻</div>
@@ -863,6 +864,9 @@ let state = {
   previewIndex: 0,
   lastReviewVoice: null,   // track last voice for variety across clicks
 };
+
+let longPressTimer = null;
+let longPressTarget = null;
 
 // ============================================================
 // DOM refs
@@ -1670,12 +1674,44 @@ copyReportBtn.addEventListener('click', () => {
   });
 });
 
+// Stage selector — click (desktop: Shift+click to force unlock)
 stageSelector.addEventListener('click', (e) => {
   const card = e.target.closest('.stage-card');
   if (!card) return;
   const stage = parseInt(card.dataset.stage);
   switchStage(stage, e.shiftKey);
 });
+
+// Long press on locked stages (mobile alternative to Shift+click)
+stageSelector.addEventListener('pointerdown', (e) => {
+  const card = e.target.closest('.stage-card');
+  if (!card || !card.classList.contains('locked')) return;
+  longPressTarget = card;
+  card.classList.add('pressing');
+  longPressTimer = setTimeout(() => {
+    if (longPressTarget) {
+      longPressTarget.classList.remove('pressing');
+      const stage = parseInt(longPressTarget.dataset.stage);
+      switchStage(stage, true);
+      // Brief flash feedback
+      const el = longPressTarget;
+      el.style.transition = 'all 0.2s';
+      el.style.borderColor = 'var(--accent)';
+      el.style.background = '#eff6ff';
+      el.style.opacity = '1';
+      setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; el.style.opacity = ''; }, 400);
+      longPressTarget = null;
+    }
+  }, 700);
+});
+
+const cancelLongPress = () => {
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  if (longPressTarget) { longPressTarget.classList.remove('pressing'); longPressTarget = null; }
+};
+stageSelector.addEventListener('pointerup', cancelLongPress);
+stageSelector.addEventListener('pointerleave', cancelLongPress);
+stageSelector.addEventListener('pointercancel', cancelLongPress);
 
 // Keyboard shortcuts: Space=play, ←=f, →=th, Enter=next/reveal
 document.addEventListener('keydown', (e) => {
