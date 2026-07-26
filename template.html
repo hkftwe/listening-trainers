@@ -1091,6 +1091,11 @@ function handleAnswer(choice) {
     }
     answeredHint.style.display = 'block';
 
+    // Single-voice mode: replay word for auditory confirmation
+    if (VOICE_MODE === 'single') {
+      speak(state.currentItem.word || state.currentItem.sentence);
+    }
+
     if (state.currentIndex >= ROUND_SIZE - 1) {
       revealBtn.style.display = 'inline-block';
       revealBtn.textContent = '公布答案';
