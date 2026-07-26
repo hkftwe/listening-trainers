@@ -8,7 +8,7 @@
   :root {
     color-scheme: light;
     --bg: #fafafa; --card-bg: #ffffff; --text: #1a1a2e; --text-muted: #6b7280;
-    --border: #e5e7eb; --accent: #7c3aed; --accent-hover: #6d28d9;
+    --border: #e5e7eb; --accent: #2563eb; --accent-hover: #1d4ed8;
     --selected: #6366f1; --selected-bg: #eef2ff;
     --v-color: #7c3aed; --v-bg: #f5f3ff; --v-border: #c4b5fd;
     --f-color: #d97706; --f-bg: #fffbeb; --f-border: #fcd34d;
@@ -35,7 +35,7 @@
     transition: all 0.15s; text-align: center; box-shadow: var(--shadow);
   }
   .stage-card:hover:not(.locked) { border-color: #9ca3af; background: #f9fafb; }
-  .stage-card.active { border-color: var(--accent); background: #f5f3ff; box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }
+  .stage-card.active { border-color: var(--accent); background: #eff6ff; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
   .stage-card.locked { opacity: 0.40; cursor: not-allowed; background: #f3f4f6; }
   .stage-card.locked:hover { border-color: var(--border); background: #f3f4f6; }
   .stage-card .stage-icon { font-size: 1.1rem; margin-bottom: 2px; }
@@ -55,7 +55,7 @@
     background: var(--card-bg); cursor: pointer; font-size: 0.72rem;
     color: var(--text-muted); transition: all 0.15s;
   }
-  .voice-reroll-btn:hover { border-color: var(--accent); color: var(--accent); background: #f5f3ff; }
+  .voice-reroll-btn:hover { border-color: var(--accent); color: var(--accent); background: #eff6ff; }
 
   .stats-bar { display: flex; gap: 12px; margin-bottom: 16px; font-size: 0.8rem; color: var(--text-muted); }
   .stat {
@@ -133,7 +133,7 @@
   .next-btn.secondary {
     background: transparent; color: var(--accent); border: 1.5px solid var(--accent);
   }
-  .next-btn.secondary:hover { background: #f5f3ff; }
+  .next-btn.secondary:hover { background: #eff6ff; }
 
   .replay-quiz-btn {
     display: block; margin: 0 auto; padding: 5px 14px; border-radius: 6px;
@@ -164,7 +164,7 @@
     cursor: pointer; font-size: 0.75rem; margin-left: 6px;
     vertical-align: middle; transition: all 0.15s; padding: 0; color: var(--text-muted);
   }
-  .review-play-btn:hover { border-color: var(--accent); background: #f5f3ff; color: var(--accent); }
+  .review-play-btn:hover { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
   .review-play-btn.playing-review { background: #fef3c7; border-color: #f59e0b; color: #f59e0b; }
 
   .summary { text-align: center; padding: 4px 0; width: 100%; }
@@ -205,7 +205,7 @@
     background: var(--card-bg); color: var(--text); font-size: 0.8rem;
     font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap;
   }
-  .report-btn:hover { border-color: var(--accent); background: #f5f3ff; }
+  .report-btn:hover { border-color: var(--accent); background: #eff6ff; }
   .report-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
   .report-btn.primary:hover { background: var(--accent-hover); }
   .report-output {
@@ -218,6 +218,28 @@
   .report-copied {
     font-size: 0.72rem; color: var(--correct); font-weight: 600; margin-top: 6px; display: none;
   }
+
+  /* Contrast toggle */
+  .contrast-toggle-wrap {
+    display: flex; align-items: center; gap: 6px;
+    justify-content: flex-end; margin-bottom: 8px;
+    font-size: 0.76rem; color: var(--text-muted);
+  }
+  .contrast-toggle-wrap label { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 5px; }
+  .contrast-toggle-wrap input[type="checkbox"] { cursor: pointer; accent-color: var(--accent); }
+  .contrast-col { display: none; }
+  .review-section.show-contrast .contrast-col { display: table-cell; }
+  .contrast-word { font-size: 0.8rem; color: var(--text-muted); opacity: 0.70; white-space: nowrap; }
+  .contrast-play-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--card-bg);
+    cursor: pointer; font-size: 0.65rem; margin-right: 4px;
+    vertical-align: middle; transition: all 0.15s;
+    padding: 0; color: var(--text-muted); opacity: 0.7;
+  }
+  .contrast-play-btn:hover { border-color: var(--accent); background: #eff6ff; color: var(--accent); opacity: 1; }
+  .contrast-play-btn.playing-review { background: #fef3c7; border-color: #f59e0b; color: #f59e0b; opacity: 1; }
 
   /* Preview (matching focused trainer) */
   .preview-section {
@@ -376,6 +398,13 @@ const VF_PAIRS = [
   { v: 'vault', f: 'fault', vIpa: '/vɔːlt/', fIpa: '/fɔːlt/' },
 ];
 
+// Build contrast map from VF_PAIRS (stage 1 only)
+const CONTRAST_MAP = {};
+for (const p of VF_PAIRS) {
+  CONTRAST_MAP[p.v] = { word: p.f, ipa: p.fIpa };
+  CONTRAST_MAP[p.f] = { word: p.v, ipa: p.vIpa };
+}
+
 const AB_PHRASES = [
   'every', 'every day', 'every morning',
   'every small improvement', 'every single time',
@@ -426,6 +455,7 @@ let state = {
   currentSelection: null,
   roundAnswers: [],
   roundRevealed: false,
+  answerUIShown: false,
   abOrder: null,
   previewWords: [],
   previewIndex: 0,
@@ -642,6 +672,7 @@ function startRound() {
   state.hasPlayedB = false;
   state.currentSelection = null;
   state.abOrder = null;
+  state.answerUIShown = false;
 
   // Build preview words
   const seen = new Set();
@@ -814,8 +845,9 @@ async function handlePlay() {
 
   if (state.stage === 2) state.hasPlayedB = true;
 
-  // Show answer UI
-  if (!state.hasPlayed || (state.stage === 2 && state.hasPlayedB) || state.stage !== 2) {
+  // Show answer UI (only once per question, matching template pattern)
+  if (!state.answerUIShown) {
+    state.answerUIShown = true;
     playSection.style.display = 'none';
     roundInfo.style.display = 'block';
     roundNum.textContent = state.currentIndex + 1;
@@ -932,6 +964,7 @@ function handleNext() {
   state.currentItem = null;
   state.currentSelection = null;
   state.abOrder = null;
+  state.answerUIShown = false;
 
   pickRandomVoice();
   showPlayState();
@@ -964,30 +997,25 @@ function handleReveal() {
   const correctCount = state.roundAnswers.filter(a => a.correct).length;
 
   let html = '<h3>本輪回顧</h3>';
+  html += '<div class="contrast-toggle-wrap"><label><input type="checkbox" id="contrastToggle" onchange="toggleContrast()"> 顯示對比詞</label></div>';
   html += '<table class="review-table"><thead><tr>';
-  html += '<th>#</th><th>題目</th><th></th><th>實際</th><th>你的答案</th><th></th>';
+  html += '<th>#</th><th>題目</th><th></th><th class="contrast-col"></th><th>實際</th><th>你的答案</th><th></th>';
   html += '</tr></thead><tbody>';
 
   state.roundAnswers.forEach((a, i) => {
     const item = a.item;
-    let actualLabel, yourLabel, playWord;
+    let actualLabel, yourLabel;
     if (state.stage === 1) {
       actualLabel = item.sound === 'v' ? '/v/' : '/f/';
       yourLabel = a.choice === 'v' ? '/v/' : '/f/';
-      playWord = item.tts;
     } else if (state.stage === 2) {
       actualLabel = a.correctAnswer === 'A' ? '版本 A' : '版本 B';
       yourLabel = a.choice === 'A' ? '版本 A' : '版本 B';
-      const orderKey = a.correctAnswer;
-      const correctness = state.stage === 2 ? (a.item.abCorrectA ? (orderKey === 'A' ? 'correct' : 'incorrect') : '') : '';
-      playWord = item.label.replace('every', 'every');
     } else {
       actualLabel = item.isCorrect ? '正確版' : '模糊版(efy)';
       yourLabel = a.choice === 'good' ? '正確' : '模糊';
-      playWord = item.isCorrect ? item.text : item.text.replace(/every/gi, 'effy');
     }
 
-    // For review play, use the TTS word/sentence
     let reviewPlayText;
     if (state.stage === 1) reviewPlayText = item.tts;
     else if (state.stage === 2) reviewPlayText = item.label.replace('every', 'every');
@@ -997,10 +1025,16 @@ function handleReveal() {
     const icon = a.correct ? '✓' : '✗';
     const label = state.stage === 1 ? (item.pairLabel || item.word) : (item.label || '');
 
+    const contrast = (state.stage === 1) ? (CONTRAST_MAP[item.word] || null) : null;
+    const contrastHtml = contrast
+      ? `<button class="contrast-play-btn" data-play="${contrast.word.replace(/"/g, '&quot;')}">▶</button> <span class="contrast-word">${contrast.word} <span class="ipa-cell">${contrast.ipa}</span></span>`
+      : '';
+
     html += `<tr class="${rowClass}">`;
     html += `<td>${i + 1}</td>`;
     html += `<td><span class="word-cell">${label}</span>${state.stage === 1 ? ` <span class="ipa-cell">${item.ipa}</span>` : ''}</td>`;
     html += `<td><button class="review-play-btn" data-play="${reviewPlayText.replace(/"/g, '&quot;')}">▶</button></td>`;
+    html += `<td class="contrast-col">${contrastHtml}</td>`;
     html += `<td style="font-weight:600">${actualLabel}</td>`;
     html += `<td>${yourLabel}</td>`;
     html += `<td class="result-icon" style="color:${a.correct ? 'var(--correct)' : 'var(--incorrect)'}">${icon}</td>`;
@@ -1011,15 +1045,16 @@ function handleReveal() {
   reviewSection.innerHTML = html;
   reviewSection.style.display = 'block';
 
-  // Bind review play buttons
-  reviewSection.querySelectorAll('.review-play-btn').forEach(btn => {
-    btn.addEventListener('click', async function() {
-      const text = this.dataset.play;
-      this.classList.add('playing-review');
-      const voice = pickVoiceDifferentFromLast();
-      await speak(text, voice);
-      this.classList.remove('playing-review');
-    });
+  // Bind review play buttons (event delegation — covers contrast-play-btn too)
+  reviewSection.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.review-play-btn, .contrast-play-btn');
+    if (!btn) return;
+    if (btn.classList.contains('playing-review')) return;
+    const text = btn.dataset.play;
+    btn.classList.add('playing-review');
+    const voice = pickVoiceDifferentFromLast();
+    await speak(text, voice);
+    btn.classList.remove('playing-review');
   });
 
   showSummaryAfterReview(correctCount);
@@ -1413,6 +1448,11 @@ document.addEventListener('keydown', (e) => {
     }
   }
 });
+
+// Contrast toggle
+function toggleContrast() {
+  reviewSection.classList.toggle('show-contrast');
+}
 
 // ============================================================
 // Init
