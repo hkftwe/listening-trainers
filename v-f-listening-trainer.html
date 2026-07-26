@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/v/ vs /f/ 聽力訓練 + every 聽覺模板重建</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #fafafa; --card-bg: #ffffff; --text: #1a1a2e; --text-muted: #6b7280;
+    --border: #e5e7eb; --accent: #7c3aed; --accent-hover: #6d28d9;
+    --selected: #6366f1; --selected-bg: #eef2ff;
+    --v-color: #7c3aed; --v-bg: #f5f3ff; --v-border: #c4b5fd;
+    --f-color: #d97706; --f-bg: #fffbeb; --f-border: #fcd34d;
+    --correct: #059669; --incorrect: #dc2626;
+    --correct-bg: #f0fdf4; --incorrect-bg: #fef2f2;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+    min-height: 100vh; display: flex; justify-content: center; padding: 24px 16px;
+  }
+  .container { max-width: 560px; width: 100%; }
+
+  .header { text-align: center; margin-bottom: 20px; }
+  .header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; }
+  .header .subtitle { font-size: 0.78rem; color: var(--text-muted); }
+
+  .stage-selector { display: flex; gap: 8px; margin-bottom: 16px; }
+  .stage-card {
+    flex: 1; padding: 10px 6px 8px; border: 1.5px solid var(--border);
+    border-radius: 10px; background: var(--card-bg); cursor: pointer;
+    transition: all 0.15s; text-align: center; box-shadow: var(--shadow);
+  }
+  .stage-card:hover:not(.locked) { border-color: #9ca3af; background: #f9fafb; }
+  .stage-card.active { border-color: var(--accent); background: #f5f3ff; box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }
+  .stage-card.locked { opacity: 0.40; cursor: not-allowed; background: #f3f4f6; }
+  .stage-card.locked:hover { border-color: var(--border); background: #f3f4f6; }
+  .stage-card .stage-icon { font-size: 1.1rem; margin-bottom: 2px; }
+  .stage-card .stage-title { font-size: 0.8rem; font-weight: 700; color: var(--text); margin-bottom: 1px; }
+  .stage-card.active .stage-title { color: var(--accent); }
+  .stage-card.locked .stage-title { color: var(--text-muted); }
+  .stage-card .stage-desc { font-size: 0.65rem; color: var(--text-muted); line-height: 1.3; }
+  .stage-card .stage-lock { font-size: 0.62rem; color: var(--text-muted); margin-top: 2px; }
+
+  .voice-bar {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-bottom: 16px; font-size: 0.76rem; color: var(--text-muted);
+  }
+  .voice-bar .current-voice { font-weight: 600; color: var(--text); }
+  .voice-reroll-btn {
+    padding: 3px 12px; border-radius: 14px; border: 1px solid var(--border);
+    background: var(--card-bg); cursor: pointer; font-size: 0.72rem;
+    color: var(--text-muted); transition: all 0.15s;
+  }
+  .voice-reroll-btn:hover { border-color: var(--accent); color: var(--accent); background: #f5f3ff; }
+
+  .stats-bar { display: flex; gap: 12px; margin-bottom: 16px; font-size: 0.8rem; color: var(--text-muted); }
+  .stat {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 14px; flex: 1; text-align: center;
+  }
+  .stat-value { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+  .stat-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+  .main-card {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 28px 24px; text-align: center; box-shadow: var(--shadow);
+    margin-bottom: 16px; min-height: 280px; display: flex;
+    flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  }
+
+  .play-btn {
+    width: 68px; height: 68px; border-radius: 50%; border: none;
+    background: var(--accent); color: white; font-size: 1.4rem; cursor: pointer;
+    transition: all 0.15s; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(124,58,237,0.25);
+  }
+  .play-btn:hover { background: var(--accent-hover); transform: scale(1.04); }
+  .play-btn:active { transform: scale(0.97); }
+  .play-btn.playing { background: #f59e0b; animation: pulse 1s infinite; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 2px 8px rgba(245,158,11,0.25); }
+    50% { box-shadow: 0 2px 20px rgba(245,158,11,0.45); }
+  }
+  .play-hint { font-size: 0.75rem; color: var(--text-muted); }
+  .play-label { font-size: 0.76rem; font-weight: 600; color: var(--accent); margin-top: -6px; }
+
+  .play-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .round-info { font-size: 0.82rem; color: var(--text-muted); }
+  .round-num { font-weight: 700; color: var(--text); font-size: 0.95rem; }
+
+  .progress-wrap { width: 100%; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.2s; }
+
+  .answer-buttons { display: flex; gap: 16px; width: 100%; }
+  .answer-btn {
+    flex: 1; padding: 20px 8px; border-radius: 10px; border: 2px solid var(--border);
+    background: var(--card-bg); cursor: pointer; font-size: 1.1rem; font-weight: 700;
+    letter-spacing: 0.02em; transition: all 0.15s;
+  }
+  .answer-btn:hover:not(:disabled) { border-color: #9ca3af; background: #f9fafb; }
+  .answer-btn:disabled { cursor: default; }
+  .answer-btn.v-btn { border-color: var(--v-border); background: var(--v-bg); color: var(--v-color); }
+  .answer-btn.v-btn:hover:not(:disabled) { border-color: var(--v-color); }
+  .answer-btn.f-btn { border-color: var(--f-border); background: var(--f-bg); color: var(--f-color); }
+  .answer-btn.f-btn:hover:not(:disabled) { border-color: var(--f-color); }
+  .answer-btn.selected-choice {
+    border-color: var(--selected) !important; background: var(--selected-bg) !important;
+    box-shadow: 0 0 0 1px rgba(99,102,241,0.25); color: var(--selected);
+  }
+  .answer-btn.unselected-choice { opacity: 0.40; }
+  .answer-btn.was-correct {
+    border-color: var(--correct) !important; background: var(--correct-bg) !important; color: var(--correct);
+  }
+  .answer-btn.was-incorrect {
+    border-color: var(--incorrect) !important; background: var(--incorrect-bg) !important; color: var(--incorrect);
+  }
+
+  .next-btn {
+    padding: 10px 28px; border-radius: 8px; border: none; background: var(--accent);
+    color: white; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .next-btn:hover { background: var(--accent-hover); }
+  .next-btn.secondary {
+    background: transparent; color: var(--accent); border: 1.5px solid var(--accent);
+  }
+  .next-btn.secondary:hover { background: #f5f3ff; }
+
+  .replay-quiz-btn {
+    display: block; margin: 0 auto; padding: 5px 14px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--card-bg); color: var(--text-muted);
+    font-size: 0.76rem; cursor: pointer; transition: all 0.15s;
+  }
+  .replay-quiz-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .answered-hint { font-size: 0.82rem; color: var(--selected); font-weight: 600; }
+
+  .review-section { width: 100%; text-align: left; }
+  .review-section h3 { text-align: center; font-size: 1rem; margin-bottom: 12px; }
+  .review-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .review-table th {
+    text-align: left; padding: 6px 8px; color: var(--text-muted); font-weight: 600;
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border);
+  }
+  .review-table td { padding: 7px 8px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  .review-table tr.row-correct { background: #f0fdf4; }
+  .review-table tr.row-incorrect { background: #fef2f2; }
+  .review-table .result-icon { font-weight: 700; font-size: 0.9rem; }
+  .review-table .word-cell { font-weight: 600; letter-spacing: 0.02em; }
+  .review-table .ipa-cell { font-size: 0.72rem; color: var(--text-muted); font-weight: 400; }
+  .review-play-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--card-bg);
+    cursor: pointer; font-size: 0.75rem; margin-left: 6px;
+    vertical-align: middle; transition: all 0.15s; padding: 0; color: var(--text-muted);
+  }
+  .review-play-btn:hover { border-color: var(--accent); background: #f5f3ff; color: var(--accent); }
+  .review-play-btn.playing-review { background: #fef3c7; border-color: #f59e0b; color: #f59e0b; }
+
+  .summary { text-align: center; padding: 4px 0; width: 100%; }
+  .summary h3 { font-size: 0.95rem; margin-bottom: 6px; }
+  .summary .big-score { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; }
+  .summary .score-detail { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px; }
+  .summary .streak-badge {
+    display: inline-block; background: #fef3c7; color: #92400e;
+    padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 600; margin-bottom: 12px;
+  }
+
+  .history-section {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; box-shadow: var(--shadow);
+  }
+  .history-section h3 {
+    font-size: 0.82rem; font-weight: 600; margin-bottom: 10px;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .history-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .history-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; font-weight: 700;
+  }
+  .history-dot.correct { background: #d1fae5; color: #065f46; }
+  .history-dot.incorrect { background: #fee2e2; color: #991b1b; }
+  .history-empty { font-size: 0.78rem; color: var(--text-muted); font-style: italic; }
+  .history-clear {
+    margin-top: 10px; font-size: 0.72rem; color: var(--text-muted);
+    border: none; background: none; cursor: pointer; text-decoration: underline;
+  }
+  .history-clear:hover { color: var(--incorrect); }
+
+  .report-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .report-btn {
+    padding: 8px 16px; border-radius: 6px; border: 1.5px solid var(--border);
+    background: var(--card-bg); color: var(--text); font-size: 0.8rem;
+    font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .report-btn:hover { border-color: var(--accent); background: #f5f3ff; }
+  .report-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .report-btn.primary:hover { background: var(--accent-hover); }
+  .report-output {
+    margin-top: 10px; width: 100%; min-height: 120px;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 0.75rem; line-height: 1.5; padding: 10px;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: #f9fafb; resize: vertical; color: var(--text);
+  }
+  .report-copied {
+    font-size: 0.72rem; color: var(--correct); font-weight: 600; margin-top: 6px; display: none;
+  }
+
+  /* Preview (matching focused trainer) */
+  .preview-section {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .preview-label {
+    font-size: 0.78rem; color: var(--text-muted); font-weight: 500;
+  }
+  .preview-word {
+    font-size: 1.6rem; font-weight: 700; letter-spacing: 0.03em; color: var(--text);
+  }
+  .preview-word .ipa-sub {
+    font-size: 0.9rem; color: var(--text-muted); font-weight: 400; margin-left: 6px;
+  }
+  .preview-progress { font-size: 0.75rem; color: var(--text-muted); }
+  .preview-actions { display: flex; gap: 8px; justify-content: center; margin-top: 6px; }
+  .skip-preview-btn {
+    font-size: 0.72rem; color: var(--text-muted); background: none;
+    border: none; cursor: pointer; text-decoration: underline; margin-top: 4px;
+  }
+  .skip-preview-btn:hover { color: var(--incorrect); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>/v/ vs /f/ 聽力訓練 + every 聽覺模板重建</h1>
+    <p class="subtitle">三階段：/v/ 震動辨識 → every 正確/錯誤版對比 → 句子中辨識（純聽音，無文字干擾）</p>
+  </div>
+
+  <div class="stage-selector" id="stageSelector">
+    <button class="stage-card active" data-stage="1">
+      <div class="stage-icon">🔊</div>
+      <div class="stage-title">第1關：/v/ vs /f/</div>
+      <div class="stage-desc">有聲震動 vs 無聲漏氣</div>
+    </button>
+    <button class="stage-card locked" data-stage="2">
+      <div class="stage-icon">🆚</div>
+      <div class="stage-title">第2關：正確 vs 錯誤</div>
+      <div class="stage-desc">聽兩個版本，選出正確的 every</div>
+      <div class="stage-lock">🔒 第1關 ≥80% 解鎖<br><span style="font-size:0.58rem;opacity:0.7">Shift+長按 強制解鎖</span></div>
+    </button>
+    <button class="stage-card locked" data-stage="3">
+      <div class="stage-icon">📝</div>
+      <div class="stage-title">第3關：句子辨識</div>
+      <div class="stage-desc">句中 every 發音正確？</div>
+      <div class="stage-lock">🔒 第2關 ≥80% 解鎖<br><span style="font-size:0.58rem;opacity:0.7">Shift+長按 強制解鎖</span></div>
+    </button>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-value" id="totalScore">0</div>
+      <div class="stat-label">今日答題</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="accuracy">—</div>
+      <div class="stat-label">今日正確率</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="streakCount">0</div>
+      <div class="stat-label">連續正確</div>
+    </div>
+  </div>
+
+  <div class="voice-bar">
+    目前語音：<span class="current-voice" id="currentVoiceName">載入中...</span>
+    <button class="voice-reroll-btn" id="voiceRerollBtn">🔄 換語音</button>
+  </div>
+
+  <div class="main-card" id="mainCard">
+
+    <!-- Preview/warm-up -->
+    <div class="preview-section" id="previewSection" style="display:none">
+      <p class="preview-label">🎧 暖耳：先聽一遍本回合會出現的單詞</p>
+      <div class="preview-word" id="previewWord"></div>
+      <button class="play-btn" id="previewPlayBtn" title="Play word">▶</button>
+      <p class="preview-progress" id="previewProgress"></p>
+      <div class="preview-actions">
+        <button class="next-btn" id="previewNextBtn">下一詞 →</button>
+      </div>
+      <button class="skip-preview-btn" id="skipPreviewBtn">跳過暖耳，直接開始</button>
+    </div>
+
+    <!-- Play state (預設可見，作為 main card 初始內容) -->
+    <div class="play-section" id="playSection">
+      <button class="play-btn" id="playBtn" title="Play">▶</button>
+      <p class="play-hint" id="playHint">點擊播放</p>
+      <p class="play-label" id="playLabel" style="display:none"></p>
+    </div>
+
+    <div class="round-info" id="roundInfo" style="display:none">
+      第 <span class="round-num" id="roundNum">1</span> / 10 題
+    </div>
+
+    <div class="progress-wrap" id="progressWrap" style="display:none">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+
+    <button class="replay-quiz-btn" id="replayQuizBtn" style="display:none">🔁 重播</button>
+
+    <div class="answer-buttons" id="answerButtons" style="display:none">
+      <button class="answer-btn v-btn" id="vBtn" disabled>/v/（震動）</button>
+      <button class="answer-btn f-btn" id="fBtn" disabled>/f/（漏氣）</button>
+    </div>
+
+    <div class="answer-buttons" id="abButtons" style="display:none">
+      <button class="answer-btn v-btn" id="abBtnA" disabled>版本 A</button>
+      <button class="answer-btn f-btn" id="abBtnB" disabled>版本 B</button>
+    </div>
+
+    <div class="answer-buttons" id="judgeButtons" style="display:none">
+      <button class="answer-btn v-btn" id="judgeGoodBtn" disabled>✅ 發音正確</button>
+      <button class="answer-btn f-btn" id="judgeBadBtn" disabled>❌ 發音模糊</button>
+    </div>
+
+    <div class="answered-hint" id="answeredHint" style="display:none">已作答 ✓</div>
+
+    <button class="next-btn" id="nextBtn" style="display:none">下一題 →</button>
+    <button class="next-btn" id="revealBtn" style="display:none">公布答案</button>
+
+    <div class="review-section" id="reviewSection" style="display:none"></div>
+    <div class="summary" id="summary" style="display:none"></div>
+  </div>
+
+  <div class="history-section">
+    <h3>今日答題記錄</h3>
+    <div class="history-list" id="historyList">
+      <span class="history-empty">尚未作答</span>
+    </div>
+    <button class="history-clear" id="historyClear" style="display:none">清除記錄</button>
+    <div class="report-buttons">
+      <button class="report-btn primary" id="exportReportBtn">📋 匯出報告</button>
+      <button class="report-btn" id="copyReportBtn" style="display:none">📋 複製到剪貼板</button>
+    </div>
+    <textarea class="report-output" id="reportOutput" style="display:none" readonly
+      placeholder="點擊「匯出報告」生成可讀的診斷報告"></textarea>
+    <p class="report-copied" id="reportCopied">✅ 已複製到剪貼簿！直接貼入 v-f-listening-report.md 即可</p>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// Word banks
+// ============================================================
+const VF_PAIRS = [
+  { v: 'van', f: 'fan', vIpa: '/væn/', fIpa: '/fæn/' },
+  { v: 'very', f: 'ferry', vIpa: '/ˈvɛr.i/', fIpa: '/ˈfɛr.i/' },
+  { v: 'vote', f: 'float', vIpa: '/voʊt/', fIpa: '/floʊt/' },
+  { v: 'save', f: 'safe', vIpa: '/seɪv/', fIpa: '/seɪf/' },
+  { v: 'leave', f: 'leaf', vIpa: '/liːv/', fIpa: '/liːf/' },
+  { v: 'vest', f: 'fest', vIpa: '/vɛst/', fIpa: '/fɛst/' },
+  { v: 'vine', f: 'fine', vIpa: '/vaɪn/', fIpa: '/faɪn/' },
+  { v: 'vault', f: 'fault', vIpa: '/vɔːlt/', fIpa: '/fɔːlt/' },
+];
+
+const AB_PHRASES = [
+  'every', 'every day', 'every morning',
+  'every small improvement', 'every single time',
+];
+
+const SENTENCES = [
+  { text: 'I practice every day and that makes me feel proud.', label: 'every day（句尾）' },
+  { text: 'Every morning I wake up and make coffee.', label: '句首 Every morning' },
+  { text: 'I notice every small improvement I make.', label: '句中 every small improvement' },
+  { text: 'Cooking at home every day helps me save money.', label: '句中 every day' },
+  { text: 'Every evening after work I walk into my kitchen.', label: '句首 Every evening（長句）' },
+  { text: 'But every failed attempt taught me something new.', label: '句中 every failed attempt' },
+  { text: 'I try to learn something new every single day.', label: '句尾 every single day' },
+  { text: 'Every bowl of soup I make tastes a little different.', label: '句首 Every bowl' },
+  { text: 'Eating well every day is a simple way to take care of yourself.', label: '句中 every day（長句）' },
+  { text: 'I remembered every step and it came out nearly perfect.', label: '句中 every step' },
+];
+
+const ROUND_SIZE = 10;
+const UNLOCK_THRESHOLD = 0.8;
+const STORAGE_KEY = 'vf-listening-trainer-v1';
+
+// ============================================================
+// Helpers
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ============================================================
+// State & DOM (must be before Voice — buildVoicePool references these)
+// ============================================================
+let state = {
+  stage: 1,
+  unlockedStages: [1],
+  voicePool: [],
+  currentVoice: null,
+  roundItems: [],
+  currentIndex: 0,
+  currentItem: null,
+  hasPlayed: false,
+  hasPlayedB: false,
+  currentSelection: null,
+  roundAnswers: [],
+  roundRevealed: false,
+  abOrder: null,
+  previewWords: [],
+  previewIndex: 0,
+  previewMode: false,
+  lastReviewVoice: null,
+};
+
+let longPressTimer = null;
+let longPressTarget = null;
+
+const $ = id => document.getElementById(id);
+const playBtn = $('playBtn');
+const playHint = $('playHint');
+const playLabel = $('playLabel');
+const playSection = $('playSection');
+const previewSection = $('previewSection');
+const previewWord = $('previewWord');
+const previewPlayBtn = $('previewPlayBtn');
+const previewNextBtn = $('previewNextBtn');
+const previewProgress = $('previewProgress');
+const skipPreviewBtn = $('skipPreviewBtn');
+const replayQuizBtn = $('replayQuizBtn');
+const roundInfo = $('roundInfo');
+const roundNum = $('roundNum');
+const progressWrap = $('progressWrap');
+const progressFill = $('progressFill');
+const answerButtons = $('answerButtons');
+const vBtn = $('vBtn');
+const fBtn = $('fBtn');
+const abButtons = $('abButtons');
+const abBtnA = $('abBtnA');
+const abBtnB = $('abBtnB');
+const judgeButtons = $('judgeButtons');
+const judgeGoodBtn = $('judgeGoodBtn');
+const judgeBadBtn = $('judgeBadBtn');
+const answeredHint = $('answeredHint');
+const nextBtn = $('nextBtn');
+const revealBtn = $('revealBtn');
+const reviewSection = $('reviewSection');
+const summaryDiv = $('summary');
+const mainCard = $('mainCard');
+const historyList = $('historyList');
+const historyClear = $('historyClear');
+const totalScore = $('totalScore');
+const accuracy = $('accuracy');
+const streakCount = $('streakCount');
+const currentVoiceName = $('currentVoiceName');
+const voiceRerollBtn = $('voiceRerollBtn');
+const stageSelector = $('stageSelector');
+const exportReportBtn = $('exportReportBtn');
+const reportOutput = $('reportOutput');
+const reportCopied = $('reportCopied');
+const copyReportBtn = $('copyReportBtn');
+
+// ============================================================
+// Voice management (matching focused trainer)
+// ============================================================
+function buildVoicePool() {
+  const all = speechSynthesis.getVoices();
+  if (all.length === 0) return;
+  const english = all.filter(v => v.lang.startsWith('en'));
+  const pool = [];
+  const names = new Set();
+  const allowed = ['Karen', 'Daniel', 'Moira', 'Samantha', 'Rocko'];
+  for (const name of allowed) {
+    const match = english.find(v => v.name === name);
+    if (match && !names.has(match.name)) { pool.push(match); names.add(match.name); }
+  }
+  // 備援：若偏好語音都找不到，用任何一個英文語音
+  if (pool.length === 0 && english.length > 0) {
+    pool.push(english[0]);
+  }
+  state.voicePool = pool;
+  if (!state.currentVoice && pool.length > 0) {
+    state.currentVoice = pool[Math.floor(Math.random() * pool.length)];
+    updateVoiceLabel();
+  }
+}
+
+function pickRandomVoice() {
+  if (state.voicePool.length === 0) return;
+  const candidates = state.voicePool.filter(v => v !== state.currentVoice);
+  state.currentVoice = candidates.length > 0
+    ? candidates[Math.floor(Math.random() * candidates.length)]
+    : state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
+  updateVoiceLabel();
+}
+
+function pickVoiceDifferentFromLast() {
+  if (state.voicePool.length === 0) return null;
+  if (state.voicePool.length === 1) return state.voicePool[0];
+  const candidates = state.voicePool.filter(v => v !== state.lastReviewVoice);
+  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+  state.lastReviewVoice = chosen;
+  return chosen;
+}
+
+function updateVoiceLabel() {
+  currentVoiceName.textContent = state.currentVoice ? state.currentVoice.name : '系統預設';
+}
+
+speechSynthesis.onvoiceschanged = () => { buildVoicePool(); };
+buildVoicePool();
+
+function speak(text, voice) {
+  return new Promise((resolve) => {
+    speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    const v = voice || state.currentVoice;
+    if (v) utt.voice = v;
+    utt.rate = 0.82;
+    utt.pitch = 1;
+    utt.onend = resolve;
+    utt.onerror = resolve;
+    speechSynthesis.speak(utt);
+  });
+}
+
+// ============================================================
+// Persistence (matching focused trainer)
+// ============================================================
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      state.unlockedStages = data.unlockedStages || [1];
+      state.stage = data.stage || 1;
+      if (!state.unlockedStages.includes(state.stage)) {
+        state.stage = Math.max(...state.unlockedStages);
+      }
+      return data;
+    }
+  } catch (e) { /* ignore */ }
+  return null;
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    unlockedStages: state.unlockedStages,
+    stage: state.stage,
+    savedAt: new Date().toISOString(),
+  }));
+}
+
+// ============================================================
+// Stage UI (matching focused trainer)
+// ============================================================
+function updateStageButtons() {
+  const cards = stageSelector.querySelectorAll('.stage-card');
+  cards.forEach(card => {
+    const s = parseInt(card.dataset.stage);
+    card.classList.remove('active', 'locked');
+    if (state.stage === s) card.classList.add('active');
+    else if (!state.unlockedStages.includes(s)) card.classList.add('locked');
+  });
+}
+
+function switchStage(stage, force) {
+  if (force && !state.unlockedStages.includes(stage)) {
+    state.unlockedStages.push(stage);
+    state.unlockedStages.sort();
+    saveData();
+    updateStageButtons();
+  }
+  if (!state.unlockedStages.includes(stage)) return;
+  state.stage = stage;
+  saveData();
+  updateStageButtons();
+  startRound();
+}
+
+// ============================================================
+// Round building
+// ============================================================
+function buildRound() {
+  if (state.stage === 1) {
+    const pool = [];
+    for (const pair of VF_PAIRS) {
+      pool.push({ type: 'vf', word: pair.v, sound: 'v', ipa: pair.vIpa, pairLabel: `${pair.v} / ${pair.f}`, tts: pair.v });
+      pool.push({ type: 'vf', word: pair.f, sound: 'f', ipa: pair.fIpa, pairLabel: `${pair.v} / ${pair.f}`, tts: pair.f });
+    }
+    // Ensure at least 1 v and 1 f
+    let items = shuffle(pool).slice(0, ROUND_SIZE);
+    const vCount = items.filter(i => i.sound === 'v').length;
+    if (vCount === 0 || vCount === ROUND_SIZE) {
+      const vItems = pool.filter(i => i.sound === 'v');
+      const fItems = pool.filter(i => i.sound === 'f');
+      const replacement = vCount === 0 ? vItems : fItems;
+      items[Math.floor(Math.random() * ROUND_SIZE)] = replacement[Math.floor(Math.random() * replacement.length)];
+      items = shuffle(items);
+    }
+    state.roundItems = items;
+  } else if (state.stage === 2) {
+    const doubled = [...AB_PHRASES, ...AB_PHRASES];
+    state.roundItems = shuffle(doubled).slice(0, ROUND_SIZE).map(label => ({
+      type: 'ab', label,
+    }));
+  } else if (state.stage === 3) {
+    const shuffled = shuffle(SENTENCES).slice(0, ROUND_SIZE);
+    state.roundItems = shuffled.map((s, i) => ({
+      ...s, type: 'sentence', isCorrect: i < ROUND_SIZE / 2,
+    }));
+    state.roundItems = shuffle(state.roundItems);
+  }
+}
+
+function startRound() {
+  buildRound();
+  state.currentIndex = 0;
+  state.roundAnswers = [];
+  state.roundRevealed = false;
+  state.hasPlayed = false;
+  state.hasPlayedB = false;
+  state.currentSelection = null;
+  state.abOrder = null;
+
+  // Build preview words
+  const seen = new Set();
+  state.previewWords = [];
+  for (const item of state.roundItems) {
+    let key, word, ipa;
+    if (state.stage === 1) { key = item.word; word = item.word; ipa = item.ipa; }
+    else if (state.stage === 2) { key = item.label; word = item.label; ipa = ''; }
+    else { key = item.label; word = item.label; ipa = ''; }
+    if (!seen.has(key)) { seen.add(key); state.previewWords.push({ word, ipa }); }
+  }
+  state.previewWords = shuffle(state.previewWords);
+  state.previewIndex = 0;
+  state.previewMode = true;
+
+  showPreviewState();
+}
+
+// ============================================================
+// Preview state (matching focused trainer)
+// ============================================================
+function showPreviewState() {
+  previewSection.style.display = 'flex';
+  playSection.style.display = 'none';
+  roundInfo.style.display = 'none';
+  progressWrap.style.display = 'none';
+  answerButtons.style.display = 'none';
+  abButtons.style.display = 'none';
+  judgeButtons.style.display = 'none';
+  replayQuizBtn.style.display = 'none';
+  answeredHint.style.display = 'none';
+  nextBtn.style.display = 'none';
+  revealBtn.style.display = 'none';
+  reviewSection.style.display = 'none';
+  summaryDiv.style.display = 'none';
+  playLabel.style.display = 'none';
+  previewPlayBtn.classList.remove('playing');
+
+  const w = state.previewWords[state.previewIndex];
+  if (w.ipa) {
+    previewWord.innerHTML = `${w.word} <span class="ipa-sub">${w.ipa}</span>`;
+  } else {
+    previewWord.textContent = w.word;
+  }
+  previewProgress.textContent = `${state.previewIndex + 1} / ${state.previewWords.length}`;
+}
+
+async function handlePreviewPlay() {
+  const w = state.previewWords[state.previewIndex];
+  previewPlayBtn.classList.add('playing');
+  await speak(w.word);
+  previewPlayBtn.classList.remove('playing');
+}
+
+function handlePreviewNext() {
+  state.previewIndex++;
+  if (state.previewIndex >= state.previewWords.length) {
+    state.previewMode = false;
+    previewSection.style.display = 'none';
+    showPlayState();
+    return;
+  }
+  showPreviewState();
+}
+
+function skipPreview() {
+  state.previewMode = false;
+  previewSection.style.display = 'none';
+  showPlayState();
+}
+
+// ============================================================
+// Play state (matching focused trainer)
+// ============================================================
+function hideAllQuizUI() {
+  playSection.style.display = 'none';
+  roundInfo.style.display = 'none';
+  progressWrap.style.display = 'none';
+  answerButtons.style.display = 'none';
+  abButtons.style.display = 'none';
+  judgeButtons.style.display = 'none';
+  replayQuizBtn.style.display = 'none';
+  answeredHint.style.display = 'none';
+  nextBtn.style.display = 'none';
+  revealBtn.style.display = 'none';
+  reviewSection.style.display = 'none';
+  summaryDiv.style.display = 'none';
+  playLabel.style.display = 'none';
+}
+
+function showPlayState() {
+  playSection.style.display = 'flex';
+  roundInfo.style.display = 'none';
+  progressWrap.style.display = 'none';
+  answerButtons.style.display = 'none';
+  abButtons.style.display = 'none';
+  judgeButtons.style.display = 'none';
+  replayQuizBtn.style.display = 'none';
+  answeredHint.style.display = 'none';
+  nextBtn.style.display = 'none';
+  revealBtn.style.display = 'none';
+  reviewSection.style.display = 'none';
+  summaryDiv.style.display = 'none';
+  playLabel.style.display = 'none';
+  playBtn.classList.remove('playing');
+  [vBtn, fBtn, abBtnA, abBtnB, judgeGoodBtn, judgeBadBtn].forEach(b => {
+    if (!b) return;
+    b.disabled = true;
+    b.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+  });
+  playHint.textContent = state.stage === 2 ? '點擊播放版本 A' : '點擊播放';
+  progressFill.style.width = '0%';
+}
+
+function updateProgress() {
+  progressFill.style.width = `${Math.round((state.currentIndex / ROUND_SIZE) * 100)}%`;
+}
+
+// ============================================================
+// Play action
+// ============================================================
+async function handlePlay() {
+  if (state.currentIndex >= ROUND_SIZE || state.roundRevealed) return;
+  state.currentItem = state.roundItems[state.currentIndex];
+
+  playBtn.classList.add('playing');
+
+  if (state.stage === 1) {
+    playHint.textContent = '播放中...';
+    await speak(state.currentItem.tts);
+  } else if (state.stage === 2) {
+    if (!state.hasPlayed) {
+      // Play version A
+      if (!state.abOrder) {
+        const correctFirst = Math.random() < 0.5;
+        state.abOrder = { A: correctFirst ? 'correct' : 'incorrect', B: correctFirst ? 'incorrect' : 'correct' };
+      }
+      const textA = state.abOrder.A === 'correct' ? 'every' : 'effy';
+      const fullA = state.currentItem.label.replace('every', textA);
+      playHint.textContent = '播放版本 A...';
+      await speak(fullA);
+      playHint.textContent = '點擊播放版本 B';
+    } else {
+      // Play version B
+      const textB = state.abOrder.B === 'correct' ? 'every' : 'effy';
+      const fullB = state.currentItem.label.replace('every', textB);
+      playHint.textContent = '播放版本 B...';
+      await speak(fullB);
+      playHint.textContent = '兩版本已播放 — 請作答';
+    }
+  } else if (state.stage === 3) {
+    playHint.textContent = '播放中...';
+    const text = state.currentItem.isCorrect
+      ? state.currentItem.text
+      : state.currentItem.text.replace(/every/gi, 'effy');
+    await speak(text);
+    playHint.textContent = '已播放 — 請作答';
+  }
+
+  playBtn.classList.remove('playing');
+
+  if (state.stage === 2 && !state.hasPlayed) {
+    state.hasPlayed = true;
+    if (!state.hasPlayedB) {
+      playLabel.style.display = 'block';
+      playLabel.textContent = '已播放 A ✓';
+    }
+    return;
+  }
+
+  if (state.stage === 2) state.hasPlayedB = true;
+
+  // Show answer UI
+  if (!state.hasPlayed || (state.stage === 2 && state.hasPlayedB) || state.stage !== 2) {
+    playSection.style.display = 'none';
+    roundInfo.style.display = 'block';
+    roundNum.textContent = state.currentIndex + 1;
+    progressWrap.style.display = 'block';
+    updateProgress();
+    replayQuizBtn.style.display = 'block';
+    answeredHint.style.display = 'none';
+    nextBtn.style.display = 'none';
+    revealBtn.style.display = 'none';
+
+    if (state.stage === 1) {
+      answerButtons.style.display = 'flex';
+      vBtn.disabled = false; fBtn.disabled = false;
+      vBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+      fBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+    } else if (state.stage === 2) {
+      abButtons.style.display = 'flex';
+      abBtnA.disabled = false; abBtnB.disabled = false;
+      abBtnA.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+      abBtnB.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+    } else if (state.stage === 3) {
+      judgeButtons.style.display = 'flex';
+      judgeGoodBtn.disabled = false; judgeBadBtn.disabled = false;
+      judgeGoodBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+      judgeBadBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+    }
+
+    state.currentSelection = null;
+    state.hasPlayed = true;
+  }
+}
+
+// ============================================================
+// Answer handling (matching focused trainer pattern)
+// ============================================================
+function getAnswerButtons() {
+  if (state.stage === 1) return { left: vBtn, right: fBtn, leftVal: 'v', rightVal: 'f' };
+  if (state.stage === 2) return { left: abBtnA, right: abBtnB, leftVal: 'A', rightVal: 'B' };
+  return { left: judgeGoodBtn, right: judgeBadBtn, leftVal: 'good', rightVal: 'bad' };
+}
+
+function handleAnswer(choice) {
+  if (state.roundRevealed) return;
+  if (state.stage === 2 && (!state.hasPlayed || !state.hasPlayedB)) return;
+  if (state.stage !== 2 && !state.hasPlayed) return;
+
+  const btns = getAnswerButtons();
+
+  if (state.currentSelection === choice) {
+    // Deselect
+    state.currentSelection = null;
+    btns.left.classList.remove('selected-choice', 'unselected-choice');
+    btns.right.classList.remove('selected-choice', 'unselected-choice');
+    answeredHint.style.display = 'none';
+    nextBtn.style.display = 'none';
+    revealBtn.style.display = 'none';
+  } else {
+    state.currentSelection = choice;
+    if (choice === btns.leftVal) {
+      btns.left.classList.add('selected-choice'); btns.left.classList.remove('unselected-choice');
+      btns.right.classList.remove('selected-choice'); btns.right.classList.add('unselected-choice');
+    } else {
+      btns.right.classList.add('selected-choice'); btns.right.classList.remove('unselected-choice');
+      btns.left.classList.remove('selected-choice'); btns.left.classList.add('unselected-choice');
+    }
+    answeredHint.style.display = 'block';
+
+    // Replay the chosen word (matching focused trainer behavior)
+    let replayText;
+    if (state.stage === 1) {
+      replayText = state.currentItem.tts;
+    } else if (state.stage === 2) {
+      const orderKey = choice === 'A' ? 'A' : 'B';
+      const correctness = state.abOrder[orderKey];
+      const text = correctness === 'correct' ? 'every' : 'effy';
+      replayText = state.currentItem.label.replace('every', text);
+    } else {
+      replayText = state.currentItem.isCorrect
+        ? state.currentItem.text
+        : state.currentItem.text.replace(/every/gi, 'effy');
+    }
+    speak(replayText);
+
+    if (state.currentIndex >= ROUND_SIZE - 1) {
+      revealBtn.style.display = 'inline-block';
+      revealBtn.textContent = '公布答案';
+      nextBtn.style.display = 'none';
+      progressFill.style.width = '100%';
+    } else {
+      nextBtn.style.display = 'inline-block';
+      revealBtn.style.display = 'none';
+    }
+  }
+}
+
+function handleNext() {
+  if (state.currentSelection) {
+    const item = state.currentItem;
+    let correctAnswer;
+    if (state.stage === 1) correctAnswer = item.sound;
+    else if (state.stage === 2) correctAnswer = state.abOrder.A === 'correct' ? 'A' : 'B';
+    else correctAnswer = item.isCorrect ? 'good' : 'bad';
+
+    state.roundAnswers.push({
+      choice: state.currentSelection,
+      correct: state.currentSelection === correctAnswer,
+      correctAnswer,
+      item,
+    });
+  }
+  state.currentIndex++;
+  state.hasPlayed = false;
+  state.hasPlayedB = false;
+  state.currentItem = null;
+  state.currentSelection = null;
+  state.abOrder = null;
+
+  pickRandomVoice();
+  showPlayState();
+}
+
+// ============================================================
+// Reveal & Review (matching focused trainer)
+// ============================================================
+function handleReveal() {
+  if (state.currentSelection) {
+    const item = state.currentItem;
+    let correctAnswer;
+    if (state.stage === 1) correctAnswer = item.sound;
+    else if (state.stage === 2) correctAnswer = state.abOrder.A === 'correct' ? 'A' : 'B';
+    else correctAnswer = item.isCorrect ? 'good' : 'bad';
+
+    state.roundAnswers.push({
+      choice: state.currentSelection,
+      correct: state.currentSelection === correctAnswer,
+      correctAnswer,
+      item,
+    });
+  }
+  state.roundRevealed = true;
+  hideAllQuizUI();
+  progressFill.style.width = '100%';
+
+  saveRoundToStorage();
+
+  const correctCount = state.roundAnswers.filter(a => a.correct).length;
+
+  let html = '<h3>本輪回顧</h3>';
+  html += '<table class="review-table"><thead><tr>';
+  html += '<th>#</th><th>題目</th><th></th><th>實際</th><th>你的答案</th><th></th>';
+  html += '</tr></thead><tbody>';
+
+  state.roundAnswers.forEach((a, i) => {
+    const item = a.item;
+    let actualLabel, yourLabel, playWord;
+    if (state.stage === 1) {
+      actualLabel = item.sound === 'v' ? '/v/' : '/f/';
+      yourLabel = a.choice === 'v' ? '/v/' : '/f/';
+      playWord = item.tts;
+    } else if (state.stage === 2) {
+      actualLabel = a.correctAnswer === 'A' ? '版本 A' : '版本 B';
+      yourLabel = a.choice === 'A' ? '版本 A' : '版本 B';
+      const orderKey = a.correctAnswer;
+      const correctness = state.stage === 2 ? (a.item.abCorrectA ? (orderKey === 'A' ? 'correct' : 'incorrect') : '') : '';
+      playWord = item.label.replace('every', 'every');
+    } else {
+      actualLabel = item.isCorrect ? '正確版' : '模糊版(efy)';
+      yourLabel = a.choice === 'good' ? '正確' : '模糊';
+      playWord = item.isCorrect ? item.text : item.text.replace(/every/gi, 'effy');
+    }
+
+    // For review play, use the TTS word/sentence
+    let reviewPlayText;
+    if (state.stage === 1) reviewPlayText = item.tts;
+    else if (state.stage === 2) reviewPlayText = item.label.replace('every', 'every');
+    else reviewPlayText = item.text;
+
+    const rowClass = a.correct ? 'row-correct' : 'row-incorrect';
+    const icon = a.correct ? '✓' : '✗';
+    const label = state.stage === 1 ? (item.pairLabel || item.word) : (item.label || '');
+
+    html += `<tr class="${rowClass}">`;
+    html += `<td>${i + 1}</td>`;
+    html += `<td><span class="word-cell">${label}</span>${state.stage === 1 ? ` <span class="ipa-cell">${item.ipa}</span>` : ''}</td>`;
+    html += `<td><button class="review-play-btn" data-play="${reviewPlayText.replace(/"/g, '&quot;')}">▶</button></td>`;
+    html += `<td style="font-weight:600">${actualLabel}</td>`;
+    html += `<td>${yourLabel}</td>`;
+    html += `<td class="result-icon" style="color:${a.correct ? 'var(--correct)' : 'var(--incorrect)'}">${icon}</td>`;
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  reviewSection.innerHTML = html;
+  reviewSection.style.display = 'block';
+
+  // Bind review play buttons
+  reviewSection.querySelectorAll('.review-play-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const text = this.dataset.play;
+      this.classList.add('playing-review');
+      const voice = pickVoiceDifferentFromLast();
+      await speak(text, voice);
+      this.classList.remove('playing-review');
+    });
+  });
+
+  showSummaryAfterReview(correctCount);
+}
+
+function saveRoundToStorage() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `vf_trainer_daily_${today}`;
+  const existing = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+  state.roundAnswers.forEach(a => {
+    const item = a.item;
+    existing.push({
+      stage: state.stage,
+      label: state.stage === 1 ? (item.pairLabel || item.word) : (item.label || ''),
+      word: item.word || item.label || '',
+      ipa: item.ipa || '',
+      sound: item.sound || '',
+      isCorrectSentence: item.isCorrect,
+      correct: a.correct,
+      chosen: a.choice,
+      correctAnswer: a.correctAnswer,
+    });
+  });
+  localStorage.setItem(dailyKey, JSON.stringify(existing));
+}
+
+function showSummaryAfterReview(correctCount) {
+  const pct = Math.round((correctCount / state.roundAnswers.length) * 100);
+
+  let streak = 0, maxStreak = 0;
+  for (const a of state.roundAnswers) {
+    if (a.correct) { streak++; maxStreak = Math.max(maxStreak, streak); }
+    else { streak = 0; }
+  }
+
+  summaryDiv.style.display = 'block';
+  summaryDiv.innerHTML = `
+    <div class="big-score" style="color:${pct >= 80 ? 'var(--correct)' : pct >= 60 ? '#f59e0b' : 'var(--incorrect)'}">
+      ${correctCount} / ${state.roundAnswers.length}
+    </div>
+    <div class="score-detail">正確率 ${pct}%</div>
+    ${maxStreak >= 4 ? `<div class="streak-badge">最佳連續：${maxStreak} 題</div>` : ''}
+    ${pct >= 80
+      ? '<p style="color:var(--correct);font-weight:600;margin-bottom:14px">達標！80%+ 正確率 👏</p>'
+      : '<p style="color:var(--text-muted);margin-bottom:14px">目標是 80% 正確率，再試一輪</p>'}
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="next-btn" onclick="startRound()">再來一輪 →</button>
+      <button class="next-btn secondary" onclick="replayWrongAnswers()">重聽錯題</button>
+    </div>
+  `;
+
+  // Unlock next stage
+  if (pct >= UNLOCK_THRESHOLD * 100 && state.stage < 3) {
+    const nextStage = state.stage + 1;
+    if (!state.unlockedStages.includes(nextStage)) {
+      state.unlockedStages.push(nextStage);
+      state.unlockedStages.sort();
+      saveData();
+      updateStageButtons();
+      const stageNames = { 2: '正確 vs 錯誤版 every 對比', 3: '句子中 every 辨識' };
+      summaryDiv.innerHTML += `
+        <p style="color:var(--accent);font-weight:600;margin-top:12px">
+          🔓 「${stageNames[nextStage]}」已解鎖！
+        </p>`;
+    }
+  }
+
+  updateStatsDisplay();
+  updateHistoryDisplay();
+}
+
+// ============================================================
+// Replay wrong answers (matching focused trainer)
+// ============================================================
+async function replayWrongAnswers() {
+  const wrong = state.roundAnswers.filter(a => !a.correct);
+  if (wrong.length === 0) {
+    alert('本輪全部正確，沒有錯題需要重聽！');
+    return;
+  }
+
+  reviewSection.style.display = 'none';
+  summaryDiv.style.display = 'none';
+
+  let html = `<h3>重聽錯題（${wrong.length} 題）</h3>`;
+  html += '<div style="text-align:left;font-size:0.85rem;line-height:2">';
+  wrong.forEach((a, i) => {
+    const item = a.item;
+    let label, actualLabel;
+    if (state.stage === 1) {
+      label = `${item.word} ${item.ipa}`;
+      actualLabel = item.sound === 'v' ? '/v/' : '/f/';
+    } else if (state.stage === 2) {
+      label = item.label;
+      actualLabel = a.correctAnswer === 'A' ? '版本 A' : '版本 B';
+    } else {
+      label = item.label;
+      actualLabel = item.isCorrect ? '正確版' : '模糊版(efy)';
+    }
+    html += `<p><strong>${i + 1}.</strong> ${label} — 實際是 <span style="color:var(--correct);font-weight:700">${actualLabel}</span></p>`;
+  });
+  html += '</div>';
+  html += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:8px">點擊下方按鈕逐一重聽</p>';
+  html += '<button class="next-btn" id="replayNextBtn" style="margin-top:8px">▶ 重聽第 1 題</button>';
+  html += '<br><button class="next-btn secondary" onclick="startRound()" style="margin-top:12px">回到練習</button>';
+
+  reviewSection.innerHTML = html;
+  reviewSection.style.display = 'block';
+
+  let replayIdx = 0;
+  const replayBtn = $('replayNextBtn');
+  replayBtn.addEventListener('click', async function handler() {
+    if (replayIdx >= wrong.length) {
+      replayBtn.textContent = '全部重聽完畢';
+      replayBtn.disabled = true;
+      return;
+    }
+    const a = wrong[replayIdx];
+    let text;
+    if (state.stage === 1) text = a.item.tts || a.item.word;
+    else if (state.stage === 2) text = a.item.label.replace('every', 'every');
+    else text = a.item.isCorrect ? a.item.text : a.item.text.replace(/every/gi, 'effy');
+
+    replayBtn.textContent = `播放中...（第 ${replayIdx + 1}/${wrong.length} 題）`;
+    replayBtn.disabled = true;
+    const voice = pickVoiceDifferentFromLast();
+    await speak(text, voice);
+    replayIdx++;
+    replayBtn.disabled = false;
+    if (replayIdx < wrong.length) {
+      replayBtn.textContent = `▶ 重聽第 ${replayIdx + 1} 題`;
+    } else {
+      replayBtn.textContent = '全部重聽完畢';
+    }
+  });
+}
+
+// ============================================================
+// Stats & History (matching focused trainer)
+// ============================================================
+function updateStatsDisplay() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `vf_trainer_daily_${today}`;
+  const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+  const allCorrect = dailyScores.filter(s => s.correct).length;
+  const allTotal = dailyScores.length;
+
+  totalScore.textContent = allTotal;
+  accuracy.textContent = allTotal > 0 ? `${Math.round((allCorrect / allTotal) * 100)}%` : '—';
+
+  let s = 0;
+  for (let i = dailyScores.length - 1; i >= 0; i--) {
+    if (dailyScores[i].correct) s++; else break;
+  }
+  streakCount.textContent = s;
+}
+
+function updateHistoryDisplay() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `vf_trainer_daily_${today}`;
+  const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+
+  if (dailyScores.length === 0) {
+    historyList.innerHTML = '<span class="history-empty">尚未作答</span>';
+    historyClear.style.display = 'none';
+    return;
+  }
+
+  historyList.innerHTML = dailyScores.map(s => {
+    const cls = s.correct ? 'correct' : 'incorrect';
+    return `<span class="history-dot ${cls}" title="${s.label || s.word}">${s.correct ? '✓' : '✗'}</span>`;
+  }).join('');
+  historyClear.style.display = 'inline-block';
+}
+
+function clearHistory() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `vf_trainer_daily_${today}`;
+  localStorage.removeItem(dailyKey);
+  historyList.innerHTML = '<span class="history-empty">尚未作答</span>';
+  historyClear.style.display = 'none';
+  reportOutput.style.display = 'none';
+  copyReportBtn.style.display = 'none';
+  reportCopied.style.display = 'none';
+  updateStatsDisplay();
+}
+
+// ============================================================
+// Export report (matching focused trainer)
+// ============================================================
+function exportReport() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `vf_trainer_daily_${today}`;
+  const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+
+  if (dailyScores.length === 0) {
+    reportOutput.value = '尚無今日答題記錄。';
+    copyReportBtn.style.display = 'none';
+    reportOutput.style.display = 'block';
+    return;
+  }
+
+  const stages = {};
+  for (const s of dailyScores) {
+    const st = s.stage || 1;
+    if (!stages[st]) stages[st] = { total: 0, correct: 0, errors: {} };
+    stages[st].total++;
+    if (s.correct) stages[st].correct++;
+    else {
+      const errKey = s.label || s.word;
+      if (!stages[st].errors[errKey]) stages[st].errors[errKey] = { count: 0, sound: s.sound, isCorrectSentence: s.isCorrectSentence, correctAnswer: s.correctAnswer, stage: st };
+      stages[st].errors[errKey].count++;
+    }
+  }
+
+  for (const st of Object.keys(stages)) {
+    stages[st].rounds = Math.ceil(stages[st].total / 10);
+  }
+
+  const total = dailyScores.length;
+  const correctCount = dailyScores.filter(s => s.correct).length;
+  const pct = Math.round((correctCount / total) * 100);
+
+  const lines = [];
+  lines.push(`# /v/ vs /f/ 聽力訓練 + every 聽覺重建報告 — ${today}`);
+  lines.push('');
+  lines.push(`總答題數：${total} 題`);
+  lines.push(`總正確率：${correctCount}/${total} = ${pct}%`);
+  lines.push('');
+
+  const stageNames = { 1: '/v/ vs /f/ 純音辨識', 2: '正確 vs 錯誤版 every 對比', 3: '句子中 every 辨識' };
+  for (const st of [1, 2, 3]) {
+    if (!stages[st]) continue;
+    const d = stages[st];
+    const spct = Math.round((d.correct / d.total) * 100);
+    lines.push(`## 第${st}關：${stageNames[st]}`);
+    lines.push(`- 答題：${d.total} 題（約 ${d.rounds} 輪）`);
+    lines.push(`- 正確率：${d.correct}/${d.total} = ${spct}%`);
+    if (spct >= 80) lines.push(`- ✅ 達標（80%+）`);
+    else lines.push(`- ❌ 未達標（需 80%+）`);
+
+    const errors = Object.entries(d.errors).sort((a, b) => b[1].count - a[1].count);
+    if (errors.length > 0) {
+      lines.push(`- 錯題分析：`);
+      for (const [label, info] of errors) {
+        if (st === 1) {
+          const actualLabel = info.sound === 'v' ? '/v/' : '/f/';
+          const mistakeLabel = info.sound === 'v' ? '/f/' : '/v/';
+          lines.push(`  - ${label}：錯 ${info.count} 次（實際是 ${actualLabel}，誤聽為 ${mistakeLabel}）`);
+        } else if (st === 2) {
+          const actualLabel = info.correctAnswer === 'A' ? '版本 A' : '版本 B';
+          lines.push(`  - ${label}：錯 ${info.count} 次（正解為 ${actualLabel}）`);
+        } else {
+          const actualLabel = info.isCorrectSentence ? '正確版' : '模糊版(efy)';
+          lines.push(`  - ${label}：錯 ${info.count} 次（實際為 ${actualLabel}）`);
+        }
+      }
+    }
+
+    if (st === 1) {
+      const vAsF = Object.values(d.errors).filter(e => e.sound === 'v').reduce((s, e) => s + e.count, 0);
+      const fAsV = Object.values(d.errors).filter(e => e.sound === 'f').reduce((s, e) => s + e.count, 0);
+      if (vAsF > 0 || fAsV > 0) {
+        lines.push(`- 錯誤方向：/v/→/f/ ${vAsF} 次　/f/→/v/ ${fAsV} 次`);
+        if (vAsF > fAsV) lines.push(`- ⚠️ 主方向：/v/→/f/（對有聲震動不夠敏感）`);
+        else if (fAsV > vAsF) lines.push(`- ⚠️ 主方向：/f/→/v/（將漏氣誤判為震動）`);
+      }
+    }
+
+    if (st === 3) {
+      const goodAsBad = Object.values(d.errors).filter(e => e.isCorrectSentence === true).reduce((s, e) => s + e.count, 0);
+      const badAsGood = Object.values(d.errors).filter(e => e.isCorrectSentence === false).reduce((s, e) => s + e.count, 0);
+      if (goodAsBad > 0 || badAsGood > 0) {
+        lines.push(`- 錯誤方向：正確版被判為模糊 ${goodAsBad} 次（過度敏感）　模糊版被判為正確 ${badAsGood} 次（漏聽錯誤）`);
+      }
+    }
+
+    lines.push('');
+  }
+
+  lines.push('---');
+  lines.push('以上報告由 /v/ vs /f/ listening trainer 自動生成。');
+
+  const report = lines.join('\n');
+  reportOutput.value = report;
+  reportOutput.style.display = 'block';
+  copyReportBtn.style.display = 'inline-block';
+  reportCopied.style.display = 'none';
+}
+
+function copyReport() {
+  reportOutput.select();
+  try {
+    navigator.clipboard.writeText(reportOutput.value);
+    reportCopied.style.display = 'block';
+    setTimeout(() => { reportCopied.style.display = 'none'; }, 3000);
+  } catch (e) { /* fallback */ }
+}
+
+// ============================================================
+// Event binding
+// ============================================================
+playBtn.addEventListener('click', handlePlay);
+replayQuizBtn.addEventListener('click', handlePlay);
+vBtn.addEventListener('click', () => handleAnswer('v'));
+fBtn.addEventListener('click', () => handleAnswer('f'));
+abBtnA.addEventListener('click', () => handleAnswer('A'));
+abBtnB.addEventListener('click', () => handleAnswer('B'));
+judgeGoodBtn.addEventListener('click', () => handleAnswer('good'));
+judgeBadBtn.addEventListener('click', () => handleAnswer('bad'));
+nextBtn.addEventListener('click', handleNext);
+revealBtn.addEventListener('click', handleReveal);
+exportReportBtn.addEventListener('click', exportReport);
+copyReportBtn.addEventListener('click', copyReport);
+previewPlayBtn.addEventListener('click', handlePreviewPlay);
+previewNextBtn.addEventListener('click', handlePreviewNext);
+skipPreviewBtn.addEventListener('click', skipPreview);
+
+voiceRerollBtn.addEventListener('click', () => { pickRandomVoice(); speechSynthesis.cancel(); });
+historyClear.addEventListener('click', clearHistory);
+
+stageSelector.addEventListener('click', (e) => {
+  const card = e.target.closest('.stage-card');
+  if (!card) return;
+  const stage = parseInt(card.dataset.stage);
+  if (state.unlockedStages.includes(stage)) switchStage(stage, false);
+});
+
+// Long-press / Shift+click force unlock (matching focused trainer)
+function forceUnlock(stage) {
+  if (state.unlockedStages.includes(stage)) return;
+  state.unlockedStages.push(stage);
+  state.unlockedStages.sort();
+  saveData();
+  updateStageButtons();
+  switchStage(stage, true);
+}
+
+stageSelector.addEventListener('mousedown', (e) => {
+  const card = e.target.closest('.stage-card.locked');
+  if (!card) return;
+  longPressTarget = card;
+  longPressTimer = setTimeout(() => {
+    if (longPressTarget === card) forceUnlock(parseInt(card.dataset.stage));
+    longPressTimer = null; longPressTarget = null;
+  }, 800);
+});
+stageSelector.addEventListener('mouseup', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressTarget = null; });
+stageSelector.addEventListener('mouseleave', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressTarget = null; });
+stageSelector.addEventListener('click', (e) => {
+  if (e.shiftKey) {
+    const card = e.target.closest('.stage-card.locked');
+    if (card) { e.stopPropagation(); e.preventDefault(); forceUnlock(parseInt(card.dataset.stage)); }
+  }
+});
+
+// Keyboard shortcuts (matching focused trainer)
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+
+  if (state.previewMode) {
+    if (e.key === ' ') { e.preventDefault(); handlePreviewPlay(); }
+    if (e.key === 'Enter') { e.preventDefault(); handlePreviewNext(); }
+    return;
+  }
+
+  if (e.key === ' ') {
+    e.preventDefault();
+    if (state.roundRevealed) return;
+    handlePlay();
+  }
+  if (e.key === 'ArrowLeft' && state.hasPlayed && !state.roundRevealed) {
+    e.preventDefault();
+    if (state.stage === 1) handleAnswer('v');
+    else if (state.stage === 2) handleAnswer('A');
+    else if (state.stage === 3) handleAnswer('good');
+  }
+  if (e.key === 'ArrowRight' && state.hasPlayed && !state.roundRevealed) {
+    e.preventDefault();
+    if (state.stage === 1) handleAnswer('f');
+    else if (state.stage === 2) handleAnswer('B');
+    else if (state.stage === 3) handleAnswer('bad');
+  }
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (state.roundRevealed) return;
+    if (state.currentSelection && state.currentIndex < ROUND_SIZE - 1) {
+      handleNext();
+    } else if (state.currentSelection && state.currentIndex >= ROUND_SIZE - 1 && !state.roundRevealed) {
+      handleReveal();
+    }
+  }
+});
+
+// ============================================================
+// Init
+// ============================================================
+loadData();
+updateStageButtons();
+updateStatsDisplay();
+updateHistoryDisplay();
+startRound();
+</script>
+</body>
+</html>
