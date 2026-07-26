@@ -1,0 +1,39 @@
+stage,text,ipa,sound,target
+1,train,/treɪn/,tr,
+1,chain,/tʃeɪn/,ch,
+1,true,/truː/,tr,
+1,chew,/tʃuː/,ch,
+1,trip,/trɪp/,tr,
+1,chip,/tʃɪp/,ch,
+2,train,/treɪn/,tr,
+2,chain,/tʃeɪn/,ch,
+2,true,/truː/,tr,
+2,chew,/tʃuː/,ch,
+2,trip,/trɪp/,tr,
+2,chip,/tʃɪp/,ch,
+2,trees,/triːz/,tr,
+2,cheese,/tʃiːz/,ch,
+2,treat,/triːt/,tr,
+2,cheat,/tʃiːt/,ch,
+2,trace,/treɪs/,tr,
+2,chase,/tʃeɪs/,ch,
+2,trill,/trɪl/,tr,
+2,chill,/tʃɪl/,ch,
+2,trap,/træp/,tr,
+2,chap,/tʃæp/,ch,
+3,I take the train every morning.,,tr,train
+3,She wore a gold chain around her neck.,,ch,chain
+3,Is it true that you like pizza?,,tr,true
+3,The dog likes to chew his toy.,,ch,chew
+3,We went on a trip to Japan last summer.,,tr,trip
+3,I ate a bag of chips with my lunch.,,ch,chips
+3,The doctor will treat your injury.,,tr,treat
+3,Do not cheat on the test — be honest.,,ch,cheat
+3,There are many tall trees in the park.,,tr,trees
+3,I love cheese on my sandwich.,,ch,cheese
+3,She tried to trace the outline of the map.,,tr,trace
+3,The cat likes to chase the laser pointer.,,ch,chase
+3,The bird made a soft trill in the morning.,,tr,trill
+3,There is a chill in the air tonight.,,ch,chill
+3,He set a trap to catch the mouse.,,tr,trap
+3,He is a friendly chap from London.,,ch,chap

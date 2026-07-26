@@ -1,0 +1,41 @@
+stage,text,ipa,sound,target
+1,need,/niːd/,n,
+1,lead,/liːd/,l,
+1,knife,/naɪf/,n,
+1,life,/laɪf/,l,
+1,no,/noʊ/,n,
+1,low,/loʊ/,l,
+1,night,/naɪt/,n,
+1,light,/laɪt/,l,
+2,need,/niːd/,n,
+2,lead,/liːd/,l,
+2,knife,/naɪf/,n,
+2,life,/laɪf/,l,
+2,no,/noʊ/,n,
+2,low,/loʊ/,l,
+2,night,/naɪt/,n,
+2,light,/laɪt/,l,
+2,nap,/næp/,n,
+2,lap,/læp/,l,
+2,name,/neɪm/,n,
+2,lame,/leɪm/,l,
+2,net,/net/,n,
+2,let,/let/,l,
+2,nine,/naɪn/,n,
+2,line,/laɪn/,l,
+3,I need a glass of water.,,n,need
+3,She will lead the team meeting.,,l,lead
+3,He used a sharp knife to cut the bread.,,n,knife
+3,She has a busy life in the city.,,l,life
+3,No, I don't want any more food.,,n,no
+3,The chair is too low for the desk.,,l,low
+3,I slept well last night.,,n,night
+3,Please turn on the light.,,l,light
+3,I took a short nap after lunch.,,n,nap
+3,The cat sat on my lap.,,l,lap
+3,What is your name?,,n,name
+3,He is lame and needs a walking stick.,,l,lame
+3,The fisherman cast his net into the sea.,,n,net
+3,Please let me help you.,,l,let
+3,I have nine apples in the basket.,,n,nine
+3,Please draw a straight line.,,l,line

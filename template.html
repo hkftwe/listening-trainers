@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>/n/ vs /l/ Listening Trainer</title>
+<title>{{TITLE_TAG}}</title>
 <style>
   :root {
     color-scheme: light;
@@ -12,16 +12,11 @@
     --text: #1a1a2e;
     --text-muted: #6b7280;
     --border: #e5e7eb;
-    --accent: #2563eb;
-    --accent-hover: #1d4ed8;
+    --accent: {{ACCENT_COLOR}};
+    --accent-hover: {{ACCENT_HOVER}};
     --selected: #6366f1;
     --selected-bg: #eef2ff;
-    --n-color: #059669;
-    --n-bg: #ecfdf5;
-    --n-border: #a7f3d0;
-    --l-color: #d97706;
-    --l-bg: #fffbeb;
-    --l-border: #fcd34d;
+    {{CSS_SOUND_VARS}}
     --correct: #059669;
     --incorrect: #dc2626;
     --correct-bg: #f0fdf4;
@@ -111,6 +106,28 @@
     color: var(--text-muted);
     margin-top: 2px;
   }
+
+  /* Voice bar (single mode) */
+  .voice-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+  }
+  .voice-bar .voice-name { font-weight: 600; color: var(--text); font-size: 0.84rem; }
+  .voice-reroll-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .voice-reroll-btn:hover { border-color: var(--accent); background: #eff6ff; }
 
   /* Stats bar */
   .stats-bar {
@@ -284,10 +301,7 @@
     color: var(--text-muted);
     font-weight: 400;
   }
-  .answer-btn.n-btn { border-color: var(--n-border); background: var(--n-bg); }
-  .answer-btn.n-btn:hover:not(:disabled) { border-color: var(--n-color); }
-  .answer-btn.l-btn { border-color: var(--l-border); background: var(--l-bg); }
-  .answer-btn.l-btn:hover:not(:disabled) { border-color: var(--l-color); }
+  {{CSS_ANSWER_BUTTONS}}
 
   /* Selected state */
   .answer-btn.selected-choice {
@@ -329,7 +343,7 @@
   }
   .next-btn.secondary:hover { background: #eff6ff; }
 
-  /* Replay button (during quiz) */
+  /* Replay button */
   .replay-quiz-btn {
     display: block;
     margin: 8px auto 4px;
@@ -638,7 +652,7 @@
     display: none;
   }
 
-  /* Voice info */
+  /* Voice info (pool mode footer) */
   .voice-info {
     font-size: 0.7rem;
     color: var(--text-muted);
@@ -656,30 +670,16 @@
 <div class="container">
 
   <div class="header">
-    <h1>/n/ vs /l/ 聽力辨識</h1>
-    <p class="subtitle">Listening Discrimination Trainer — Nasal vs Lateral</p>
+    <h1>{{H1}}</h1>
+    <p class="subtitle">{{SUBTITLE}}</p>
   </div>
 
   <!-- Stage selector -->
   <div class="stage-selector" id="stageSelector">
-    <button class="stage-card active" data-stage="1">
-      <div class="stage-icon">🎯</div>
-      <div class="stage-title">need vs lead</div>
-      <div class="stage-desc">4 組核心詞對<br>need·knife·no·night</div>
-    </button>
-    <button class="stage-card locked" data-stage="2">
-      <div class="stage-icon">🔀</div>
-      <div class="stage-title">8 組混合詞對</div>
-      <div class="stage-desc">nap·name·net<br>nine·nose·knot …</div>
-      <div class="stage-lock">🔒 第1關 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
-    </button>
-    <button class="stage-card locked" data-stage="3">
-      <div class="stage-icon">📻</div>
-      <div class="stage-title">完整句子辨識</div>
-      <div class="stage-desc">句中找出<br>/n/ 或 /l/ 音</div>
-      <div class="stage-lock">🔒 第2關 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
-    </button>
+{{STAGE_CARDS}}
   </div>
+
+{{VOICE_UI}}
 
   <!-- Stats bar -->
   <div class="stats-bar">
@@ -700,7 +700,7 @@
   <!-- Main card -->
   <div class="main-card" id="mainCard">
 
-    <!-- Preview state -->
+    <!-- Preview state (warm-up before round) -->
     <div class="preview-section" id="previewSection" style="display:none">
       <p class="preview-label">🎧 暖耳：先聽一遍本回合會出現的單詞</p>
       <div class="preview-word" id="previewWord"></div>
@@ -729,14 +729,7 @@
     <button class="replay-quiz-btn" id="replayQuizBtn" style="display:none">🔁 重播</button>
 
     <div class="answer-buttons" id="answerButtons" style="display:none">
-      <button class="answer-btn n-btn" id="nBtn" disabled>
-        <span class="sound-label">/n/ 音</span>
-        <span class="sound-example">像 need, knife, no</span>
-      </button>
-      <button class="answer-btn l-btn" id="lBtn" disabled>
-        <span class="sound-label">/l/ 音</span>
-        <span class="sound-example">像 lead, life, low</span>
-      </button>
+{{ANSWER_BUTTONS}}
     </div>
 
     <!-- Answer confirmed indicator -->
@@ -749,7 +742,7 @@
     <!-- Reveal button (after Q10) -->
     <button class="next-btn" id="revealBtn" style="display:none">公布答案</button>
 
-    <!-- Review table -->
+    <!-- Review table (after reveal) -->
     <div class="review-section" id="reviewSection" style="display:none"></div>
 
     <!-- Summary -->
@@ -772,100 +765,36 @@
     <p class="report-copied" id="reportCopied">✅ 已複製到剪貼簿！直接貼給你的老師即可</p>
   </div>
 
-  <div class="voice-info" id="voiceInfo">載入語音引擎中...</div>
-
 </div>
 
 <script>
 // ============================================================
-// Word bank — /n/ (nasal) vs /l/ (lateral)
+// Word bank — generated from CSV data
 // ============================================================
-const WORD_BANKS = {
-  1: [
-    { word: 'need', sound: 'n', ipa: '/niːd/' },
-    { word: 'lead', sound: 'l', ipa: '/liːd/' },
-    { word: 'knife', sound: 'n', ipa: '/naɪf/' },
-    { word: 'life', sound: 'l', ipa: '/laɪf/' },
-    { word: 'no', sound: 'n', ipa: '/noʊ/' },
-    { word: 'low', sound: 'l', ipa: '/loʊ/' },
-    { word: 'night', sound: 'n', ipa: '/naɪt/' },
-    { word: 'light', sound: 'l', ipa: '/laɪt/' },
-  ],
-  2: [
-    { word: 'need', sound: 'n', ipa: '/niːd/' },
-    { word: 'lead', sound: 'l', ipa: '/liːd/' },
-    { word: 'knife', sound: 'n', ipa: '/naɪf/' },
-    { word: 'life', sound: 'l', ipa: '/laɪf/' },
-    { word: 'no', sound: 'n', ipa: '/noʊ/' },
-    { word: 'low', sound: 'l', ipa: '/loʊ/' },
-    { word: 'night', sound: 'n', ipa: '/naɪt/' },
-    { word: 'light', sound: 'l', ipa: '/laɪt/' },
-    { word: 'nap', sound: 'n', ipa: '/næp/' },
-    { word: 'lap', sound: 'l', ipa: '/læp/' },
-    { word: 'name', sound: 'n', ipa: '/neɪm/' },
-    { word: 'lame', sound: 'l', ipa: '/leɪm/' },
-    { word: 'net', sound: 'n', ipa: '/net/' },
-    { word: 'let', sound: 'l', ipa: '/let/' },
-    { word: 'nine', sound: 'n', ipa: '/naɪn/' },
-    { word: 'line', sound: 'l', ipa: '/laɪn/' },
-  ],
-  3: [
-    { sentence: 'I need to buy some groceries today.', sound: 'n', word: 'need' },
-    { sentence: 'Can you lead the way to the station?', sound: 'l', word: 'lead' },
-    { sentence: 'Please use a sharp knife to cut the bread.', sound: 'n', word: 'knife' },
-    { sentence: 'She wants to live a happy life.', sound: 'l', word: 'life' },
-    { sentence: 'No, I have not been there before.', sound: 'n', word: 'no' },
-    { sentence: 'The chair is too low for the table.', sound: 'l', word: 'low' },
-    { sentence: 'I could not sleep at all last night.', sound: 'n', word: 'night' },
-    { sentence: 'Please turn on the light — it is dark.', sound: 'l', word: 'light' },
-    { sentence: 'I took a short nap after lunch.', sound: 'n', word: 'nap' },
-    { sentence: 'The cat sat in my lap and purred.', sound: 'l', word: 'lap' },
-    { sentence: 'My name is written on the top of the page.', sound: 'n', word: 'name' },
-    { sentence: 'He walks with a lame leg since the accident.', sound: 'l', word: 'lame' },
-    { sentence: 'The fisherman pulled up his net.', sound: 'n', word: 'net' },
-    { sentence: 'Let me know when you are ready.', sound: 'l', word: 'let' },
-    { sentence: 'I have lived here for nine years.', sound: 'n', word: 'nine' },
-    { sentence: 'Please stand in a straight line.', sound: 'l', word: 'line' },
-  ],
-};
+{{WORD_BANKS}}
 
 // Build contrast-pair map from adjacent entries in word banks
-const CONTRAST_MAP = {};
-(function buildContrastMap() {
-  for (const stageData of Object.values(WORD_BANKS)) {
-    for (let i = 0; i < stageData.length - 1; i += 2) {
-      const a = stageData[i], b = stageData[i + 1];
-      if (a.sound === b.sound) continue;
-      CONTRAST_MAP[a.word] = { word: b.word, ipa: b.ipa || '', sentence: b.sentence || '' };
-      CONTRAST_MAP[b.word] = { word: a.word, ipa: a.ipa || '', sentence: a.sentence || '' };
-    }
-  }
-})();
+{{CONTRAST_MAP}}
+
+// Bonus preview words (extra difficult pairs for warm-up)
+{{BONUS_PREVIEW}}
 
 const ROUND_SIZE = 10;
 const UNLOCK_THRESHOLD = 0.8;
-const MIN_VOICE_COUNT = 3;
+const STORAGE_KEY = '{{STORAGE_KEY}}';
+const NUM_STAGES = {{NUM_STAGES}};
+const HAS_SENTENCES = {{HAS_SENTENCES}};
+const HAS_STAGE3 = {{HAS_STAGE3}};
+const VOICE_MODE = '{{VOICE_MODE}}';
+const SA_ID = '{{SOUND_A_ID}}';
+const SB_ID = '{{SOUND_B_ID}}';
+const SA_LABEL = '{{SOUND_A_LABEL}}';
+const SB_LABEL = '{{SOUND_B_LABEL}}';
 
 // ============================================================
 // State
 // ============================================================
-let state = {
-  stage: 1,
-  unlockedStages: [1],
-  roundWords: [],
-  currentIndex: 0,
-  currentItem: null,
-  hasPlayed: false,
-  hasAnswered: false,
-  currentSelection: null,
-  roundAnswers: [],
-  roundRevealed: false,
-  voicePool: [],
-  previewMode: false,
-  previewWords: [],
-  previewIndex: 0,
-  lastReviewVoice: null,   // track last voice for variety across clicks
-};
+{{STATE_OBJ}}
 
 let longPressTimer = null;
 let longPressTarget = null;
@@ -881,9 +810,9 @@ const previewSection = $('previewSection');
 const previewWord = $('previewWord');
 const previewPlayBtn = $('previewPlayBtn');
 const previewNextBtn = $('previewNextBtn');
-const replayQuizBtn = $('replayQuizBtn');
 const previewProgress = $('previewProgress');
 const skipPreviewBtn = $('skipPreviewBtn');
+const replayQuizBtn = $('replayQuizBtn');
 const exportReportBtn = $('exportReportBtn');
 const reportOutput = $('reportOutput');
 const reportCopied = $('reportCopied');
@@ -893,8 +822,7 @@ const roundNum = $('roundNum');
 const progressWrap = $('progressWrap');
 const progressFill = $('progressFill');
 const answerButtons = $('answerButtons');
-const nBtn = $('nBtn');
-const lBtn = $('lBtn');
+{{VOICE_DOM_REFS}}
 const answeredHint = $('answeredHint');
 const nextBtn = $('nextBtn');
 const revealBtn = $('revealBtn');
@@ -906,102 +834,16 @@ const historyClear = $('historyClear');
 const totalScore = $('totalScore');
 const accuracy = $('accuracy');
 const streakCount = $('streakCount');
-const voiceInfo = $('voiceInfo');
 const stageSelector = $('stageSelector');
 
 // ============================================================
-// Voice pool — gather ≥3 English voices, random rotation
+// Voice management
 // ============================================================
-function buildVoicePool() {
-  const all = speechSynthesis.getVoices();
-  if (all.length === 0) return;
-
-  const english = all.filter(v => v.lang.startsWith('en'));
-  const preferred = [];
-  const names = new Set();
-
-  for (const v of english) {
-    if (v.name === 'Samantha' && !names.has('Samantha')) { preferred.push(v); names.add('Samantha'); }
-    if (v.name === 'Daniel' && !names.has('Daniel')) { preferred.push(v); names.add('Daniel'); }
-    if (v.name === 'Karen' && !names.has('Karen')) { preferred.push(v); names.add('Karen'); }
-    if (v.name === 'Alex' && !names.has('Alex')) { preferred.push(v); names.add('Alex'); }
-    if (v.name === 'Moira' && !names.has('Moira')) { preferred.push(v); names.add('Moira'); }
-    if (v.name === 'Fiona' && !names.has('Fiona')) { preferred.push(v); names.add('Fiona'); }
-    if (v.name === 'Veena' && !names.has('Veena')) { preferred.push(v); names.add('Veena'); }
-    if (v.name === 'Tom' && !names.has('Tom')) { preferred.push(v); names.add('Tom'); }
-  }
-
-  for (const v of english) {
-    if (preferred.length >= 5) break;
-    if (!names.has(v.name)) {
-      preferred.push(v);
-      names.add(v.name);
-    }
-  }
-
-  if (preferred.length < MIN_VOICE_COUNT) {
-    for (const v of all) {
-      if (preferred.length >= MIN_VOICE_COUNT) break;
-      if (!names.has(v.name)) {
-        preferred.push(v);
-        names.add(v.name);
-      }
-    }
-  }
-
-  state.voicePool = preferred;
-  updateVoiceLabel();
-}
-
-function pickVoice() {
-  if (state.voicePool.length === 0) return null;
-  const idx = Math.floor(Math.random() * state.voicePool.length);
-  return state.voicePool[idx];
-}
-
-function pickVoiceDifferentFromLast() {
-  if (state.voicePool.length === 0) return null;
-  if (state.voicePool.length === 1) return state.voicePool[0];
-  const candidates = state.voicePool.filter(v => v !== state.lastReviewVoice);
-  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-  state.lastReviewVoice = chosen;
-  return chosen;
-}
-
-function updateVoiceLabel() {
-  if (state.voicePool.length === 0) {
-    voiceInfo.innerHTML = '語音引擎載入中...';
-    return;
-  }
-  const names = state.voicePool.map(v => `<span class="voice-name">${v.name}</span>`).join(' · ');
-  voiceInfo.innerHTML = `語音：${names}<br><span style="font-size:0.65rem;opacity:0.7">每題隨機輪換</span>`;
-}
-
-speechSynthesis.onvoiceschanged = () => {
-  buildVoicePool();
-};
-
-buildVoicePool();
-
-function speak(text, voice) {
-  return new Promise((resolve) => {
-    speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    const v = voice || pickVoice();
-    if (v) utt.voice = v;
-    utt.rate = 0.85;
-    utt.pitch = 1;
-    utt.onend = resolve;
-    utt.onerror = resolve;
-    speechSynthesis.speak(utt);
-  });
-}
+{{VOICE_JS}}
 
 // ============================================================
 // Persistence (localStorage)
 // ============================================================
-const STORAGE_KEY = 'nl-listening-trainer-v1';
-
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -1056,16 +898,17 @@ function shuffle(arr) {
 
 function generateRound() {
   const bank = WORD_BANKS[state.stage];
+  // For single-stage trainers (nl-core), bank may be keyed at 1 even with no stage selector
+  const saItems = bank.filter(w => w.sound === SA_ID);
+  const sbItems = bank.filter(w => w.sound === SB_ID);
   let pool = [];
   while (pool.length < ROUND_SIZE) {
     pool = pool.concat(shuffle(bank));
   }
   pool = pool.slice(0, ROUND_SIZE);
-  const nCount = pool.filter(w => w.sound === 'n').length;
-  if (nCount === 0 || nCount === ROUND_SIZE) {
-    const nItems = bank.filter(w => w.sound === 'n');
-    const lItems = bank.filter(w => w.sound === 'l');
-    const other = nCount === 0 ? nItems : lItems;
+  const saCount = pool.filter(w => w.sound === SA_ID).length;
+  if (saCount === 0 || saCount === ROUND_SIZE) {
+    const other = saCount === 0 ? saItems : sbItems;
     pool[Math.floor(Math.random() * ROUND_SIZE)] = other[Math.floor(Math.random() * other.length)];
   }
   return shuffle(pool);
@@ -1077,10 +920,9 @@ function startRound() {
   state.roundAnswers = [];
   state.roundRevealed = false;
   state.hasPlayed = false;
-  state.hasAnswered = false;
   state.currentSelection = null;
 
-  // Build preview: unique words from this round + bonus difficult pairs
+  // Build preview: unique words from this round, shuffled
   const seen = new Set();
   const unique = [];
   for (const w of state.roundWords) {
@@ -1091,17 +933,7 @@ function startRound() {
     }
   }
 
-  // Bonus preview: extra difficult minimal pairs (common confusion targets)
-  const BONUS_PREVIEW = [
-    { word: 'nose', sound: 'n', ipa: '/noʊz/' },
-    { word: 'lose', sound: 'l', ipa: '/luːz/' },
-    { word: 'knot', sound: 'n', ipa: '/nɒt/' },
-    { word: 'lot', sound: 'l', ipa: '/lɒt/' },
-    { word: 'nail', sound: 'n', ipa: '/neɪl/' },
-    { word: 'lane', sound: 'l', ipa: '/leɪn/' },
-    { word: 'snow', sound: 'n', ipa: '/snoʊ/' },
-    { word: 'slow', sound: 'l', ipa: '/sloʊ/' },
-  ];
+  // Bonus preview: extra difficult minimal pairs for warm-up
   for (const w of BONUS_PREVIEW) {
     const key = w.word;
     if (!seen.has(key)) {
@@ -1131,10 +963,11 @@ function showPreviewState() {
   revealBtn.style.display = 'none';
   reviewSection.style.display = 'none';
   summary.style.display = 'none';
+  replayQuizBtn.style.display = 'none';
   previewPlayBtn.classList.remove('playing');
 
   const w = state.previewWords[state.previewIndex];
-  const isStage3 = state.stage === 3 && w.sentence;
+  const isStage3 = (state.stage === 3 && HAS_SENTENCES && w.sentence);
   const label = isStage3 ? highlightTargetWord(w.sentence, w.word) : (w.sentence || `${w.word} <span class="ipa-sub">${w.ipa}</span>`);
   previewWord.innerHTML = label;
   previewProgress.textContent = `${state.previewIndex + 1} / ${state.previewWords.length}`;
@@ -1176,10 +1009,10 @@ function showPlayState() {
   summary.style.display = 'none';
   replayQuizBtn.style.display = 'none';
   playBtn.classList.remove('playing');
-  nBtn.disabled = true;
-  lBtn.disabled = true;
-  nBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
-  lBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+  aBtn.disabled = true;
+  bBtn.disabled = true;
+  aBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+  bBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
   playHint.textContent = '點擊播放單詞';
   progressFill.style.width = '0%';
 }
@@ -1223,10 +1056,10 @@ async function handlePlay() {
     answeredHint.style.display = 'none';
     nextBtn.style.display = 'none';
     revealBtn.style.display = 'none';
-    nBtn.disabled = false;
-    lBtn.disabled = false;
-    nBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
-    lBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+    aBtn.disabled = false;
+    bBtn.disabled = false;
+    aBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+    bBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
     state.currentSelection = null;
     state.hasPlayed = true;
   }
@@ -1238,24 +1071,23 @@ function handleAnswer(choice) {
   if (state.currentSelection === choice) {
     // Clicking same button → deselect
     state.currentSelection = null;
-    nBtn.classList.remove('selected-choice', 'unselected-choice');
-    lBtn.classList.remove('selected-choice', 'unselected-choice');
+    aBtn.classList.remove('selected-choice', 'unselected-choice');
+    bBtn.classList.remove('selected-choice', 'unselected-choice');
     answeredHint.style.display = 'none';
     nextBtn.style.display = 'none';
     revealBtn.style.display = 'none';
   } else {
-    // Select this choice (first select, or switch from other)
     state.currentSelection = choice;
-    if (choice === 'n') {
-      nBtn.classList.add('selected-choice');
-      nBtn.classList.remove('unselected-choice');
-      lBtn.classList.remove('selected-choice');
-      lBtn.classList.add('unselected-choice');
+    if (choice === SA_ID) {
+      aBtn.classList.add('selected-choice');
+      aBtn.classList.remove('unselected-choice');
+      bBtn.classList.remove('selected-choice');
+      bBtn.classList.add('unselected-choice');
     } else {
-      lBtn.classList.add('selected-choice');
-      lBtn.classList.remove('unselected-choice');
-      nBtn.classList.remove('selected-choice');
-      nBtn.classList.add('unselected-choice');
+      bBtn.classList.add('selected-choice');
+      bBtn.classList.remove('unselected-choice');
+      aBtn.classList.remove('selected-choice');
+      aBtn.classList.add('unselected-choice');
     }
     answeredHint.style.display = 'block';
 
@@ -1285,7 +1117,7 @@ function handleNext() {
 }
 
 // ============================================================
-// Reveal & Review
+// Reveal & Review (after all 10 answered)
 // ============================================================
 function handleReveal() {
   if (state.currentSelection) {
@@ -1303,8 +1135,10 @@ function handleReveal() {
   nextBtn.style.display = 'none';
   revealBtn.style.display = 'none';
 
+  // Save all answers to localStorage
   saveRoundToStorage();
 
+  // Build review table
   const correctCount = state.roundAnswers.filter(a => a.correct).length;
 
   let html = '<h3>本輪回顧</h3>';
@@ -1315,11 +1149,11 @@ function handleReveal() {
 
   state.roundAnswers.forEach((a, i) => {
     const item = a.item;
-    const isStage3 = state.stage === 3;
+    const isStage3 = (state.stage === 3 && HAS_SENTENCES);
     const wordLabel = isStage3 ? `"${item.word}"` : item.word;
     const ipaLabel = isStage3 ? '' : ` <span class="ipa-cell">${item.ipa}</span>`;
-    const actualSound = item.sound === 'n' ? '/n/' : '/l/';
-    const yourSound = a.choice === 'n' ? '/n/' : '/l/';
+    const actualSound = item.sound === SA_ID ? SA_LABEL : SB_LABEL;
+    const yourSound = a.choice === SA_ID ? SA_LABEL : SB_LABEL;
     const rowClass = a.correct ? 'row-correct' : 'row-incorrect';
     const icon = a.correct ? '✓' : '✗';
 
@@ -1327,7 +1161,7 @@ function handleReveal() {
     html += `<td>${i + 1}</td>`;
     html += `<td><span class="word-cell">${wordLabel}</span>${ipaLabel}</td>`;
     html += `<td><button class="review-play-btn" data-play-text="${(item.sentence || item.word).replace(/"/g, '&quot;')}">▶</button></td>`;
-    const contrast = CONTRAST_MAP[item.word];
+    const contrast = CONTRAST_MAP[item.word || item.sentence];
     const contrastHtml = contrast
       ? `<button class="contrast-play-btn" data-play-text="${contrast.word.replace(/"/g, '&quot;')}">▶</button> <span class="contrast-word">${contrast.word} <span class="ipa-cell">${contrast.ipa}</span></span>`
       : '';
@@ -1346,10 +1180,10 @@ function handleReveal() {
 }
 
 function saveRoundToStorage() {
-  const stageKey = `nl_stage${state.stage}_scores`;
+  const stageKey = `stage${state.stage}_scores`;
   const scores = JSON.parse(localStorage.getItem(stageKey) || '[]');
   const today = new Date().toISOString().slice(0, 10);
-  const dailyKey = `nl_daily_${today}`;
+  const dailyKey = `daily_${today}`;
 
   state.roundAnswers.forEach(a => {
     scores.push(a.correct ? 1 : 0);
@@ -1392,16 +1226,18 @@ function showSummaryAfterReview(correctCount) {
   `;
 
   // Check unlock
-  if (pct >= 80 && state.stage < 3) {
+  if (pct >= 80 && state.stage < NUM_STAGES) {
     const nextStage = state.stage + 1;
     if (!state.unlockedStages.includes(nextStage)) {
       state.unlockedStages.push(nextStage);
       state.unlockedStages.sort();
       saveData();
       updateStageButtons();
+      const stageNames = ['', ...document.querySelectorAll('.stage-card .stage-title')].map(el => el ? el.textContent : '');
+      const nextName = stageNames[nextStage] || `第${nextStage}關`;
       summary.innerHTML += `
         <p style="color:var(--accent);font-weight:600;margin-top:12px">
-          🔓 「${nextStage === 2 ? '8 組混合詞對' : '完整句子辨識'}」已解鎖！
+          🔓 「${nextName}」已解鎖！
         </p>`;
     }
   }
@@ -1428,7 +1264,7 @@ async function replayWrongAnswers() {
   wrong.forEach((a, i) => {
     const item = a.item;
     const label = item.sentence || `${item.word} ${item.ipa}`;
-    const actualSound = item.sound === 'n' ? '/n/' : '/l/';
+    const actualSound = item.sound === SA_ID ? SA_LABEL : SB_LABEL;
     html += `<p><strong>${i + 1}.</strong> ${label} — 實際是 <span style="color:var(--correct);font-weight:700">${actualSound}</span></p>`;
   });
   html += '</div>';
@@ -1466,7 +1302,7 @@ async function replayWrongAnswers() {
 // ============================================================
 function updateStatsDisplay() {
   const today = new Date().toISOString().slice(0, 10);
-  const dailyKey = `nl_daily_${today}`;
+  const dailyKey = `daily_${today}`;
   const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
   const allCorrect = dailyScores.filter(s => s.correct).length;
   const allTotal = dailyScores.length;
@@ -1484,7 +1320,7 @@ function updateStatsDisplay() {
 
 function updateHistoryDisplay() {
   const today = new Date().toISOString().slice(0, 10);
-  const dailyKey = `nl_daily_${today}`;
+  const dailyKey = `daily_${today}`;
   const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
 
   if (dailyScores.length === 0) {
@@ -1502,7 +1338,7 @@ function updateHistoryDisplay() {
 
 function clearHistory() {
   const today = new Date().toISOString().slice(0, 10);
-  const dailyKey = `nl_daily_${today}`;
+  const dailyKey = `daily_${today}`;
   localStorage.removeItem(dailyKey);
   historyList.innerHTML = '<span class="history-empty">尚未作答</span>';
   historyClear.style.display = 'none';
@@ -1513,11 +1349,13 @@ function clearHistory() {
 }
 
 // ============================================================
-// Export report for review
+// Export report
 // ============================================================
+const REPORT_STAGE_NAMES = {{REPORT_STAGE_NAMES}};
+
 function exportReport() {
   const today = new Date().toISOString().slice(0, 10);
-  const dailyKey = `nl_daily_${today}`;
+  const dailyKey = `daily_${today}`;
   const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
 
   if (dailyScores.length === 0) {
@@ -1527,11 +1365,10 @@ function exportReport() {
     return;
   }
 
-  // Per-stage analysis
   const stages = {};
   for (const s of dailyScores) {
     const st = s.stage;
-    if (!stages[st]) stages[st] = { total: 0, correct: 0, errors: {}, rounds: 0 };
+    if (!stages[st]) stages[st] = { total: 0, correct: 0, errors: {} };
     stages[st].total++;
     if (s.correct) stages[st].correct++;
     else {
@@ -1541,13 +1378,8 @@ function exportReport() {
     }
   }
 
-  for (const st of Object.keys(stages)) {
-    stages[st].rounds = Math.floor(stages[st].total / 10);
-    if (stages[st].total % 10 > 0) stages[st].rounds++;
-  }
-
   const lines = [];
-  lines.push(`# /n/ vs /l/ 聽力練習報告 — ${today}`);
+  lines.push(`# {{REPORT_TITLE}} — ${today}`);
   lines.push('');
   lines.push(`總答題數：${dailyScores.length} 題`);
   const overallCorrect = dailyScores.filter(s => s.correct).length;
@@ -1555,13 +1387,13 @@ function exportReport() {
   lines.push(`總正確率：${overallCorrect}/${dailyScores.length} = ${overallPct}%`);
   lines.push('');
 
-  const stageNames = { 1: 'need vs lead（核心詞對）', 2: '8 組混合詞對', 3: '句子中辨識' };
-  for (const st of [1, 2, 3]) {
+  for (const st of Object.keys(REPORT_STAGE_NAMES)) {
     if (!stages[st]) continue;
     const d = stages[st];
+    const stNum = parseInt(st);
     const pct = Math.round((d.correct / d.total) * 100);
-    lines.push(`## 第${st}關：${stageNames[st]}`);
-    lines.push(`- 答題：${d.total} 題（約 ${d.rounds} 輪）`);
+    lines.push(`## 第${st}關：${REPORT_STAGE_NAMES[stNum]}`);
+    lines.push(`- 答題：${d.total} 題`);
     lines.push(`- 正確率：${d.correct}/${d.total} = ${pct}%`);
     if (pct >= 80) lines.push(`- ✅ 達標（80%+）`);
     else lines.push(`- ❌ 未達標（需 80%+）`);
@@ -1570,31 +1402,30 @@ function exportReport() {
     if (errors.length > 0) {
       lines.push(`- 錯題分析：`);
       for (const [word, info] of errors) {
-        const actualLabel = info.sound === 'n' ? '/n/' : '/l/';
-        const mistakeLabel = info.sound === 'n' ? '/l/' : '/n/';
+        const actualLabel = info.sound === SA_ID ? SA_LABEL : SB_LABEL;
+        const mistakeLabel = info.sound === SA_ID ? SB_LABEL : SA_LABEL;
         lines.push(`  - ${word}：錯 ${info.count} 次（實際是 ${actualLabel}，誤聽為 ${mistakeLabel}）`);
       }
     }
 
-    const nAsL = Object.values(d.errors).filter(e => e.sound === 'n').reduce((s, e) => s + e.count, 0);
-    const lAsN = Object.values(d.errors).filter(e => e.sound === 'l').reduce((s, e) => s + e.count, 0);
-    if (nAsL > 0 || lAsN > 0) {
-      lines.push(`- 錯誤方向：/n/→/l/ ${nAsL} 次　/l/→/n/ ${lAsN} 次`);
+    const aErr = Object.values(d.errors).filter(e => e.sound === SA_ID).reduce((s, e) => s + e.count, 0);
+    const bErr = Object.values(d.errors).filter(e => e.sound === SB_ID).reduce((s, e) => s + e.count, 0);
+    if (aErr > 0 || bErr > 0) {
+      lines.push(`- 錯誤方向：{{ERROR_A_LABEL}} ${aErr} 次　{{ERROR_B_LABEL}} ${bErr} 次`);
     }
     lines.push('');
   }
 
-  // Error direction summary
   const allErrors = Object.values(stages).flatMap(s => Object.values(s.errors));
-  const totalNAsL = allErrors.filter(e => e.sound === 'n').reduce((s, e) => s + e.count, 0);
-  const totalLAsN = allErrors.filter(e => e.sound === 'l').reduce((s, e) => s + e.count, 0);
+  const totalAErr = allErrors.filter(e => e.sound === SA_ID).reduce((s, e) => s + e.count, 0);
+  const totalBErr = allErrors.filter(e => e.sound === SB_ID).reduce((s, e) => s + e.count, 0);
   lines.push('## 整體錯誤方向');
-  lines.push(`- /n/ 誤聽為 /l/：${totalNAsL} 次`);
-  lines.push(`- /l/ 誤聽為 /n/：${totalLAsN} 次`);
-  if (totalNAsL > totalLAsN * 2) {
-    lines.push('- ⚠️ 主方向為 /n/ → /l/（鼻音漏聽——學員沒聽到鼻腔共鳴）');
-  } else if (totalLAsN > totalNAsL * 2) {
-    lines.push('- ⚠️ 主方向為 /l/ → /n/（邊音漏聽——學員把邊音誤判為鼻音）');
+  lines.push(`- {{ERROR_A_LABEL}}：${totalAErr} 次`);
+  lines.push(`- {{ERROR_B_LABEL}}：${totalBErr} 次`);
+  if (totalAErr > totalBErr * 2) {
+    lines.push('- {{ERROR_NOTE_A}}');
+  } else if (totalBErr > totalAErr * 2) {
+    lines.push('- {{ERROR_NOTE_B}}');
   } else {
     lines.push('- 雙向錯誤大致平衡');
   }
@@ -1614,7 +1445,8 @@ function exportReport() {
     lines.push('## 最需關注的詞（錯 ≥2 次）');
     for (const [word, info] of topProblems) {
       if (info.count >= 2) {
-        lines.push(`- ${word}：錯 ${info.count} 次（實際 /${info.sound === 'n' ? 'n' : 'l'}/）`);
+        const label = info.sound === SA_ID ? SA_LABEL : SB_LABEL;
+        lines.push(`- ${word}：錯 ${info.count} 次（實際 ${label}）`);
       }
     }
     if (topProblems.every(([, i]) => i.count < 2)) {
@@ -1623,7 +1455,7 @@ function exportReport() {
   }
   lines.push('');
   lines.push('---');
-  lines.push('以上報告由 /n/ vs /l/ HTML 聽力練習頁面自動生成。');
+  lines.push('以上報告由 HTML 聽力練習頁面自動生成。');
 
   const report = lines.join('\n');
   reportOutput.value = report;
@@ -1639,7 +1471,7 @@ function exportReport() {
 }
 
 // ============================================================
-// Stage switching
+// Stage switching (only for multi-stage trainers)
 // ============================================================
 function switchStage(stage, force) {
   if (force && !state.unlockedStages.includes(stage)) {
@@ -1663,8 +1495,8 @@ previewPlayBtn.addEventListener('click', handlePreviewPlay);
 previewNextBtn.addEventListener('click', handlePreviewNext);
 replayQuizBtn.addEventListener('click', handlePlay);
 skipPreviewBtn.addEventListener('click', skipPreview);
-nBtn.addEventListener('click', () => handleAnswer('n'));
-lBtn.addEventListener('click', () => handleAnswer('l'));
+aBtn.addEventListener('click', () => handleAnswer(SA_ID));
+bBtn.addEventListener('click', () => handleAnswer(SB_ID));
 nextBtn.addEventListener('click', handleNext);
 revealBtn.addEventListener('click', handleReveal);
 historyClear.addEventListener('click', clearHistory);
@@ -1697,7 +1529,6 @@ stageSelector.addEventListener('pointerdown', (e) => {
       longPressTarget.classList.remove('pressing');
       const stage = parseInt(longPressTarget.dataset.stage);
       switchStage(stage, true);
-      // Brief flash feedback
       const el = longPressTarget;
       el.style.transition = 'all 0.2s';
       el.style.borderColor = 'var(--accent)';
@@ -1717,47 +1548,28 @@ stageSelector.addEventListener('pointerup', cancelLongPress);
 stageSelector.addEventListener('pointerleave', cancelLongPress);
 stageSelector.addEventListener('pointercancel', cancelLongPress);
 
-// Keyboard shortcuts: Space=play, ←=/n/, →=/l/, Enter=next/reveal
+// Keyboard shortcuts: Space=play, ←=A, →=B, Enter=next/reveal
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'BUTTON') return;
 
   if (state.previewMode) {
-    if (e.key === ' ') {
-      e.preventDefault();
-      handlePreviewPlay();
-    }
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handlePreviewNext();
-    }
+    if (e.key === ' ') { e.preventDefault(); handlePreviewPlay(); }
+    if (e.key === 'Enter') { e.preventDefault(); handlePreviewNext(); }
     return;
   }
 
-  if (e.key === ' ') {
-    e.preventDefault();
-    if (state.roundRevealed) return;
-    handlePlay();
-  }
-  if (e.key === 'ArrowLeft' && state.hasPlayed) {
-    e.preventDefault();
-    handleAnswer('n');
-  }
-  if (e.key === 'ArrowRight' && state.hasPlayed) {
-    e.preventDefault();
-    handleAnswer('l');
-  }
+  if (e.key === ' ') { e.preventDefault(); if (!state.roundRevealed) handlePlay(); }
+  if (e.key === 'ArrowLeft' && state.hasPlayed) { e.preventDefault(); handleAnswer(SA_ID); }
+  if (e.key === 'ArrowRight' && state.hasPlayed) { e.preventDefault(); handleAnswer(SB_ID); }
   if (e.key === 'Enter') {
     e.preventDefault();
     if (state.roundRevealed) return;
-    if (state.currentSelection && state.currentIndex < ROUND_SIZE - 1) {
-      handleNext();
-    } else if (state.currentSelection && state.currentIndex >= ROUND_SIZE - 1 && !state.roundRevealed) {
-      handleReveal();
-    }
+    if (state.currentSelection && state.currentIndex < ROUND_SIZE - 1) { handleNext(); }
+    else if (state.currentSelection && state.currentIndex >= ROUND_SIZE - 1 && !state.roundRevealed) { handleReveal(); }
   }
 });
 
-// Review play buttons — event delegation (different voice per click)
+// Review play buttons — event delegation
 reviewSection.addEventListener('click', async (e) => {
   const btn = e.target.closest('.review-play-btn, .contrast-play-btn');
   if (!btn) return;
@@ -1769,6 +1581,8 @@ reviewSection.addEventListener('click', async (e) => {
   btn.classList.remove('playing-review');
   btn.textContent = '▶';
 });
+
+{{VOICE_EVENT_LISTENERS}}
 
 // Contrast toggle
 function toggleContrast() {
