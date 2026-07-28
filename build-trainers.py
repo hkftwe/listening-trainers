@@ -127,6 +127,43 @@ TRAINERS = {
         "error_direction_note_b": "⚠️ 主方向為 /l/ → /n/，舌側音被誤聽為鼻音",
     },
 
+    "n-l-complex": {
+        "filename": "nl-listening-trainer-complex.html",
+        "title_tag": "/n/ vs /l/ 複雜環境聽力訓練",
+        "h1": "/n/ vs /l/ 複雜環境聽力辨識",
+        "subtitle": "Listening Discrimination Trainer — Complex Environment (Multi-syllable)",
+        "storage_key": "nl-complex-listening-trainer-v1",
+        "accent_color": "#2563eb",
+        "accent_hover": "#1d4ed8",
+        "voice_mode": "pool",
+        "sound_a": {"id": "n", "label": "/n/", "example": "needing, nightly, nearly",
+                     "color": "#0891b2", "bg": "#ecfeff", "border": "#a5f3fc"},
+        "sound_b": {"id": "l", "label": "/l/", "example": "leading, lightly, really",
+                     "color": "#d97706", "bg": "#fffbeb", "border": "#fcd34d"},
+        "stages": [
+            {"icon": "🎯", "title": "needing vs leading", "desc": "2 組核心詞對<br>needing·nightly<br>（多音節複雜環境）"},
+            {"icon": "🔀", "title": "6 組混合詞對", "desc": "nearly·nothing·nervous<br>really·learning·lighter …"},
+            {"icon": "📻", "title": "完整句子辨識", "desc": "句中找出<br>/n/ 或 /l/ 音<br>含 medial /l/ 詞"},
+        ],
+        "bonus_preview": [
+            {"word": "narrow", "sound": "n", "ipa": "/ˈnær.oʊ/"},
+            {"word": "living", "sound": "l", "ipa": "/ˈlɪ.vɪŋ/"},
+            {"word": "lonely", "sound": "l", "ipa": "/ˈloʊn.li/"},
+            {"word": "lovely", "sound": "l", "ipa": "/ˈlʌv.li/"},
+        ],
+        "has_sentences": True,
+        "report_title": "/n/ vs /l/ 複雜環境聽力練習報告",
+        "report_stage_names": {
+            1: "needing vs leading（核心詞對）",
+            2: "6 組混合詞對",
+            3: "句子中辨識（含 medial /l/）",
+        },
+        "error_direction_a_label": "/n/ → /l/",
+        "error_direction_b_label": "/l/ → /n/",
+        "error_direction_note_a": "⚠️ 主方向為 /n/ → /l/，鼻音被誤聽為舌側音",
+        "error_direction_note_b": "⚠️ 主方向為 /l/ → /n/，舌側音被誤聽為鼻音",
+    },
+
     "n-l-core": {
         "filename": "nl-listening-trainer-core.html",
         "title_tag": "/n/ vs /l/ 核心聽力訓練",
