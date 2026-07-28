@@ -783,7 +783,7 @@ function showPlayState() {
     b.disabled = true;
     b.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
   });
-  playHint.textContent = state.stage === 2 ? '點擊播放版本 A' : '點擊播放';
+  playHint.textContent = state.stage === 2 ? '點擊播放（共需播放 2 次：A 與 B）' : '點擊播放';
   progressFill.style.width = '0%';
 }
 
@@ -797,6 +797,17 @@ function updateProgress() {
 async function handlePlay() {
   if (state.currentIndex >= ROUND_SIZE || state.roundRevealed) return;
   state.currentItem = state.roundItems[state.currentIndex];
+
+  // Guard: in Stage 2, if both A and B are already played and answer UI is shown,
+  // don't replay — just ensure answer buttons are visible (recover from stuck state)
+  if (state.stage === 2 && state.hasPlayed && state.hasPlayedB) {
+    if (state.answerUIShown && abButtons.style.display !== 'flex') {
+      // Re-show answer UI that was somehow hidden
+      abButtons.style.display = 'flex';
+      abBtnA.disabled = false; abBtnB.disabled = false;
+    }
+    return;
+  }
 
   playBtn.classList.add('playing');
 
@@ -814,7 +825,7 @@ async function handlePlay() {
       const fullA = state.currentItem.label.replace('every', textA);
       playHint.textContent = '播放版本 A...';
       await speak(fullA);
-      playHint.textContent = '點擊播放版本 B';
+      playHint.textContent = '▶ 再點一次播放版本 B';
     } else {
       // Play version B
       const textB = state.abOrder.B === 'correct' ? 'every' : 'effy';
