@@ -783,7 +783,7 @@ function showPlayState() {
     b.disabled = true;
     b.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
   });
-  playHint.textContent = state.stage === 2 ? '點擊播放（共需播放 2 次：A 與 B）' : '點擊播放';
+  playHint.textContent = state.stage === 2 ? '點擊播放（依序播放 A 與 B）' : '點擊播放';
   progressFill.style.width = '0%';
 }
 
@@ -798,42 +798,41 @@ async function handlePlay() {
   if (state.currentIndex >= ROUND_SIZE || state.roundRevealed) return;
   state.currentItem = state.roundItems[state.currentIndex];
 
-  // Guard: in Stage 2, if both A and B are already played and answer UI is shown,
-  // don't replay — just ensure answer buttons are visible (recover from stuck state)
-  if (state.stage === 2 && state.hasPlayed && state.hasPlayedB) {
-    if (state.answerUIShown && abButtons.style.display !== 'flex') {
-      // Re-show answer UI that was somehow hidden
-      abButtons.style.display = 'flex';
-      abBtnA.disabled = false; abBtnB.disabled = false;
-    }
-    return;
-  }
-
   playBtn.classList.add('playing');
 
   if (state.stage === 1) {
     playHint.textContent = '播放中...';
     await speak(state.currentItem.tts);
   } else if (state.stage === 2) {
-    if (!state.hasPlayed) {
-      // Play version A
-      if (!state.abOrder) {
-        const correctFirst = Math.random() < 0.5;
-        state.abOrder = { A: correctFirst ? 'correct' : 'incorrect', B: correctFirst ? 'incorrect' : 'correct' };
-      }
-      const textA = state.abOrder.A === 'correct' ? 'every' : 'effy';
-      const fullA = state.currentItem.label.replace('every', textA);
-      playHint.textContent = '播放版本 A...';
-      await speak(fullA);
-      playHint.textContent = '▶ 再點一次播放版本 B';
-    } else {
-      // Play version B
-      const textB = state.abOrder.B === 'correct' ? 'every' : 'effy';
-      const fullB = state.currentItem.label.replace('every', textB);
-      playHint.textContent = '播放版本 B...';
-      await speak(fullB);
-      playHint.textContent = '兩版本已播放 — 請作答';
+    // Stage 2: play both A and B in sequence on a single click
+    if (!state.abOrder) {
+      const correctFirst = Math.random() < 0.5;
+      state.abOrder = { A: correctFirst ? 'correct' : 'incorrect', B: correctFirst ? 'incorrect' : 'correct' };
     }
+
+    // Play version A
+    const textA = state.abOrder.A === 'correct' ? 'every' : 'effy';
+    const fullA = state.currentItem.label.replace('every', textA);
+    playHint.textContent = '播放版本 A...';
+    playLabel.style.display = 'block';
+    playLabel.textContent = '版本 A';
+    await speak(fullA);
+
+    // Brief pause between versions
+    playLabel.textContent = '...';
+    await new Promise(r => setTimeout(r, 500));
+
+    // Play version B
+    const textB = state.abOrder.B === 'correct' ? 'every' : 'effy';
+    const fullB = state.currentItem.label.replace('every', textB);
+    playHint.textContent = '播放版本 B...';
+    playLabel.textContent = '版本 B';
+    await speak(fullB);
+
+    playHint.textContent = '兩版本已播放 — 請作答';
+    playLabel.textContent = '哪一個是正確的 every？';
+    state.hasPlayed = true;
+    state.hasPlayedB = true;
   } else if (state.stage === 3) {
     playHint.textContent = '播放中...';
     const text = state.currentItem.isCorrect
@@ -844,17 +843,6 @@ async function handlePlay() {
   }
 
   playBtn.classList.remove('playing');
-
-  if (state.stage === 2 && !state.hasPlayed) {
-    state.hasPlayed = true;
-    if (!state.hasPlayedB) {
-      playLabel.style.display = 'block';
-      playLabel.textContent = '已播放 A ✓';
-    }
-    return;
-  }
-
-  if (state.stage === 2) state.hasPlayedB = true;
 
   // Show answer UI (only once per question, matching template pattern)
   if (!state.answerUIShown) {
