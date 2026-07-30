@@ -319,13 +319,13 @@
 
     <!-- Stage 2: Oddball position -->
     <div class="oddball-buttons" id="oddballButtons" style="display:none">
-      <button class="oddball-btn" id="pos1Btn" disabled>
+      <button class="oddball-btn" id="pos1Btn" data-pos="1" disabled>
         <span class="pos-num">1</span>第 1 個
       </button>
-      <button class="oddball-btn" id="pos2Btn" disabled>
+      <button class="oddball-btn" id="pos2Btn" data-pos="2" disabled>
         <span class="pos-num">2</span>第 2 個
       </button>
-      <button class="oddball-btn" id="pos3Btn" disabled>
+      <button class="oddball-btn" id="pos3Btn" data-pos="3" disabled>
         <span class="pos-num">3</span>第 3 個
       </button>
     </div>
@@ -909,6 +909,8 @@ function handleNLAnswer(choice) {
       lBtn.classList.add('selected-choice');
       nBtn.classList.add('unselected-choice');
     }
+    // Replay word for auditory confirmation (matches basic trainer behavior)
+    speak(state.currentTrial.word);
     showAnsweredState();
   }
 }
