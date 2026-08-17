@@ -316,6 +316,37 @@ TRAINERS = {
         "error_direction_note_a": "⚠️ 主方向為 /θr/ → /tr/，/θ/ 在叢集中被聽成 /t/",
         "error_direction_note_b": "⚠️ 主方向為 /tr/ → /θr/，與產出方向相反——值得注意",
     },
+
+    "u-oo": {
+        "filename": "u-oo-listening-trainer.html",
+        "title_tag": "/ʊ/ vs /uː/ Listening Trainer",
+        "h1": "/ʊ/ vs /uː/ 聽力辨識（母音長短）",
+        "subtitle": "Listening Discrimination Trainer — Vowel Length (full vs fool)",
+        "storage_key": "u-oo-listening-trainer-v1",
+        "accent_color": "#2563eb",
+        "accent_hover": "#1d4ed8",
+        "voice_mode": "pool",
+        "sound_a": {"id": "u", "label": "/ʊ/（短音）", "example": "full, pull, could",
+                     "color": "#d97706", "bg": "#fffbeb", "border": "#fcd34d"},
+        "sound_b": {"id": "oo", "label": "/uː/（長音）", "example": "fool, pool, cooed",
+                     "color": "#7c3aed", "bg": "#f5f3ff", "border": "#c4b5fd"},
+        "stages": [
+            {"icon": "🎯", "title": "full vs fool", "desc": "3 組核心詞對<br>full·pull·could"},
+            {"icon": "🔀", "title": "4 組混合詞對", "desc": "look·wood·stood<br>nook …"},
+            {"icon": "📻", "title": "完整句子辨識", "desc": "句中找出<br>/ʊ/ 或 /uː/ 音"},
+        ],
+        "has_sentences": True,
+        "report_title": "/ʊ/ vs /uː/ 聽力練習報告",
+        "report_stage_names": {
+            1: "full vs fool（核心詞對）",
+            2: "4 組混合詞對",
+            3: "句子中辨識",
+        },
+        "error_direction_a_label": "/ʊ/ → /uː/",
+        "error_direction_b_label": "/uː/ → /ʊ/",
+        "error_direction_note_a": "⚠️ 主方向為 /ʊ/ → /uː/，短音被聽成長音",
+        "error_direction_note_b": "⚠️ 主方向為 /uː/ → /ʊ/，長音被聽成短音——注意時長對立",
+    },
 }
 
 
