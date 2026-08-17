@@ -785,19 +785,32 @@ def main():
             f.write(html)
         print(f"  → {config['filename']} ({len(html)} bytes)")
 
-    # Copy hand-maintained v-f trainer into dist/
-    vf_src = os.path.join(SCRIPT_DIR, "manual", "v-f-listening-trainer.html")
-    vf_dst = os.path.join(dist_dir, "v-f-listening-trainer.html")
-    if os.path.exists(vf_src):
-        import shutil
-        shutil.copy2(vf_src, vf_dst)
-        print(f"Copied v-f-listening-trainer.html → dist/")
+    # Copy hand-maintained trainers into dist/
+    import shutil
+    manual_trainers = {
+        "v-f": "v-f-listening-trainer.html",
+        "vowel-assessment": "vowel-minimal-pairs-assessment.html",
+    }
+    for key, fname in manual_trainers.items():
+        src = os.path.join(SCRIPT_DIR, "manual", fname)
+        dst = os.path.join(dist_dir, fname)
+        if os.path.exists(src):
+            shutil.copy2(src, dst)
+            print(f"Copied {fname} → dist/")
 
-    # Build index (includes all generated trainers + v-f)
+    # Build index (includes all generated trainers + manual trainers)
     all_trainers = dict(TRAINERS)
+    all_trainers["n-l-regression"] = {
+        "filename": "nl-listening-trainer-regression.html",
+        "h1": "/n/ vs /l/ 漸進式聽力訓練（退階設計）",
+    }
     all_trainers["v-f"] = {
         "filename": "v-f-listening-trainer.html",
         "h1": "/v/ vs /f/ 聽力辨識 + every 聽覺重建",
+    }
+    all_trainers["vowel-assessment"] = {
+        "filename": "vowel-minimal-pairs-assessment.html",
+        "h1": "母音 Minimal Pair 聽辨評估（第 0 天評估）",
     }
     index_html = build_index(all_trainers)
     with open(os.path.join(SCRIPT_DIR, "index.html"), "w", encoding="utf-8") as f:
