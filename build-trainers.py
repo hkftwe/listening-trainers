@@ -285,6 +285,37 @@ TRAINERS = {
         "error_direction_note_a": "⚠️ 主方向為 /f/ → /θ/",
         "error_direction_note_b": "⚠️ 主方向為 /θ/ → /f/",
     },
+
+    "thr-tr": {
+        "filename": "thr-tr-listening-trainer.html",
+        "title_tag": "/θr/ vs /tr/ Listening Trainer",
+        "h1": "/θr/ vs /tr/ 聽力辨識",
+        "subtitle": "Listening Discrimination Trainer — /θ/ in Cluster",
+        "storage_key": "thr-tr-listening-trainer-v1",
+        "accent_color": "#2563eb",
+        "accent_hover": "#1d4ed8",
+        "voice_mode": "pool",
+        "sound_a": {"id": "thr", "label": "/θr/", "example": "three, through, thrill",
+                     "color": "#0891b2", "bg": "#ecfeff", "border": "#a5f3fc"},
+        "sound_b": {"id": "tr", "label": "/tr/", "example": "tree, true, trill",
+                     "color": "#7c3aed", "bg": "#f5f3ff", "border": "#c4b5fd"},
+        "stages": [
+            {"icon": "🎯", "title": "three vs tree", "desc": "3 組核心詞對<br>three·through·thrill"},
+            {"icon": "🔀", "title": "4 組混合詞對", "desc": "thread·tread<br>加入擴充詞"},
+            {"icon": "📻", "title": "完整句子辨識", "desc": "句中找出<br>/θr/ 或 /tr/ 音"},
+        ],
+        "has_sentences": True,
+        "report_title": "/θr/ vs /tr/ 聽力練習報告",
+        "report_stage_names": {
+            1: "three vs tree（核心詞對）",
+            2: "4 組混合詞對",
+            3: "句子中辨識",
+        },
+        "error_direction_a_label": "/θr/ → /tr/",
+        "error_direction_b_label": "/tr/ → /θr/",
+        "error_direction_note_a": "⚠️ 主方向為 /θr/ → /tr/，/θ/ 在叢集中被聽成 /t/",
+        "error_direction_note_b": "⚠️ 主方向為 /tr/ → /θr/，與產出方向相反——值得注意",
+    },
 }
 
 

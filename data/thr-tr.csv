@@ -1,0 +1,23 @@
+stage,text,ipa,sound,target
+1,three,/θriː/,thr,
+1,tree,/triː/,tr,
+1,through,/θruː/,thr,
+1,true,/truː/,tr,
+1,thrill,/θrɪl/,thr,
+1,trill,/trɪl/,tr,
+2,three,/θriː/,thr,
+2,tree,/triː/,tr,
+2,through,/θruː/,thr,
+2,true,/truː/,tr,
+2,thrill,/θrɪl/,thr,
+2,trill,/trɪl/,tr,
+2,thread,/θred/,thr,
+2,tread,/tred/,tr,
+3,I have three new friends at school.,,thr,three
+3,The tree outside my window is very tall.,,tr,tree
+3,The train goes through the tunnel.,,thr,through
+3,It is true that I miss my old home.,,tr,true
+3,I felt a thrill when I nearly scored a goal.,,thr,thrill
+3,The bird made a soft trill in the morning.,,tr,trill
+3,I need a needle and thread to fix my shirt.,,thr,thread
+3,Please tread carefully on the wet floor.,,tr,tread
