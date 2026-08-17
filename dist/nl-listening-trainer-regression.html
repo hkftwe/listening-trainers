@@ -775,9 +775,13 @@ async function handlePlay() {
 
   state.currentTrial = state.roundItems[state.currentIndex];
 
-  // Pick one voice for this entire trial — same voice for all words
-  // within a trial, so the only difference is the word itself.
-  const trialVoice = pickVoice();
+  // Lock one voice per question (trial) — the same voice is reused across
+  // replays of the same question, and only changes when moving to the next
+  // question. (Fix Day 64 TODO: 語音轉換時機應為「換題目時」而非「每一下」)
+  if (!state.currentTrial.voice) {
+    state.currentTrial.voice = pickVoice();
+  }
+  const trialVoice = state.currentTrial.voice;
 
   playBtn.classList.add('playing');
   playbackSeq.style.display = 'none';
