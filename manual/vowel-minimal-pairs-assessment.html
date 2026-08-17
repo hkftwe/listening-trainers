@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>母音 Minimal Pair 聽辨評估</title>
+<style>
+:root { color-scheme: light; --accent:#2563eb; --accent-hover:#1d4ed8; --correct:#059669; --incorrect:#dc2626; }
+* { box-sizing:border-box; }
+body {
+  font-family:-apple-system, system-ui, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background:#f8fafc; color:#1a1a2e; margin:0; padding:20px;
+  display:flex; justify-content:center; line-height:1.7;
+}
+.card {
+  background:#fff; border:1px solid #e5e7eb; border-radius:16px;
+  max-width:560px; width:100%; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+h1 { font-size:1.25rem; margin:0 0 4px; }
+.subtitle { color:#64748b; font-size:.85rem; margin:0 0 20px; }
+h2 { font-size:1.05rem; margin:18px 0 8px; }
+.note { background:#eff6ff; border-left:4px solid var(--accent); padding:10px 14px; border-radius:8px; font-size:.85rem; color:#1e3a5f; margin:12px 0; }
+.pairlist { font-size:.85rem; color:#334155; }
+.pairlist li { margin:3px 0; }
+.pairlist .ipa { color:#94a3b8; font-size:.8rem; }
+button {
+  cursor:pointer; border:none; border-radius:10px; font-size:1rem;
+  padding:12px 20px; font-weight:600; transition:transform .08s ease;
+}
+button:active { transform:scale(.97); }
+.primary { background:var(--accent); color:#fff; width:100%; }
+.primary:hover { background:var(--accent-hover); }
+.play-btn {
+  width:100%; background:#0f172a; color:#fff; font-size:1.1rem; padding:18px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.play-btn:hover { background:#1e293b; }
+.play-btn.playing { background:#334155; }
+.progress { display:flex; justify-content:space-between; align-items:center; font-size:.85rem; color:#64748b; margin-bottom:8px; }
+.progress-bar { height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden; margin-bottom:14px; }
+.progress-fill { height:100%; background:var(--accent); width:0; transition:width .2s; }
+.voice-label { font-size:.75rem; color:#94a3b8; text-align:center; margin-bottom:6px; min-height:1.2em; }
+.hint { text-align:center; font-size:.8rem; color:#94a3b8; margin:8px 0; }
+.options { display:flex; gap:12px; margin-top:14px; }
+.opt {
+  flex:1; padding:16px 10px; font-size:1.05rem; background:#f1f5f9; color:#1a1a2e;
+  border:2px solid #e2e8f0; border-radius:12px;
+}
+.opt:hover { border-color:var(--accent); background:#eff6ff; }
+.opt.correct-pick { background:#ecfdf5; border-color:var(--correct); color:var(--correct); }
+.opt.incorrect-pick { background:#fef2f2; border-color:var(--incorrect); color:var(--incorrect); }
+.opt.dimmed { opacity:.45; }
+.feedback { margin-top:14px; padding:12px 16px; border-radius:10px; font-size:.9rem; text-align:center; }
+.feedback.ok { background:#ecfdf5; color:var(--correct); }
+.feedback.bad { background:#fef2f2; color:var(--incorrect); }
+.next-btn { background:var(--accent); color:#fff; width:100%; margin-top:14px; }
+.summary-box { text-align:center; padding:18px; background:#f8fafc; border-radius:12px; margin:12px 0; }
+.summary-box .score { font-size:2rem; font-weight:700; }
+.pair-row { display:flex; justify-content:space-between; align-items:center; padding:9px 4px; border-bottom:1px solid #f1f5f9; font-size:.9rem; }
+.pair-row .badge { font-weight:700; }
+.badge.ok { color:var(--correct); }
+.badge.warn { color:#b45309; }
+.badge.bad { color:var(--incorrect); }
+.mishear { font-size:.8rem; color:#b45309; padding-left:8px; }
+.report-output { width:100%; min-height:160px; margin-top:12px; font-size:.8rem; border:1px solid #e2e8f0; border-radius:8px; padding:10px; font-family:ui-monospace, monospace; display:none; }
+.row-btns { display:flex; gap:10px; margin-top:12px; }
+.row-btns button { flex:1; }
+.secondary { background:#e2e8f0; color:#1a1a2e; }
+.secondary:hover { background:#cbd5e1; }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <h1>母音 Minimal Pair 聽辨評估</h1>
+  <p class="subtitle">44 音盤點法 · 第 0 天評估 · 10 組母音 minimal pair</p>
+
+  <!-- ===== 說明 ===== -->
+  <div id="intro">
+    <div class="note">
+      <b>玩法</b>：按「播放」聽一個英文單字 → 選你<b>聽到</b>的是哪個字。<br>
+      選項在第一次播放後才出現——<b>先聽、不看拼寫</b>（44 音盤點法鐵律一）。
+    </div>
+    <p class="pairlist"><b>10 組測驗對（每詞出現 1 次，共 20 題）：</b></p>
+    <ul class="pairlist" id="pairList"></ul>
+    <button class="primary" id="startBtn">開始評估</button>
+  </div>
+
+  <!-- ===== 測驗 ===== -->
+  <div id="quiz" style="display:none">
+    <div class="progress">
+      <span id="qLabel">第 1 / 20 題</span>
+      <span id="pairHint"></span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="voice-label" id="voiceLabel"></div>
+    <button class="play-btn" id="playBtn">▶ 播放</button>
+    <p class="hint">先聽音，選項才會出現（可重複播放）</p>
+    <div class="options" id="options" style="display:none">
+      <button class="opt" id="optA"></button>
+      <button class="opt" id="optB"></button>
+    </div>
+    <div class="feedback" id="feedback" style="display:none"></div>
+    <button class="next-btn" id="nextBtn" style="display:none">下一題 →</button>
+  </div>
+
+  <!-- ===== 結果 ===== -->
+  <div id="results" style="display:none">
+    <h2>評估結果</h2>
+    <div class="summary-box">
+      <div class="score" id="scoreText">—</div>
+      <div id="scoreSub" style="color:#64748b;font-size:.85rem"></div>
+    </div>
+    <div id="pairBreakdown"></div>
+    <textarea class="report-output" id="reportOutput" readonly></textarea>
+    <div class="row-btns">
+      <button class="secondary" id="exportBtn">📋 顯示報告</button>
+      <button class="primary" id="restartBtn">重新評估</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============ 詞庫：10 組母音 minimal pair ============
+const PAIRS = [
+  { label:"/ɪ/ vs /iː/", a:{word:"ship", ipa:"/ʃɪp/"},  b:{word:"sheep", ipa:"/ʃiːp/"} },
+  { label:"/æ/ vs /e/",  a:{word:"bad",  ipa:"/bæd/"},  b:{word:"bed",   ipa:"/bed/"} },
+  { label:"/ʊ/ vs /uː/", a:{word:"full", ipa:"/fʊl/"},  b:{word:"fool",  ipa:"/fuːl/"} },
+  { label:"/æ/ vs /ʌ/",  a:{word:"cat",  ipa:"/kæt/"},  b:{word:"cut",   ipa:"/kʌt/"} },
+  { label:"/e/ vs /eɪ/", a:{word:"pen",  ipa:"/pen/"},  b:{word:"pain",  ipa:"/peɪn/"} },
+  { label:"/ɔː/ vs /oʊ/",a:{word:"bought", ipa:"/bɔːt/"}, b:{word:"boat", ipa:"/boʊt/"} },
+  { label:"/aʊ/ vs /oʊ/",a:{word:"now",  ipa:"/naʊ/"},  b:{word:"no",    ipa:"/noʊ/"} },
+  { label:"/ɜː/ vs /ɔː/",a:{word:"bird", ipa:"/bɜːrd/"}, b:{word:"bored", ipa:"/bɔːrd/"} },
+  { label:"/ɪə/ vs /eə/",a:{word:"ear",  ipa:"/ɪər/"},  b:{word:"air",   ipa:"/eər/"} },
+  { label:"/ʌ/ vs /ɑː/", a:{word:"luck", ipa:"/lʌk/"},  b:{word:"lock",  ipa:"/lɑːk/"} },
+];
+
+// ============ 狀態 ============
+let questions = [];   // {pairIdx, side:'a'|'b', word, ipa}
+let qIndex = 0;
+let answers = [];     // {pairIdx, played, chosen, correct}
+let voicePool = [];
+let lastVoiceName = null;
+let playedOnce = false;
+
+const $ = id => document.getElementById(id);
+
+// ============ 語音池（多口音輪轉）============
+function buildVoicePool() {
+  const all = speechSynthesis.getVoices();
+  if (!all.length) return;
+  const english = all.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+  const preferred = [];
+  const seen = new Set();
+  const preferNames = ['Samantha','Daniel','Karen','Alex','Moira','Fiona','Veena','Tom'];
+  for (const name of preferNames) {
+    const v = english.find(x => x.name === name);
+    if (v && !seen.has(v.name)) { preferred.push(v); seen.add(v.name); }
+  }
+  for (const v of english) {
+    if (preferred.length >= 6) break;
+    if (!seen.has(v.name)) { preferred.push(v); seen.add(v.name); }
+  }
+  voicePool = preferred;
+}
+
+function pickVoice() {
+  if (!voicePool.length) return null;
+  const others = voicePool.filter(v => v.name !== lastVoiceName);
+  const pool = others.length ? others : voicePool;
+  const v = pool[Math.floor(Math.random() * pool.length)];
+  lastVoiceName = v.name;
+  return v;
+}
+
+function speak(text) {
+  if (!text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = 0.9;
+  const v = pickVoice();
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+  $('voiceLabel').textContent = '🔊 本題語音：' + (v ? v.name : '（系統預設）');
+}
+
+// ============ 題目生成 ============
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildQuestions() {
+  const qs = [];
+  PAIRS.forEach((p, i) => {
+    qs.push({ pairIdx:i, side:'a', word:p.a.word, ipa:p.a.ipa });
+    qs.push({ pairIdx:i, side:'b', word:p.b.word, ipa:p.b.ipa });
+  });
+  return shuffle(qs);
+}
+
+// ============ 畫面切換 ============
+function show(el) { $('intro').style.display='none'; $('quiz').style.display='none'; $('results').style.display='none'; $(el).style.display='block'; }
+
+// ============ 開始 ============
+$('startBtn').addEventListener('click', () => {
+  questions = buildQuestions();
+  answers = [];
+  qIndex = 0;
+  show('quiz');
+  renderQuestion();
+});
+
+// ============ 單題 ============
+function renderQuestion() {
+  const q = questions[qIndex];
+  const pair = PAIRS[q.pairIdx];
+  playedOnce = false;
+  $('qLabel').textContent = '第 ' + (qIndex + 1) + ' / ' + questions.length + ' 題';
+  $('pairHint').textContent = pair.label;
+  $('progressFill').style.width = (qIndex / questions.length * 100) + '%';
+  $('options').style.display = 'none';
+  $('feedback').style.display = 'none';
+  $('nextBtn').style.display = 'none';
+  $('optA').textContent = pair.a.word;
+  $('optB').textContent = pair.b.word;
+  $('optA').className = 'opt';
+  $('optB').className = 'opt';
+  $('voiceLabel').textContent = '';
+}
+
+$('playBtn').addEventListener('click', () => {
+  const q = questions[qIndex];
+  speak(q.word);
+  if (!playedOnce) {
+    playedOnce = true;
+    $('options').style.display = 'flex';
+  }
+});
+
+function choose(side) {
+  const q = questions[qIndex];
+  const pair = PAIRS[q.pairIdx];
+  const chosenWord = side === 'a' ? pair.a.word : pair.b.word;
+  const correct = (side === q.side);
+  answers.push({ pairIdx:q.pairIdx, played:q.word, playedIpa:q.ipa, chosen:chosenWord, correct });
+
+  const btnA = $('optA'), btnB = $('optB');
+  btnA.disabled = btnB.disabled = true;
+  if (side === 'a') { (correct ? btnA.classList.add('correct-pick') : btnA.classList.add('incorrect-pick')); btnB.classList.add('dimmed'); }
+  else { (correct ? btnB.classList.add('correct-pick') : btnB.classList.add('incorrect-pick')); btnA.classList.add('dimmed'); }
+
+  const fb = $('feedback');
+  fb.style.display = 'block';
+  if (correct) {
+    fb.className = 'feedback ok';
+    fb.textContent = '✅ 正確！' + q.word + ' ' + q.ipa;
+  } else {
+    fb.className = 'feedback bad';
+    fb.textContent = '❌ 你聽到的是 ' + q.word + ' ' + q.ipa + '（你選了 ' + chosenWord + '）';
+  }
+  $('nextBtn').style.display = 'block';
+}
+
+$('optA').addEventListener('click', () => choose('a'));
+$('optB').addEventListener('click', () => choose('b'));
+
+$('nextBtn').addEventListener('click', () => {
+  qIndex++;
+  if (qIndex < questions.length) {
+    renderQuestion();
+  } else {
+    showResults();
+  }
+});
+
+// ============ 結果 ============
+function showResults() {
+  show('results');
+  const total = answers.length;
+  const correctN = answers.filter(a => a.correct).length;
+  const pct = Math.round(correctN / total * 100);
+  $('scoreText').textContent = correctN + ' / ' + total + '（' + pct + '%）';
+  $('scoreSub').textContent = '10 組母音 minimal pair，每詞 1 次';
+
+  // 各對表現
+  let html = '';
+  const mishears = [];
+  PAIRS.forEach((p, i) => {
+    const pairAnswers = answers.filter(a => a.pairIdx === i);
+    const c = pairAnswers.filter(a => a.correct).length;
+    const n = pairAnswers.length;
+    const badge = (c === n) ? '<span class="badge ok">✅ ' + c + '/' + n + '</span>'
+      : (c === 0 ? '<span class="badge bad">❌ ' + c + '/' + n + '</span>'
+      : '<span class="badge warn">⚠️ ' + c + '/' + n + '</span>');
+    html += '<div class="pair-row"><span>' + (i+1) + '. ' + p.label + '　' + p.a.word + '·' + p.b.word + '</span>' + badge + '</div>';
+    pairAnswers.forEach(a => {
+      if (!a.correct) {
+        html += '<div class="mishear">↳ 誤聽：' + a.played + ' → ' + a.chosen + '（' + a.playedIpa + ' 聽錯）</div>';
+        mishears.push(a.played + ' → ' + a.chosen);
+      }
+    });
+  });
+  $('pairBreakdown').innerHTML = html;
+
+  // 報告文字
+  let rep = '===== 母音 Minimal Pair 聽辨評估報告 =====\n';
+  rep += '日期：' + new Date().toLocaleString('zh-HK') + '\n';
+  rep += '題數：' + total + '（10 對 × 每詞 1 次）\n\n';
+  rep += '總分：' + correctN + '/' + total + '（' + pct + '%）\n\n';
+  rep += '各對表現：\n';
+  PAIRS.forEach((p, i) => {
+    const pairAnswers = answers.filter(a => a.pairIdx === i);
+    const c = pairAnswers.filter(a => a.correct).length;
+    rep += (i+1) + '. ' + p.label + '　' + p.a.word + '·' + p.b.word + '　' + c + '/' + pairAnswers.length + '\n';
+    pairAnswers.forEach(a => {
+      if (!a.correct) rep += '   ↳ ' + a.played + ' → ' + a.chosen + '\n';
+    });
+  });
+  rep += '\n錯誤方向統計：\n';
+  if (!mishears.length) rep += '（無誤聽）\n';
+  else {
+    const counts = {};
+    mishears.forEach(m => counts[m] = (counts[m] || 0) + 1);
+    for (const k in counts) rep += k + ' ×' + counts[k] + '\n';
+  }
+  rep += '\n建議：總分 <80% 或任一對 0/2，代表該母音對需先做聽辨訓練（建立對應 trainer）。\n';
+  $('reportOutput').value = rep;
+}
+
+$('exportBtn').addEventListener('click', () => {
+  const ta = $('reportOutput');
+  ta.style.display = 'block';
+  ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+});
+
+$('restartBtn').addEventListener('click', () => { show('intro'); });
+
+// ============ 初始 ============
+(function init() {
+  const ul = $('pairList');
+  PAIRS.forEach((p, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = (i+1) + '. ' + p.a.word + ' / ' + p.b.word + ' <span class="ipa">' + p.a.ipa + '　' + p.b.ipa + '</span>';
+    ul.appendChild(li);
+  });
+  buildVoicePool();
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = buildVoicePool;
+  }
+})();
+</script>
+</body>
+</html>
