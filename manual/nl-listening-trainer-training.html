@@ -817,6 +817,9 @@ function showImmediateFeedback() {
 
   answeredHint.textContent = correct ? '✓ 正確' : '✗ 正確答案是綠色選項';
   answeredHint.style.color = correct ? 'var(--correct)' : 'var(--incorrect)';
+
+  // 作答即存：不依賴「看本輪回顧」按鈕，資料不遺失
+  saveAnswerToDaily({ trial, choice, correct });
 }
 
 function updateProgress() {
@@ -1023,7 +1026,6 @@ function handleReveal() {
   state.roundRevealed = true;
 
   hideAll();
-  saveRoundToStorage();
 
   const correctCount = state.roundAnswers.filter(a => a.correct).length;
   buildReviewTable(correctCount);
@@ -1080,28 +1082,26 @@ function buildReviewTable(correctCount) {
   showSummaryAfterReview(correctCount);
 }
 
-function saveRoundToStorage() {
+function saveAnswerToDaily(a) {
   const today = new Date().toISOString().slice(0, 10);
   const dailyKey = `daily_${today}`;
 
-  state.roundAnswers.forEach(a => {
-    const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
-    const chosenWord = state.stage === 3
-      ? (a.choice === 'n' ? a.trial.pair.nWord.word : a.trial.pair.lWord.word)
-      : null;
-    dailyScores.push({
-      stage: state.stage,
-      trialType: state.stage === 1 ? 'same-diff' : state.stage === 2 ? 'oddball' : 'identify',
-      correct: a.correct,
-      direction: state.stage === 3 ? a.trial.answer : null,
-      detail: state.stage === 1
-        ? `${a.trial.word1.word}-${a.trial.word2.word}/${a.trial.answer}/${a.choice}`
-        : state.stage === 2
-          ? a.trial.words.map(w => w.word).join('-') + `/odd${a.trial.answer}/chose${a.choice}`
-          : `${a.trial.word} → ${chosenWord}`,
-    });
-    localStorage.setItem(dailyKey, JSON.stringify(dailyScores));
+  const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+  const chosenWord = state.stage === 3
+    ? (a.choice === 'n' ? a.trial.pair.nWord.word : a.trial.pair.lWord.word)
+    : null;
+  dailyScores.push({
+    stage: state.stage,
+    trialType: state.stage === 1 ? 'same-diff' : state.stage === 2 ? 'oddball' : 'identify',
+    correct: a.correct,
+    direction: state.stage === 3 ? a.trial.answer : null,
+    detail: state.stage === 1
+      ? `${a.trial.word1.word}-${a.trial.word2.word}/${a.trial.answer}/${a.choice}`
+      : state.stage === 2
+        ? a.trial.words.map(w => w.word).join('-') + `/odd${a.trial.answer}/chose${a.choice}`
+        : `${a.trial.word} → ${chosenWord}`,
   });
+  localStorage.setItem(dailyKey, JSON.stringify(dailyScores));
 }
 
 function showSummaryAfterReview(correctCount) {
