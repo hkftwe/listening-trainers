@@ -674,8 +674,8 @@
 <div class="container">
 
   <div class="header">
-    <h1>/ʊ/ vs /uː/ 聽力辨識（母音長短）</h1>
-    <p class="subtitle">Listening Discrimination Trainer — Vowel Length (full vs fool)</p>
+    <h1>/ʊ/ vs /uː/ 聽力辨識</h1>
+    <p class="subtitle">Listening Discrimination Trainer (full vs fool)</p>
   </div>
 
   <!-- Stage selector -->
@@ -750,11 +750,11 @@
 
     <div class="answer-buttons" id="answerButtons" style="display:none">
       <button class="answer-btn u-btn" id="aBtn" disabled>
-        <span class="sound-label">/ʊ/（短音） 音</span>
+        <span class="sound-label">/ʊ/ 音</span>
         <span class="sound-example">像 full, pull, could</span>
       </button>
       <button class="answer-btn oo-btn" id="bBtn" disabled>
-        <span class="sound-label">/uː/（長音） 音</span>
+        <span class="sound-label">/uː/ 音</span>
         <span class="sound-example">像 fool, pool, cooed</span>
       </button>
     </div>
@@ -856,8 +856,8 @@ const HAS_STAGE3 = true;
 const VOICE_MODE = 'pool';
 const SA_ID = 'u';
 const SB_ID = 'oo';
-const SA_LABEL = '/ʊ/（短音）';
-const SB_LABEL = '/uː/（長音）';
+const SA_LABEL = '/ʊ/';
+const SB_LABEL = '/uː/';
 
 // ============================================================
 // State
@@ -1582,9 +1582,9 @@ function exportReport() {
   lines.push(`- /ʊ/ → /uː/：${totalAErr} 次`);
   lines.push(`- /uː/ → /ʊ/：${totalBErr} 次`);
   if (totalAErr > totalBErr * 2) {
-    lines.push('- ⚠️ 主方向為 /ʊ/ → /uː/，短音被聽成長音');
+    lines.push('- ⚠️ 主方向為 /ʊ/ → /uː/');
   } else if (totalBErr > totalAErr * 2) {
-    lines.push('- ⚠️ 主方向為 /uː/ → /ʊ/，長音被聽成短音——注意時長對立');
+    lines.push('- ⚠️ 主方向為 /uː/ → /ʊ/');
   } else {
     lines.push('- 雙向錯誤大致平衡');
   }
