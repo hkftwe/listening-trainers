@@ -64,6 +64,19 @@
   /* Voice info */
   .voice-info { font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-bottom: 12px; line-height: 1.5; }
   .voice-info .voice-name { font-weight: 600; color: var(--text); }
+  .voice-info .voice-reroll-btn {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 3px 10px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .voice-info .voice-reroll-btn:hover { border-color: var(--accent); color: var(--accent); background: #eff6ff; }
 
   /* Stats bar */
   .stats-bar { display: flex; gap: 12px; margin-bottom: 16px; font-size: 0.8rem; color: var(--text-muted); }
@@ -252,24 +265,27 @@
   <div class="stage-selector" id="stageSelector">
     <button class="stage-card active" data-stage="1">
       <div class="stage-icon">👂</div>
-      <div class="stage-title">相同或不同？</div>
+      <div class="stage-title">Stage 1 · 相同或不同？</div>
       <div class="stage-desc">聽兩個詞<br>判斷是否一樣</div>
     </button>
     <button class="stage-card locked" data-stage="2">
       <div class="stage-icon">🔍</div>
-      <div class="stage-title">找出不同的</div>
+      <div class="stage-title">Stage 2 · 找出不同的</div>
       <div class="stage-desc">聽三個詞<br>哪一個不一樣？</div>
-      <div class="stage-lock">🔒 Stage 1 達 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
+      <div class="stage-lock">🔒 需 Stage 1 達 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
     </button>
     <button class="stage-card locked" data-stage="3">
       <div class="stage-icon">🎯</div>
-      <div class="stage-title">辨識 /n/ 或 /l/</div>
+      <div class="stage-title">Stage 3 · 辨識 /n/ 或 /l/</div>
       <div class="stage-desc">聽一個詞<br>判斷是哪個音</div>
-      <div class="stage-lock">🔒 Stage 2 達 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
+      <div class="stage-lock">🔒 需 Stage 2 達 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
     </button>
   </div>
 
-  <div class="voice-info" id="voiceInfo">載入語音引擎中...</div>
+  <div class="voice-info" id="voiceInfo">
+    🎤 語音：<span class="voice-name" id="currentVoiceName">載入中...</span>
+    <button class="voice-reroll-btn" id="voiceRerollBtn">🔄 換語音</button>
+  </div>
 
   <!-- Stats bar -->
   <div class="stats-bar">
@@ -406,6 +422,7 @@ let state = {
   stage: 1,
   unlockedStages: [1],
   voicePool: [],
+  currentVoice: null,
   roundItems: [],      // Array of trial objects (shape depends on stage)
   currentIndex: 0,
   currentTrial: null,
@@ -413,7 +430,6 @@ let state = {
   currentSelection: null,  // string: 'same'|'diff', or 1|2|3, or 'n'|'l'
   roundAnswers: [],        // { trial, choice, correct }
   roundRevealed: false,
-  lastReviewVoice: null,
 };
 
 let longPressTimer = null;
@@ -449,7 +465,8 @@ const roundInfo = $('roundInfo');
 const roundNum = $('roundNum');
 const progressWrap = $('progressWrap');
 const progressFill = $('progressFill');
-const voiceInfo = $('voiceInfo');
+const currentVoiceName = $('currentVoiceName');
+const voiceRerollBtn = $('voiceRerollBtn');
 const historyList = $('historyList');
 const historyClear = $('historyClear');
 const totalScore = $('totalScore');
@@ -462,7 +479,7 @@ const reportCopied = $('reportCopied');
 const copyReportBtn = $('copyReportBtn');
 
 // ============================================================
-// Voice management (pool mode)
+// Voice management (single mode — 換題才換聲)
 // ============================================================
 function buildVoicePool() {
   const all = speechSynthesis.getVoices();
@@ -491,30 +508,23 @@ function buildVoicePool() {
     }
   }
   state.voicePool = preferred;
+  if (!state.currentVoice && state.voicePool.length > 0) {
+    state.currentVoice = state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
+  }
   updateVoiceLabel();
 }
 
-function pickVoice() {
-  if (state.voicePool.length === 0) return null;
-  return state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
-}
-
-function pickVoiceDifferentFromLast() {
-  if (state.voicePool.length === 0) return null;
-  if (state.voicePool.length === 1) return state.voicePool[0];
-  const candidates = state.voicePool.filter(v => v !== state.lastReviewVoice);
-  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-  state.lastReviewVoice = chosen;
-  return chosen;
+function pickRandomVoice() {
+  if (state.voicePool.length === 0) return;
+  const candidates = state.voicePool.filter(v => v !== state.currentVoice);
+  state.currentVoice = candidates.length > 0
+    ? candidates[Math.floor(Math.random() * candidates.length)]
+    : state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
+  updateVoiceLabel();
 }
 
 function updateVoiceLabel() {
-  if (state.voicePool.length === 0) {
-    voiceInfo.innerHTML = '語音引擎載入中...';
-    return;
-  }
-  const names = state.voicePool.map(v => `<span class="voice-name">${v.name}</span>`).join(' · ');
-  voiceInfo.innerHTML = `語音：${names}<br><span style="font-size:0.65rem;opacity:0.7">每題隨機輪換</span>`;
+  currentVoiceName.textContent = state.currentVoice ? state.currentVoice.name : '系統預設';
 }
 
 speechSynthesis.onvoiceschanged = () => { buildVoicePool(); };
@@ -523,7 +533,7 @@ buildVoicePool();
 function speak(text, voice) {
   return new Promise((resolve) => {
     const utt = new SpeechSynthesisUtterance(text);
-    const v = voice || pickVoice();
+    const v = voice || state.currentVoice;
     if (v) utt.voice = v;
     utt.rate = 0.85;
     utt.pitch = 1;
@@ -775,13 +785,10 @@ async function handlePlay() {
 
   state.currentTrial = state.roundItems[state.currentIndex];
 
-  // Lock one voice per question (trial) — the same voice is reused across
-  // replays of the same question, and only changes when moving to the next
-  // question. (Fix Day 64 TODO: 語音轉換時機應為「換題目時」而非「每一下」)
-  if (!state.currentTrial.voice) {
-    state.currentTrial.voice = pickVoice();
-  }
-  const trialVoice = state.currentTrial.voice;
+  // Single voice per question — the same voice is reused across replays of
+  // the same question, and only changes when moving to the next question
+  // (handleNext) or when the user taps the 換語音 button.
+  const trialVoice = state.currentVoice;
 
   playBtn.classList.add('playing');
   playbackSeq.style.display = 'none';
@@ -932,6 +939,7 @@ function handleNext() {
   state.hasPlayed = false;
   state.currentTrial = null;
   state.currentSelection = null;
+  pickRandomVoice();
   showPlayState();
 }
 
@@ -1327,6 +1335,7 @@ function switchStage(stage, force) {
 // ============================================================
 playBtn.addEventListener('click', handlePlay);
 replayBtn.addEventListener('click', handlePlay);
+voiceRerollBtn.addEventListener('click', () => { pickRandomVoice(); speechSynthesis.cancel(); });
 sameBtn.addEventListener('click', () => handleSDAnswer('same'));
 diffBtn.addEventListener('click', () => handleSDAnswer('diff'));
 pos1Btn.addEventListener('click', () => handleOddballAnswer(1));
