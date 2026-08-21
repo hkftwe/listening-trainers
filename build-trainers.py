@@ -327,8 +327,10 @@ TRAINERS = {
         "accent_hover": "#1d4ed8",
         "voice_mode": "pool",
         "sound_a": {"id": "u", "label": "/ʊ/", "example": "full, pull, could",
+                     "hint": "嘴唇放鬆、短促（彈出來）",
                      "color": "#d97706", "bg": "#fffbeb", "border": "#fcd34d"},
         "sound_b": {"id": "oo", "label": "/uː/", "example": "fool, pool, cooed",
+                     "hint": "嘴唇收攏、用力（說出來）",
                      "color": "#7c3aed", "bg": "#f5f3ff", "border": "#c4b5fd"},
         "stages": [
             {"icon": "🎯", "title": "full vs fool", "desc": "3 組核心詞對<br>full·pull·could"},
@@ -506,14 +508,18 @@ def html_answer_buttons(config):
     """Generate answer buttons HTML."""
     sa = config["sound_a"]
     sb = config["sound_b"]
+    hint_a = f'\n        <span class="sound-hint">{sa["hint"]}</span>' if sa.get("hint") else ""
+    hint_b = f'\n        <span class="sound-hint">{sb["hint"]}</span>' if sb.get("hint") else ""
     return (
         f'      <button class="answer-btn {sa["id"]}-btn" id="aBtn" disabled>\n'
         f'        <span class="sound-label">{sa["label"]} 音</span>\n'
-        f'        <span class="sound-example">像 {sa["example"]}</span>\n'
+        f'        <span class="sound-example">像 {sa["example"]}</span>'
+        f'{hint_a}\n'
         f"      </button>\n"
         f'      <button class="answer-btn {sb["id"]}-btn" id="bBtn" disabled>\n'
         f'        <span class="sound-label">{sb["label"]} 音</span>\n'
-        f'        <span class="sound-example">像 {sb["example"]}</span>\n'
+        f'        <span class="sound-example">像 {sb["example"]}</span>'
+        f'{hint_b}\n'
         f"      </button>"
     )
 
