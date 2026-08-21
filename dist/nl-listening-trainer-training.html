@@ -440,6 +440,7 @@ let state = {
   currentSelection: null,  // string: 'same'|'diff', or 1|2|3, or 'n'|'l'
   roundAnswers: [],        // { trial, choice, correct }
   roundRevealed: false,
+  answerSaved: false,      // 當題是否已存（改答案時覆蓋而非重複追加）
 };
 
 let longPressTimer = null;
@@ -818,8 +819,9 @@ function showImmediateFeedback() {
   answeredHint.textContent = correct ? '✓ 正確' : '✗ 正確答案是綠色選項';
   answeredHint.style.color = correct ? 'var(--correct)' : 'var(--incorrect)';
 
-  // 作答即存：不依賴「看本輪回顧」按鈕，資料不遺失
-  saveAnswerToDaily({ trial, choice, correct });
+  // 作答即存：不依賴「看本輪回顧」按鈕，資料不遺失；改答案時覆蓋最後一筆（去重）
+  saveAnswerToDaily({ trial, choice, correct }, state.answerSaved);
+  state.answerSaved = true;
 }
 
 function updateProgress() {
@@ -1002,6 +1004,7 @@ function handleNext() {
   state.hasPlayed = false;
   state.currentTrial = null;
   state.currentSelection = null;
+  state.answerSaved = false;
   pickRandomVoice();
   showPlayState();
 }
@@ -1082,7 +1085,7 @@ function buildReviewTable(correctCount) {
   showSummaryAfterReview(correctCount);
 }
 
-function saveAnswerToDaily(a) {
+function saveAnswerToDaily(a, replaceLast) {
   const today = new Date().toISOString().slice(0, 10);
   const dailyKey = `daily_${today}`;
 
@@ -1090,7 +1093,7 @@ function saveAnswerToDaily(a) {
   const chosenWord = state.stage === 3
     ? (a.choice === 'n' ? a.trial.pair.nWord.word : a.trial.pair.lWord.word)
     : null;
-  dailyScores.push({
+  const entry = {
     stage: state.stage,
     trialType: state.stage === 1 ? 'same-diff' : state.stage === 2 ? 'oddball' : 'identify',
     correct: a.correct,
@@ -1100,7 +1103,12 @@ function saveAnswerToDaily(a) {
       : state.stage === 2
         ? a.trial.words.map(w => w.word).join('-') + `/odd${a.trial.answer}/chose${a.choice}`
         : `${a.trial.word} → ${chosenWord}`,
-  });
+  };
+  if (replaceLast && dailyScores.length > 0) {
+    dailyScores[dailyScores.length - 1] = entry;
+  } else {
+    dailyScores.push(entry);
+  }
   localStorage.setItem(dailyKey, JSON.stringify(dailyScores));
 }
 
