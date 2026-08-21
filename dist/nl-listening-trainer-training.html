@@ -802,14 +802,12 @@ function showImmediateFeedback() {
     const ans = trial.answer; // 'same' | 'diff'
     sameBtn.classList.add(ans === 'same' ? 'was-correct' : 'was-incorrect');
     diffBtn.classList.add(ans === 'diff' ? 'was-correct' : 'was-incorrect');
-    (async () => { await speak(trial.word1.word); await delay(450); await speak(trial.word2.word); })();
   } else if (state.stage === 2) {
     const ans = trial.answer; // 1|2|3
     [pos1Btn, pos2Btn, pos3Btn].forEach(b => {
       const bp = parseInt(b.dataset.pos);
       b.classList.add(bp === ans ? 'was-correct' : 'was-incorrect');
     });
-    (async () => { await speak(trial.words[ans - 1].word); })();
   } else {
     const ans = trial.answer; // 'n' | 'l'
     nBtn.classList.add(ans === 'n' ? 'was-correct' : 'was-incorrect');
