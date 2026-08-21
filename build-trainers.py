@@ -260,7 +260,7 @@ TRAINERS = {
     "f-th-simple": {
         "filename": "f-th-listening-trainer-simple.html",
         "title_tag": "/f/ vs /θ/ 聽力訓練",
-        "h1": "/f/ vs /θ/ 聽力辨識",
+        "h1": "/f/ vs /θ/ 簡短版（無句子）",
         "subtitle": "Listening Discrimination Trainer",
         "storage_key": "f-th-simple-trainer-v4",
         "accent_color": "#2563eb",
@@ -827,14 +827,43 @@ def build_html(config, banks):
 # ── Index page ──────────────────────────────────────────────────────
 
 def build_index(trainers):
-    """Generate index.html navigation page."""
-    links = []
-    for tid, cfg in trainers.items():
-        links.append(
-            f'<a href="dist/{cfg["filename"]}">{cfg["h1"]}</a>'
-        )
-    links_html = "\n".join(links)
-    return f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Listening Trainers</title><style>:root{{color-scheme:light}}body{{font-family:-apple-system,system-ui,sans-serif;max-width:540px;margin:40px auto;padding:0 20px;line-height:1.8}}h1{{font-size:1.3rem}}a{{display:block;padding:10px 14px;margin:6px 0;border:1px solid #e5e7eb;border-radius:8px;text-decoration:none;color:#1a1a2e;font-weight:500}}a:hover{{background:#f3f4f6}}</style></head><body><h1>Listening Trainers</h1>{links_html}</body></html>"""
+    """Generate index.html navigation page (grouped by phoneme pair)."""
+    groups = [
+        ("/n/ vs /l/", [
+            ("n-l", "基本辨識（含句子）"),
+            ("n-l-core", "核心詞對（4 對）"),
+            ("n-l-complex", "複雜環境"),
+            ("nl-training", "訓練模式（逐題即時回饋）"),
+            ("n-l-regression", "測驗（退階三關）"),
+        ]),
+        ("/f/ vs /θ/", [
+            ("f-th", "基本辨識（3 關含句子）"),
+            ("f-th-simple", "簡短版（無句子）"),
+            ("f-th-focused", "純聽音（不顯示文字）"),
+        ]),
+        ("其他子音對", [
+            ("tr-ch", "/tr/ vs /tʃ/"),
+            ("fr-fire", "/fr/ vs /f/"),
+            ("thr-tr", "/θr/ vs /tr/"),
+            ("v-f", "/v/ vs /f/（+ every 重建）"),
+        ]),
+        ("母音", [
+            ("u-oo", "/ʊ/ vs /uː/"),
+            ("vowel-assessment", "Minimal Pair 評估（第 0 天）"),
+        ]),
+    ]
+    sections = []
+    for group_title, items in groups:
+        links = []
+        for tid, label in items:
+            cfg = trainers.get(tid)
+            if not cfg:
+                continue
+            links.append(f'<a href="dist/{cfg["filename"]}">{label}</a>')
+        if links:
+            sections.append(f'<h2>{group_title}</h2>' + "\n".join(links))
+    body = "\n".join(sections)
+    return f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Listening Trainers</title><style>:root{{color-scheme:light}}body{{font-family:-apple-system,system-ui,sans-serif;max-width:540px;margin:40px auto;padding:0 20px;line-height:1.6}}h1{{font-size:1.3rem;margin-bottom:8px}}h2{{font-size:0.9rem;color:#6b7280;font-weight:600;margin:20px 0 4px;padding-bottom:4px;border-bottom:1px solid #e5e7eb}}a{{display:block;padding:9px 12px;margin:5px 0 5px 12px;border:1px solid #e5e7eb;border-radius:8px;text-decoration:none;color:#1a1a2e;font-weight:500}}a:hover{{background:#f3f4f6}}</style></head><body><h1>Listening Trainers</h1>{body}</body></html>"""
 
 
 # ── Main ────────────────────────────────────────────────────────────
