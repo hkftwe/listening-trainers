@@ -152,7 +152,7 @@
   .oddball-btn:disabled { cursor: default; }
   .oddball-btn .pos-num { font-size: 1.4rem; font-weight: 800; }
 
-  /* Stage 3: /n/ /l/ answer buttons (same as core trainer) */
+  /* Stage 3: minimal-pair word answer buttons (n-word cyan / l-word orange) */
   .answer-buttons { display: flex; gap: 16px; width: 100%; }
   .answer-btn {
     flex: 1; padding: 18px 12px; border-radius: 10px; border: 2px solid var(--border);
@@ -258,7 +258,7 @@
   <div class="header">
     <h1>/n/ vs /l/ 漸進式聽力訓練</h1>
     <p class="subtitle">Progressive Listening — 從「聽出差異」開始，不從「辨識音位」開始</p>
-    <p class="method-note">退階設計：Stage 1（相同/不同）→ Stage 2（找出不一樣的那個）→ Stage 3（辨識 /n/ 或 /l/）</p>
+    <p class="method-note">退階設計：Stage 1（相同/不同）→ Stage 2（找出不一樣的那個）→ Stage 3（聽出是哪個詞：night 還是 light？）</p>
   </div>
 
   <!-- Stage selector -->
@@ -276,8 +276,8 @@
     </button>
     <button class="stage-card locked" data-stage="3">
       <div class="stage-icon">🎯</div>
-      <div class="stage-title">Stage 3 · 辨識 /n/ 或 /l/</div>
-      <div class="stage-desc">聽一個詞<br>判斷是哪個音</div>
+      <div class="stage-title">Stage 3 · 是哪個詞？</div>
+      <div class="stage-desc">聽一個詞<br>night 還是 light？</div>
       <div class="stage-lock">🔒 需 Stage 2 達 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
     </button>
   </div>
@@ -346,15 +346,15 @@
       </button>
     </div>
 
-    <!-- Stage 3: /n/ or /l/ -->
+    <!-- Stage 3: 哪個詞？ -->
     <div class="answer-buttons" id="answerButtons" style="display:none">
       <button class="answer-btn n-btn" id="nBtn" disabled>
-        <span class="sound-label">/n/ 音</span>
-        <span class="sound-example">像 need, night, no</span>
+        <span class="sound-label" id="nWordLabel">—</span>
+        <span class="sound-example" id="nIpaLabel"></span>
       </button>
       <button class="answer-btn l-btn" id="lBtn" disabled>
-        <span class="sound-label">/l/ 音</span>
-        <span class="sound-example">像 lead, light, low</span>
+        <span class="sound-label" id="lWordLabel">—</span>
+        <span class="sound-example" id="lIpaLabel"></span>
       </button>
     </div>
 
@@ -410,9 +410,19 @@ const CORE_PAIRS = [
   { word: "lap",  sound: 'l', ipa: "/læp/" },
 ];
 
+// CONTRAST: 每個詞對應它的最小對詞（need↔lead、night↔light、no↔low、nap↔lap）。
+// 由 CORE_PAIRS 的相鄰兩兩配對自動生成。
+const CONTRAST = {};
+for (let i = 0; i < CORE_PAIRS.length - 1; i += 2) {
+  const a = CORE_PAIRS[i], b = CORE_PAIRS[i + 1];
+  CONTRAST[a.word] = b;
+  CONTRAST[b.word] = a;
+}
+
 const ROUND_SIZE = 10;
 const UNLOCK_THRESHOLD = 0.8;
-const STORAGE_KEY = 'nl-regression-trainer-v1';
+// v2: Stage 3 從「/n/ /l/ 音位標籤」改為「最小對詞辨識（night 還是 light？）」——換 key 避免與舊格式每日成績混雜
+const STORAGE_KEY = 'nl-regression-trainer-v2';
 const NUM_STAGES = 3;
 
 // ============================================================
@@ -454,6 +464,10 @@ const pos3Btn = $('pos3Btn');
 const answerButtons = $('answerButtons');
 const nBtn = $('nBtn');
 const lBtn = $('lBtn');
+const nWordLabel = $('nWordLabel');
+const nIpaLabel = $('nIpaLabel');
+const lWordLabel = $('lWordLabel');
+const lIpaLabel = $('lIpaLabel');
 const answeredHint = $('answeredHint');
 const revealArea = $('revealArea');
 const nextBtn = $('nextBtn');
@@ -665,7 +679,7 @@ function generateStage2Round() {
 }
 
 function generateStage3Round() {
-  // Stage 3: Identification. Same as core trainer.
+  // Stage 3: Word Identification（最小對詞辨識）——聽一個詞，判斷是兩個最小對詞中的哪一個。
   const bank = CORE_PAIRS;
   let pool = [];
   while (pool.length < ROUND_SIZE) {
@@ -679,12 +693,20 @@ function generateStage3Round() {
     const missing = nCount === 0 ? bank.find(w => w.sound === 'n') : bank.find(w => w.sound === 'l');
     pool[Math.floor(Math.random() * ROUND_SIZE)] = missing;
   }
-  return shuffle(pool).map(w => ({
-    word: w.word,
-    sound: w.sound,
-    ipa: w.ipa,
-    answer: w.sound,  // 'n' or 'l'
-  }));
+  return shuffle(pool).map(w => {
+    const contrast = CONTRAST[w.word];
+    // pair.nWord = 該組的 /n/ 詞、pair.lWord = 該組的 /l/ 詞（按鈕左 n、右 l，顏色固定）
+    const pair = w.sound === 'n'
+      ? { nWord: w, lWord: contrast }
+      : { nWord: contrast, lWord: w };
+    return {
+      word: w.word,
+      sound: w.sound,
+      ipa: w.ipa,
+      pair: pair,
+      answer: w.sound,  // 'n' or 'l'
+    };
+  });
 }
 
 function generateRound() {
@@ -775,6 +797,15 @@ function updateProgress() {
 // ============================================================
 // Actions
 // ============================================================
+function updateStage3Buttons() {
+  // Stage 3: 兩個按鈕顯示當題的最小對詞（左 = /n/ 詞、右 = /l/ 詞）
+  const pair = state.currentTrial.pair;
+  nWordLabel.textContent = pair.nWord.word;
+  nIpaLabel.textContent = pair.nWord.ipa;
+  lWordLabel.textContent = pair.lWord.word;
+  lIpaLabel.textContent = pair.lWord.ipa;
+}
+
 async function handlePlay() {
   if (state.currentIndex >= ROUND_SIZE || state.roundRevealed) return;
 
@@ -784,6 +815,7 @@ async function handlePlay() {
   speechSynthesis.cancel();
 
   state.currentTrial = state.roundItems[state.currentIndex];
+  if (state.stage === 3) updateStage3Buttons();
 
   // Single voice per question — the same voice is reused across replays of
   // the same question, and only changes when moving to the next question
@@ -995,8 +1027,8 @@ function buildReviewTable(correctCount) {
     } else {
       const t = a.trial;
       contentHtml = `<span style="font-weight:600">${t.word}</span> <span style="color:var(--text-muted);font-size:0.72rem">${t.ipa}</span>`;
-      answerHtml = t.answer === 'n' ? '/n/' : '/l/';
-      choiceHtml = a.choice === 'n' ? '/n/' : '/l/';
+      answerHtml = `<span style="font-weight:600">${t.word}</span>`;
+      choiceHtml = a.choice === 'n' ? t.pair.nWord.word : t.pair.lWord.word;
       playTexts = [t.word];
     }
 
@@ -1026,15 +1058,19 @@ function saveRoundToStorage() {
 
   state.roundAnswers.forEach(a => {
     const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+    const chosenWord = state.stage === 3
+      ? (a.choice === 'n' ? a.trial.pair.nWord.word : a.trial.pair.lWord.word)
+      : null;
     dailyScores.push({
       stage: state.stage,
       trialType: state.stage === 1 ? 'same-diff' : state.stage === 2 ? 'oddball' : 'identify',
       correct: a.correct,
+      direction: state.stage === 3 ? a.trial.answer : null,
       detail: state.stage === 1
         ? `${a.trial.word1.word}-${a.trial.word2.word}/${a.trial.answer}/${a.choice}`
         : state.stage === 2
           ? a.trial.words.map(w => w.word).join('-') + `/odd${a.trial.answer}/chose${a.choice}`
-          : `${a.trial.word}/${a.trial.answer}/${a.choice}`,
+          : `${a.trial.word} → ${chosenWord}`,
     });
     localStorage.setItem(dailyKey, JSON.stringify(dailyScores));
   });
@@ -1049,7 +1085,7 @@ function showSummaryAfterReview(correctCount) {
     else { streak = 0; }
   }
 
-  const stageNames = ['', '相同或不同？', '找出不同的', '辨識 /n/ 或 /l/'];
+  const stageNames = ['', '相同或不同？', '找出不同的', '是哪個詞？'];
 
   summary.style.display = 'block';
   summary.innerHTML = `
@@ -1108,7 +1144,8 @@ async function replayWrongAnswers() {
     } else if (state.stage === 2) {
       desc = a.trial.words.map(w => w.word).join(' · ') + ` — 第 ${a.trial.answer} 個不一樣`;
     } else {
-      desc = `${a.trial.word} ${a.trial.ipa} — 實際是 ${a.trial.answer === 'n' ? '/n/' : '/l/'}`;
+      const chosenWord = a.choice === 'n' ? a.trial.pair.nWord.word : a.trial.pair.lWord.word;
+      desc = `${a.trial.word} ${a.trial.ipa} — 你選了「${chosenWord}」，實際是「${a.trial.word}」`;
     }
     html += `<p><strong>${i + 1}.</strong> ${desc}</p>`;
   });
@@ -1212,7 +1249,7 @@ function clearHistory() {
 const STAGE_NAMES = {
   1: '相同或不同？（Same-Different）',
   2: '找出不同的（Oddball）',
-  3: '辨識 /n/ 或 /l/（Identification）',
+  3: '是哪個詞？（Word Identification）',
 };
 
 function exportReport() {
@@ -1239,7 +1276,7 @@ function exportReport() {
   const lines = [];
   lines.push(`# /n/ vs /l/ 漸進式聽力練習報告 — ${today}`);
   lines.push('');
-  lines.push('> 退階設計：Stage 1（相同/不同）→ Stage 2（找出不一樣的）→ Stage 3（辨識 /n/ 或 /l/）');
+  lines.push('> 退階設計：Stage 1（相同/不同）→ Stage 2（找出不一樣的）→ Stage 3（是哪個詞：night 還是 light？）');
   lines.push('');
   lines.push(`總答題數：${dailyScores.length} 題`);
   const overallCorrect = dailyScores.filter(s => s.correct).length;
@@ -1266,19 +1303,13 @@ function exportReport() {
     lines.push('');
   }
 
-  // Overall direction analysis (Stage 3 only — identification)
+  // Overall direction analysis (Stage 3 only — word identification)
   if (stages[3]) {
     const idErrors = stages[3].errors;
-    const nToL = idErrors.filter(e => e.detail.includes('/n/') && e.detail.includes('/l/')).length;
-    // More detailed: parse detail strings
     let nErr = 0, lErr = 0;
     for (const e of idErrors) {
-      // detail format: "word/sound/choice"
-      const parts = e.detail.split('/');
-      if (parts.length >= 3) {
-        if (parts[1] === 'n') nErr++;
-        else if (parts[1] === 'l') lErr++;
-      }
+      if (e.direction === 'n') nErr++;
+      else if (e.direction === 'l') lErr++;
     }
     if (nErr > 0 || lErr > 0) {
       lines.push('## 辨識階段錯誤方向');
@@ -1297,7 +1328,7 @@ function exportReport() {
   lines.push('設計說明：');
   lines.push('- Stage 1（Same-Different）：只判斷兩個詞是否相同，不需知道哪個是 /n/ 哪個是 /l/');
   lines.push('- Stage 2（Oddball）：三個詞中找出不同的那一個');
-  lines.push('- Stage 3（Identification）：回到傳統的 /n/ vs /l/ 辨識');
+  lines.push('- Stage 3（Word Identification）：聽一個詞，判斷是兩個最小對詞中的哪一個（night 還是 light？）');
   lines.push('- 每關需達到 80% 正確率才能解鎖下一關');
 
   const report = lines.join('\n');
