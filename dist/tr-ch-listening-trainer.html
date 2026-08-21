@@ -302,6 +302,11 @@
     color: var(--text-muted);
     font-weight: 400;
   }
+  .answer-btn .sound-hint {
+    font-size: 0.74rem;
+    color: var(--text);
+    font-weight: 600;
+  }
     .answer-btn.tr-btn { border-color: var(--sa-border); background: var(--sa-bg); }
   .answer-btn.tr-btn:hover:not(:disabled) { border-color: #059669; }
   .answer-btn.ch-btn { border-color: var(--sb-border); background: var(--sb-bg); }
@@ -699,8 +704,6 @@
     </button>
   </div>
 
-  <div class="voice-info" id="voiceInfo">載入語音引擎中...</div>
-
   <!-- Stats bar -->
   <div class="stats-bar">
     <div class="stat">
@@ -716,6 +719,8 @@
       <div class="stat-label">連續正確</div>
     </div>
   </div>
+
+  <div class="voice-info" id="voiceInfo">載入語音引擎中...</div>
 
   <!-- Main card -->
   <div class="main-card" id="mainCard">

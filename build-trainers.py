@@ -858,6 +858,7 @@ def main():
     manual_trainers = {
         "v-f": "v-f-listening-trainer.html",
         "vowel-assessment": "vowel-minimal-pairs-assessment.html",
+        "nl-training": "nl-listening-trainer-training.html",
     }
     for key, fname in manual_trainers.items():
         src = os.path.join(SCRIPT_DIR, "manual", fname)
@@ -871,6 +872,10 @@ def main():
     all_trainers["n-l-regression"] = {
         "filename": "nl-listening-trainer-regression.html",
         "h1": "/n/ vs /l/ 漸進式聽力訓練（退階設計）",
+    }
+    all_trainers["nl-training"] = {
+        "filename": "nl-listening-trainer-training.html",
+        "h1": "/n/ vs /l/ 聽力訓練（訓練模式）",
     }
     all_trainers["v-f"] = {
         "filename": "v-f-listening-trainer.html",

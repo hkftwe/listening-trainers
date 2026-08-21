@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>/n/ vs /l/ 聽力訓練（訓練模式）</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #fafafa;
+    --card-bg: #ffffff;
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --selected: #6366f1;
+    --selected-bg: #eef2ff;
+    --n-color: #0891b2; --n-bg: #ecfeff; --n-border: #a5f3fc;
+    --l-color: #d97706; --l-bg: #fffbeb; --l-border: #fcd34d;
+    --correct: #059669;
+    --incorrect: #dc2626;
+    --correct-bg: #f0fdf4;
+    --incorrect-bg: #fef2f2;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+  .container { max-width: 540px; width: 100%; }
+
+  .header { text-align: center; margin-bottom: 20px; }
+  .header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; }
+  .header .subtitle { font-size: 0.82rem; color: var(--text-muted); }
+  .header .method-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; font-style: italic; }
+
+  /* Stage selector */
+  .stage-selector { display: flex; gap: 8px; margin-bottom: 20px; }
+  .stage-card {
+    flex: 1; padding: 10px 6px 8px; border: 1.5px solid var(--border);
+    border-radius: 10px; background: var(--card-bg); cursor: pointer;
+    transition: all 0.15s; text-align: center; box-shadow: var(--shadow);
+  }
+  .stage-card:hover:not(.locked) { border-color: #9ca3af; background: #f9fafb; }
+  .stage-card.active { border-color: var(--accent); background: #eff6ff; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+  .stage-card.locked { opacity: 0.40; cursor: not-allowed; background: #f3f4f6; }
+  .stage-card.locked:hover { border-color: var(--border); background: #f3f4f6; }
+  .stage-card.locked.pressing { border-color: var(--accent) !important; background: #eff6ff !important; transform: scale(0.97); opacity: 0.75 !important; }
+  .stage-card .stage-icon { font-size: 1.3rem; margin-bottom: 2px; }
+  .stage-card .stage-title { font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 1px; }
+  .stage-card.active .stage-title { color: var(--accent); }
+  .stage-card.locked .stage-title { color: var(--text-muted); }
+  .stage-card .stage-desc { font-size: 0.68rem; color: var(--text-muted); line-height: 1.3; }
+  .stage-card .stage-lock { font-size: 0.65rem; color: var(--text-muted); margin-top: 3px; }
+
+  /* Voice info */
+  .voice-info { font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-bottom: 12px; line-height: 1.5; }
+  .voice-info .voice-name { font-weight: 600; color: var(--text); }
+  .voice-info .voice-reroll-btn {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 3px 10px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    cursor: pointer;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .voice-info .voice-reroll-btn:hover { border-color: var(--accent); color: var(--accent); background: #eff6ff; }
+
+  /* Stats bar */
+  .stats-bar { display: flex; gap: 12px; margin-bottom: 16px; font-size: 0.8rem; color: var(--text-muted); }
+  .stat { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; flex: 1; text-align: center; }
+  .stat-value { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+  .stat-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+  /* Main card */
+  .main-card {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 28px 24px; text-align: center; box-shadow: var(--shadow);
+    margin-bottom: 16px; min-height: 280px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  }
+
+  /* Play button */
+  .play-section { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .play-btn {
+    width: 72px; height: 72px; border-radius: 50%; border: none;
+    background: var(--accent); color: white; font-size: 1.5rem;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+  }
+  .play-btn:hover { background: var(--accent-hover); transform: scale(1.04); }
+  .play-btn:active { transform: scale(0.97); }
+  .play-btn.playing { background: #f59e0b; animation: pulse 1s infinite; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 2px 8px rgba(245,158,11,0.25); }
+    50% { box-shadow: 0 2px 20px rgba(245,158,11,0.45); }
+  }
+  .play-hint { font-size: 0.75rem; color: var(--text-muted); }
+
+  /* Playback sequence indicator */
+  .playback-seq { font-size: 0.9rem; font-weight: 700; color: var(--accent); margin-top: 4px; }
+
+  /* Round info */
+  .round-info { font-size: 0.82rem; color: var(--text-muted); }
+  .round-num { font-weight: 700; color: var(--text); font-size: 0.95rem; }
+
+  /* Progress bar */
+  .progress-wrap { width: 100%; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.2s; }
+
+  /* Replay button */
+  .replay-btn {
+    display: block; margin: 8px auto 4px; padding: 5px 14px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--card-bg);
+    color: var(--text-muted); font-size: 0.76rem; cursor: pointer; transition: all 0.15s;
+  }
+  .replay-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Stage 1: Same/Different buttons */
+  .sd-buttons { display: flex; gap: 16px; width: 100%; }
+  .sd-btn {
+    flex: 1; padding: 20px 12px; border-radius: 10px; border: 2px solid var(--border);
+    background: var(--card-bg); cursor: pointer; font-size: 1.1rem; font-weight: 700;
+    transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .sd-btn:hover:not(:disabled) { border-color: #9ca3af; background: #f9fafb; }
+  .sd-btn:disabled { cursor: default; }
+  .sd-btn.same-btn:hover:not(:disabled) { border-color: var(--correct); background: var(--correct-bg); }
+  .sd-btn.diff-btn:hover:not(:disabled) { border-color: #f59e0b; background: #fffbeb; }
+
+  /* Stage 2: Oddball position buttons */
+  .oddball-buttons { display: flex; gap: 12px; width: 100%; }
+  .oddball-btn {
+    flex: 1; padding: 16px 8px; border-radius: 10px; border: 2px solid var(--border);
+    background: var(--card-bg); cursor: pointer; font-size: 0.95rem; font-weight: 600;
+    transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .oddball-btn:hover:not(:disabled) { border-color: #9ca3af; background: #f9fafb; }
+  .oddball-btn:disabled { cursor: default; }
+  .oddball-btn .pos-num { font-size: 1.4rem; font-weight: 800; }
+
+  /* Stage 3: minimal-pair word answer buttons (n-word cyan / l-word orange) */
+  .answer-buttons { display: flex; gap: 16px; width: 100%; }
+  .answer-btn {
+    flex: 1; padding: 18px 12px; border-radius: 10px; border: 2px solid var(--border);
+    background: var(--card-bg); cursor: pointer; font-size: 1rem; font-weight: 600;
+    transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .answer-btn:hover:not(:disabled) { border-color: #9ca3af; background: #f9fafb; }
+  .answer-btn:disabled { cursor: default; }
+  .answer-btn .sound-label { font-size: 1.25rem; letter-spacing: 0.02em; }
+  .answer-btn .sound-example { font-size: 0.72rem; color: var(--text-muted); font-weight: 400; }
+  .answer-btn.n-btn { border-color: var(--n-border); background: var(--n-bg); }
+  .answer-btn.n-btn:hover:not(:disabled) { border-color: var(--n-color); }
+  .answer-btn.l-btn { border-color: var(--l-border); background: var(--l-bg); }
+  .answer-btn.l-btn:hover:not(:disabled) { border-color: var(--l-color); }
+
+  /* Selected / Reveal states */
+  .selected-choice { border-color: var(--selected) !important; background: var(--selected-bg) !important; box-shadow: 0 0 0 1px rgba(99,102,241,0.25); }
+  .unselected-choice { opacity: 0.45; }
+  .was-correct { border-color: var(--correct) !important; background: var(--correct-bg) !important; }
+  .was-incorrect { border-color: var(--incorrect) !important; background: var(--incorrect-bg) !important; }
+
+  /* Reveal for same-different: show both words */
+  .reveal-words {
+    display: flex; gap: 20px; align-items: center; justify-content: center; flex-wrap: wrap;
+  }
+  .reveal-word {
+    padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 1.1rem; letter-spacing: 0.03em;
+  }
+  .reveal-word.n-word { background: var(--n-bg); border: 1.5px solid var(--n-border); color: var(--n-color); }
+  .reveal-word.l-word { background: var(--l-bg); border: 1.5px solid var(--l-border); color: var(--l-color); }
+  .reveal-word .ipa-sub { font-size: 0.78rem; font-weight: 400; opacity: 0.7; margin-left: 4px; }
+  .reveal-separator { font-size: 1.2rem; font-weight: 700; color: var(--text-muted); }
+
+  /* Reveal for oddball: show three words with highlight */
+  .reveal-triplet { display: flex; gap: 12px; align-items: center; justify-content: center; }
+  .reveal-pos {
+    padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.95rem;
+    border: 1.5px solid var(--border); background: var(--card-bg); text-align: center;
+  }
+  .reveal-pos .pos-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .reveal-pos.odd-highlight { border-color: var(--incorrect); background: var(--incorrect-bg); box-shadow: 0 0 0 2px rgba(220,38,38,0.2); }
+
+  /* Next / Reveal buttons */
+  .next-btn {
+    padding: 10px 28px; border-radius: 8px; border: none;
+    background: var(--accent); color: white; font-size: 0.9rem;
+    font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .next-btn:hover { background: var(--accent-hover); }
+  .next-btn.secondary {
+    background: transparent; color: var(--accent); border: 1.5px solid var(--accent);
+  }
+  .next-btn.secondary:hover { background: #eff6ff; }
+
+  /* Review table */
+  .review-section { width: 100%; text-align: left; }
+  .review-section h3 { text-align: center; font-size: 1rem; margin-bottom: 12px; }
+  .review-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .review-table th { text-align: left; padding: 6px 8px; color: var(--text-muted); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border); }
+  .review-table td { padding: 7px 8px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  .review-table tr.row-correct { background: #f0fdf4; }
+  .review-table tr.row-incorrect { background: #fef2f2; }
+  .review-table .result-icon { font-weight: 700; font-size: 0.9rem; }
+  .review-play-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--card-bg); cursor: pointer; font-size: 0.75rem; margin-left: 6px;
+    vertical-align: middle; transition: all 0.15s; padding: 0; color: var(--text-muted);
+  }
+  .review-play-btn:hover { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
+  .review-play-btn.playing-review { background: #fef3c7; border-color: #f59e0b; color: #f59e0b; }
+
+  /* Summary */
+  .summary { text-align: center; padding: 4px 0; width: 100%; }
+  .summary .big-score { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; }
+  .summary .score-detail { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px; }
+  .summary .streak-badge { display: inline-block; background: #fef3c7; color: #92400e; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 600; margin-bottom: 12px; }
+
+  /* History */
+  .history-section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: var(--shadow); }
+  .history-section h3 { font-size: 0.82rem; font-weight: 600; margin-bottom: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .history-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .history-dot { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; }
+  .history-dot.correct { background: #d1fae5; color: #065f46; }
+  .history-dot.incorrect { background: #fee2e2; color: #991b1b; }
+  .history-empty { font-size: 0.78rem; color: var(--text-muted); font-style: italic; }
+  .history-clear { margin-top: 10px; font-size: 0.72rem; color: var(--text-muted); border: none; background: none; cursor: pointer; text-decoration: underline; }
+  .history-clear:hover { color: var(--incorrect); }
+
+  /* Report */
+  .report-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .report-btn { padding: 8px 16px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .report-btn:hover { border-color: var(--accent); background: #eff6ff; }
+  .report-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .report-btn.primary:hover { background: var(--accent-hover); }
+  .report-output { margin-top: 10px; width: 100%; min-height: 120px; font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; font-size: 0.75rem; line-height: 1.5; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: #f9fafb; resize: vertical; color: var(--text); }
+  .report-copied { font-size: 0.72rem; color: var(--correct); font-weight: 600; margin-top: 6px; display: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>/n/ vs /l/ 聽力訓練 · 訓練模式</h1>
+    <p class="subtitle">訓練模式 — 逐題即時回饋 · 慢速誇大（rate 0.35）· 分數不計入測驗</p>
+    <p class="method-note">⚠️ 這是「訓練」模式：每題作答後立即顯示對錯＋重播正確音。測驗（整輪結束才公布、分數進 SRS）請開 nl-listening-trainer-regression.html</p>
+  </div>
+
+  <!-- Stage selector -->
+  <div class="stage-selector" id="stageSelector">
+    <button class="stage-card active" data-stage="1">
+      <div class="stage-icon">👂</div>
+      <div class="stage-title">Stage 1 · 相同或不同？</div>
+      <div class="stage-desc">聽兩個詞<br>判斷是否一樣</div>
+    </button>
+    <button class="stage-card locked" data-stage="2">
+      <div class="stage-icon">🔍</div>
+      <div class="stage-title">Stage 2 · 找出不同的</div>
+      <div class="stage-desc">聽三個詞<br>哪一個不一樣？</div>
+      <div class="stage-lock">🔒 需 Stage 1 達 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
+    </button>
+    <button class="stage-card locked" data-stage="3">
+      <div class="stage-icon">🎯</div>
+      <div class="stage-title">Stage 3 · 是哪個詞？</div>
+      <div class="stage-desc">聽一個詞<br>night 還是 light？</div>
+      <div class="stage-lock">🔒 需 Stage 2 達 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
+    </button>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-value" id="totalScore">0</div>
+      <div class="stat-label">今日答題</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="accuracy">—</div>
+      <div class="stat-label">今日正確率</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="streakCount">0</div>
+      <div class="stat-label">連續正確</div>
+    </div>
+  </div>
+
+  <div class="voice-info" id="voiceInfo">
+    🎤 語音：<span class="voice-name" id="currentVoiceName">載入中...</span>
+    <button class="voice-reroll-btn" id="voiceRerollBtn">🔄 換語音</button>
+  </div>
+
+  <!-- Main card -->
+  <div class="main-card" id="mainCard">
+
+    <!-- Play state (shared across all stages) -->
+    <div class="play-section" id="playSection">
+      <button class="play-btn" id="playBtn" title="Play">▶</button>
+      <p class="play-hint" id="playHint">點擊播放</p>
+      <div class="playback-seq" id="playbackSeq" style="display:none"></div>
+    </div>
+
+    <div class="round-info" id="roundInfo" style="display:none">
+      第 <span class="round-num" id="roundNum">1</span> / 10 題
+    </div>
+
+    <div class="progress-wrap" id="progressWrap" style="display:none">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+
+    <button class="replay-btn" id="replayBtn" style="display:none">🔁 重播</button>
+
+    <!-- Stage 1: Same / Different -->
+    <div class="sd-buttons" id="sdButtons" style="display:none">
+      <button class="sd-btn same-btn" id="sameBtn" disabled>
+        <span>✅</span> 相同<br><span style="font-size:0.7rem;font-weight:400">Same</span>
+      </button>
+      <button class="sd-btn diff-btn" id="diffBtn" disabled>
+        <span>❌</span> 不同<br><span style="font-size:0.7rem;font-weight:400">Different</span>
+      </button>
+    </div>
+
+    <!-- Stage 2: Oddball position -->
+    <div class="oddball-buttons" id="oddballButtons" style="display:none">
+      <button class="oddball-btn" id="pos1Btn" data-pos="1" disabled>
+        <span class="pos-num">1</span>第 1 個
+      </button>
+      <button class="oddball-btn" id="pos2Btn" data-pos="2" disabled>
+        <span class="pos-num">2</span>第 2 個
+      </button>
+      <button class="oddball-btn" id="pos3Btn" data-pos="3" disabled>
+        <span class="pos-num">3</span>第 3 個
+      </button>
+    </div>
+
+    <!-- Stage 3: 哪個詞？ -->
+    <div class="answer-buttons" id="answerButtons" style="display:none">
+      <button class="answer-btn n-btn" id="nBtn" disabled>
+        <span class="sound-label" id="nWordLabel">—</span>
+        <span class="sound-example" id="nIpaLabel"></span>
+      </button>
+      <button class="answer-btn l-btn" id="lBtn" disabled>
+        <span class="sound-label" id="lWordLabel">—</span>
+        <span class="sound-example" id="lIpaLabel"></span>
+      </button>
+    </div>
+
+    <!-- Answered hint -->
+    <div id="answeredHint" style="display:none;font-size:0.82rem;color:var(--selected);font-weight:600">已作答 ✓</div>
+
+    <!-- Reveal area (dynamic per stage) -->
+    <div id="revealArea" style="display:none"></div>
+
+    <!-- Next button -->
+    <button class="next-btn" id="nextBtn" style="display:none">下一題 →</button>
+
+    <!-- Reveal button (last question) -->
+    <button class="next-btn" id="revealBtn" style="display:none">看本輪回顧</button>
+
+    <!-- Review table -->
+    <div class="review-section" id="reviewSection" style="display:none"></div>
+
+    <!-- Summary -->
+    <div class="summary" id="summary" style="display:none"></div>
+  </div>
+
+  <!-- History -->
+  <div class="history-section">
+    <h3>本日答題記錄</h3>
+    <div class="history-list" id="historyList">
+      <span class="history-empty">尚未作答</span>
+    </div>
+    <button class="history-clear" id="historyClear" style="display:none">清除記錄</button>
+    <div class="report-buttons">
+      <button class="report-btn primary" id="exportReportBtn">📋 匯出報告</button>
+      <button class="report-btn" id="copyReportBtn" style="display:none">📋 複製到剪貼板</button>
+    </div>
+    <textarea class="report-output" id="reportOutput" style="display:none" readonly
+      placeholder="點擊「匯出報告」生成可讀的診斷報告"></textarea>
+    <p class="report-copied" id="reportCopied">✅ 已複製到剪貼簿！直接貼給你的老師即可</p>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// Word bank
+// ============================================================
+const CORE_PAIRS = [
+  { word: "need", sound: 'n', ipa: "/niːd/" },
+  { word: "lead", sound: 'l', ipa: "/liːd/" },
+  { word: "night", sound: 'n', ipa: "/naɪt/" },
+  { word: "light", sound: 'l', ipa: "/laɪt/" },
+  { word: "no",   sound: 'n', ipa: "/noʊ/" },
+  { word: "low",  sound: 'l', ipa: "/loʊ/" },
+  { word: "nap",  sound: 'n', ipa: "/næp/" },
+  { word: "lap",  sound: 'l', ipa: "/læp/" },
+];
+
+// CONTRAST: 每個詞對應它的最小對詞（need↔lead、night↔light、no↔low、nap↔lap）。
+// 由 CORE_PAIRS 的相鄰兩兩配對自動生成。
+const CONTRAST = {};
+for (let i = 0; i < CORE_PAIRS.length - 1; i += 2) {
+  const a = CORE_PAIRS[i], b = CORE_PAIRS[i + 1];
+  CONTRAST[a.word] = b;
+  CONTRAST[b.word] = a;
+}
+
+const ROUND_SIZE = 10;
+const UNLOCK_THRESHOLD = 0.8;
+// v2: Stage 3 從「/n/ /l/ 音位標籤」改為「最小對詞辨識（night 還是 light？）」——換 key 避免與舊格式每日成績混雜
+const STORAGE_KEY = 'nl-training-trainer-v1';
+const NUM_STAGES = 3;
+
+// ============================================================
+// State
+// ============================================================
+let state = {
+  stage: 1,
+  unlockedStages: [1],
+  voicePool: [],
+  currentVoice: null,
+  roundItems: [],      // Array of trial objects (shape depends on stage)
+  currentIndex: 0,
+  currentTrial: null,
+  hasPlayed: false,
+  currentSelection: null,  // string: 'same'|'diff', or 1|2|3, or 'n'|'l'
+  roundAnswers: [],        // { trial, choice, correct }
+  roundRevealed: false,
+};
+
+let longPressTimer = null;
+let longPressTarget = null;
+
+// ============================================================
+// DOM refs
+// ============================================================
+const $ = id => document.getElementById(id);
+const playBtn = $('playBtn');
+const playHint = $('playHint');
+const playbackSeq = $('playbackSeq');
+const playSection = $('playSection');
+const replayBtn = $('replayBtn');
+const sdButtons = $('sdButtons');
+const sameBtn = $('sameBtn');
+const diffBtn = $('diffBtn');
+const oddballButtons = $('oddballButtons');
+const pos1Btn = $('pos1Btn');
+const pos2Btn = $('pos2Btn');
+const pos3Btn = $('pos3Btn');
+const answerButtons = $('answerButtons');
+const nBtn = $('nBtn');
+const lBtn = $('lBtn');
+const nWordLabel = $('nWordLabel');
+const nIpaLabel = $('nIpaLabel');
+const lWordLabel = $('lWordLabel');
+const lIpaLabel = $('lIpaLabel');
+const answeredHint = $('answeredHint');
+const revealArea = $('revealArea');
+const nextBtn = $('nextBtn');
+const revealBtnEl = $('revealBtn');
+const reviewSection = $('reviewSection');
+const summary = $('summary');
+const mainCard = $('mainCard');
+const roundInfo = $('roundInfo');
+const roundNum = $('roundNum');
+const progressWrap = $('progressWrap');
+const progressFill = $('progressFill');
+const currentVoiceName = $('currentVoiceName');
+const voiceRerollBtn = $('voiceRerollBtn');
+const historyList = $('historyList');
+const historyClear = $('historyClear');
+const totalScore = $('totalScore');
+const accuracy = $('accuracy');
+const streakCount = $('streakCount');
+const stageSelector = $('stageSelector');
+const exportReportBtn = $('exportReportBtn');
+const reportOutput = $('reportOutput');
+const reportCopied = $('reportCopied');
+const copyReportBtn = $('copyReportBtn');
+
+// ============================================================
+// Voice management (single mode — 換題才換聲)
+// ============================================================
+function buildVoicePool() {
+  const all = speechSynthesis.getVoices();
+  if (all.length === 0) return;
+  const english = all.filter(v => v.lang.startsWith('en'));
+  const preferred = [];
+  const names = new Set();
+  for (const v of english) {
+    if (v.name === 'Samantha' && !names.has('Samantha')) { preferred.push(v); names.add('Samantha'); }
+    if (v.name === 'Daniel' && !names.has('Daniel')) { preferred.push(v); names.add('Daniel'); }
+    if (v.name === 'Karen' && !names.has('Karen')) { preferred.push(v); names.add('Karen'); }
+    if (v.name === 'Alex' && !names.has('Alex')) { preferred.push(v); names.add('Alex'); }
+    if (v.name === 'Moira' && !names.has('Moira')) { preferred.push(v); names.add('Moira'); }
+    if (v.name === 'Fiona' && !names.has('Fiona')) { preferred.push(v); names.add('Fiona'); }
+    if (v.name === 'Veena' && !names.has('Veena')) { preferred.push(v); names.add('Veena'); }
+    if (v.name === 'Tom' && !names.has('Tom')) { preferred.push(v); names.add('Tom'); }
+  }
+  for (const v of english) {
+    if (preferred.length >= 5) break;
+    if (!names.has(v.name)) { preferred.push(v); names.add(v.name); }
+  }
+  if (preferred.length < 3) {
+    for (const v of all) {
+      if (preferred.length >= 3) break;
+      if (!names.has(v.name)) { preferred.push(v); names.add(v.name); }
+    }
+  }
+  state.voicePool = preferred;
+  if (!state.currentVoice && state.voicePool.length > 0) {
+    state.currentVoice = state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
+  }
+  updateVoiceLabel();
+}
+
+function pickRandomVoice() {
+  if (state.voicePool.length === 0) return;
+  const candidates = state.voicePool.filter(v => v !== state.currentVoice);
+  state.currentVoice = candidates.length > 0
+    ? candidates[Math.floor(Math.random() * candidates.length)]
+    : state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
+  updateVoiceLabel();
+}
+
+function updateVoiceLabel() {
+  currentVoiceName.textContent = state.currentVoice ? state.currentVoice.name : '系統預設';
+}
+
+speechSynthesis.onvoiceschanged = () => { buildVoicePool(); };
+buildVoicePool();
+
+function speak(text, voice) {
+  return new Promise((resolve) => {
+    const utt = new SpeechSynthesisUtterance(text);
+    const v = voice || state.currentVoice;
+    if (v) utt.voice = v;
+    utt.rate = 0.35;
+    utt.pitch = 1;
+    utt.onend = resolve;
+    utt.onerror = resolve;
+    speechSynthesis.speak(utt);
+  });
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ============================================================
+// Persistence
+// ============================================================
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      state.unlockedStages = data.unlockedStages || [1];
+      state.stage = data.stage || 1;
+      if (!state.unlockedStages.includes(state.stage)) {
+        state.stage = Math.max(...state.unlockedStages);
+      }
+      return data;
+    }
+  } catch (e) { /* ignore */ }
+  return null;
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    unlockedStages: state.unlockedStages,
+    stage: state.stage,
+    savedAt: new Date().toISOString(),
+  }));
+}
+
+// ============================================================
+// Stage UI
+// ============================================================
+function updateStageButtons() {
+  const cards = stageSelector.querySelectorAll('.stage-card');
+  cards.forEach(card => {
+    const s = parseInt(card.dataset.stage);
+    card.classList.remove('active', 'locked');
+    if (state.stage === s) {
+      card.classList.add('active');
+    } else if (!state.unlockedStages.includes(s)) {
+      card.classList.add('locked');
+    }
+  });
+}
+
+// ============================================================
+// Shuffle
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ============================================================
+// Round generation (stage-dependent)
+// ============================================================
+
+function generateStage1Round() {
+  // Stage 1: Same-Different. Generate 10 trials, half "same", half "different".
+  const pairs = [];
+  for (let i = 0; i < CORE_PAIRS.length - 1; i += 2) {
+    const a = CORE_PAIRS[i];
+    const b = CORE_PAIRS[i + 1];
+    pairs.push({ a, b });
+  }
+  // 4 contrast pairs. We need 10 trials.
+  const trials = [];
+  // 5 "same" trials
+  for (let i = 0; i < 5; i++) {
+    const pair = pairs[Math.floor(Math.random() * pairs.length)];
+    const sameWord = Math.random() < 0.5 ? pair.a : pair.b;
+    trials.push({ type: 'same', word1: sameWord, word2: sameWord, answer: 'same' });
+  }
+  // 5 "different" trials
+  for (let i = 0; i < 5; i++) {
+    const pair = pairs[Math.floor(Math.random() * pairs.length)];
+    // Randomize order
+    const order = Math.random() < 0.5 ? [pair.a, pair.b] : [pair.b, pair.a];
+    trials.push({ type: 'different', word1: order[0], word2: order[1], answer: 'diff' });
+  }
+  return shuffle(trials);
+}
+
+function generateStage2Round() {
+  // Stage 2: Oddball. 10 triplets, the odd one can be at position 1, 2, or 3.
+  const pairs = [];
+  for (let i = 0; i < CORE_PAIRS.length - 1; i += 2) {
+    pairs.push({ a: CORE_PAIRS[i], b: CORE_PAIRS[i + 1] });
+  }
+  const trials = [];
+  // Distribute oddball positions: 3,3,4 (balanced across 10 trials)
+  const positions = [1,1,1, 2,2,2, 3,3,3,3];
+  const shuffledPositions = shuffle(positions);
+
+  for (let i = 0; i < 10; i++) {
+    const pair = pairs[Math.floor(Math.random() * pairs.length)];
+    const oddPos = shuffledPositions[i];
+    const isAOdd = Math.random() < 0.5;
+    const oddWord = isAOdd ? pair.a : pair.b;
+    const baseWord = isAOdd ? pair.b : pair.a;
+    const triplet = [];
+    for (let p = 1; p <= 3; p++) {
+      triplet.push(p === oddPos ? oddWord : baseWord);
+    }
+    trials.push({
+      words: triplet,
+      oddPosition: oddPos,
+      oddWord: oddWord,
+    });
+    // answer is the position (1, 2, or 3)
+    trials[trials.length - 1].answer = oddPos;
+  }
+  return trials;
+}
+
+function generateStage3Round() {
+  // Stage 3: Word Identification（最小對詞辨識）——聽一個詞，判斷是兩個最小對詞中的哪一個。
+  const bank = CORE_PAIRS;
+  let pool = [];
+  while (pool.length < ROUND_SIZE) {
+    pool = pool.concat(shuffle(bank));
+  }
+  pool = pool.slice(0, ROUND_SIZE);
+  // Ensure at least one of each sound
+  const nCount = pool.filter(w => w.sound === 'n').length;
+  const lCount = pool.filter(w => w.sound === 'l').length;
+  if (nCount === 0 || lCount === 0) {
+    const missing = nCount === 0 ? bank.find(w => w.sound === 'n') : bank.find(w => w.sound === 'l');
+    pool[Math.floor(Math.random() * ROUND_SIZE)] = missing;
+  }
+  return shuffle(pool).map(w => {
+    const contrast = CONTRAST[w.word];
+    // pair.nWord = 該組的 /n/ 詞、pair.lWord = 該組的 /l/ 詞（按鈕左 n、右 l，顏色固定）
+    const pair = w.sound === 'n'
+      ? { nWord: w, lWord: contrast }
+      : { nWord: contrast, lWord: w };
+    return {
+      word: w.word,
+      sound: w.sound,
+      ipa: w.ipa,
+      pair: pair,
+      answer: w.sound,  // 'n' or 'l'
+    };
+  });
+}
+
+function generateRound() {
+  if (state.stage === 1) {
+    state.roundItems = generateStage1Round();
+  } else if (state.stage === 2) {
+    state.roundItems = generateStage2Round();
+  } else {
+    state.roundItems = generateStage3Round();
+  }
+  state.currentIndex = 0;
+  state.roundAnswers = [];
+  state.roundRevealed = false;
+  state.hasPlayed = false;
+  state.currentSelection = null;
+  state.currentTrial = null;
+  showPlayState();
+}
+
+function startRound() {
+  reviewSection.style.display = 'none';
+  summary.style.display = 'none';
+  generateRound();
+}
+
+// ============================================================
+// Show states
+// ============================================================
+function hideAll() {
+  playSection.style.display = 'none';
+  roundInfo.style.display = 'none';
+  progressWrap.style.display = 'none';
+  replayBtn.style.display = 'none';
+  sdButtons.style.display = 'none';
+  oddballButtons.style.display = 'none';
+  answerButtons.style.display = 'none';
+  answeredHint.style.display = 'none';
+  revealArea.style.display = 'none';
+  nextBtn.style.display = 'none';
+  revealBtnEl.style.display = 'none';
+  reviewSection.style.display = 'none';
+  summary.style.display = 'none';
+  playbackSeq.style.display = 'none';
+}
+
+function showPlayState() {
+  hideAll();
+  playSection.style.display = 'flex';
+  playBtn.classList.remove('playing');
+  playHint.textContent = state.stage === 1 ? '點擊播放兩個詞' : state.stage === 2 ? '點擊播放三個詞' : '點擊播放單詞';
+  playbackSeq.style.display = 'none';
+  progressFill.style.width = '0%';
+  // Reset answer buttons
+  [sameBtn, diffBtn, pos1Btn, pos2Btn, pos3Btn, nBtn, lBtn].forEach(b => {
+    b.disabled = true;
+    b.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+  });
+  state.currentSelection = null;
+}
+
+function showAnsweredState() {
+  // Show buttons for current stage
+  if (state.stage === 1) {
+    sdButtons.style.display = 'flex';
+  } else if (state.stage === 2) {
+    oddballButtons.style.display = 'flex';
+  } else {
+    answerButtons.style.display = 'flex';
+  }
+  answeredHint.style.display = 'block';
+
+  // 訓練模式：逐題即時回饋（標示對錯＋重播正確音）
+  showImmediateFeedback();
+
+  if (state.currentIndex >= ROUND_SIZE - 1) {
+    revealBtnEl.style.display = 'inline-block';
+    revealBtnEl.textContent = '看本輪回顧';
+    nextBtn.style.display = 'none';
+    progressFill.style.width = '100%';
+  } else {
+    nextBtn.style.display = 'inline-block';
+    revealBtnEl.style.display = 'none';
+  }
+}
+
+// 訓練模式：逐題即時回饋——標示正確按鈕（綠）與其餘（紅）＋重播正確音
+function showImmediateFeedback() {
+  const trial = state.currentTrial;
+  const choice = state.currentSelection;
+  const correct = isAnswerCorrect(trial, choice);
+
+  if (state.stage === 1) {
+    const ans = trial.answer; // 'same' | 'diff'
+    sameBtn.classList.add(ans === 'same' ? 'was-correct' : 'was-incorrect');
+    diffBtn.classList.add(ans === 'diff' ? 'was-correct' : 'was-incorrect');
+    (async () => { await speak(trial.word1.word); await delay(450); await speak(trial.word2.word); })();
+  } else if (state.stage === 2) {
+    const ans = trial.answer; // 1|2|3
+    [pos1Btn, pos2Btn, pos3Btn].forEach(b => {
+      const bp = parseInt(b.dataset.pos);
+      b.classList.add(bp === ans ? 'was-correct' : 'was-incorrect');
+    });
+    (async () => { await speak(trial.words[ans - 1].word); })();
+  } else {
+    const ans = trial.answer; // 'n' | 'l'
+    nBtn.classList.add(ans === 'n' ? 'was-correct' : 'was-incorrect');
+    lBtn.classList.add(ans === 'l' ? 'was-correct' : 'was-incorrect');
+    (async () => { await speak(trial.word); })();
+  }
+
+  answeredHint.textContent = correct ? '✓ 正確' : '✗ 正確答案是綠色選項';
+  answeredHint.style.color = correct ? 'var(--correct)' : 'var(--incorrect)';
+}
+
+function updateProgress() {
+  const pct = Math.round((state.currentIndex / ROUND_SIZE) * 100);
+  progressFill.style.width = `${pct}%`;
+}
+
+// ============================================================
+// Actions
+// ============================================================
+function updateStage3Buttons() {
+  // Stage 3: 兩個按鈕顯示當題的最小對詞（左 = /n/ 詞、右 = /l/ 詞）
+  const pair = state.currentTrial.pair;
+  nWordLabel.textContent = pair.nWord.word;
+  nIpaLabel.textContent = pair.nWord.ipa;
+  lWordLabel.textContent = pair.lWord.word;
+  lIpaLabel.textContent = pair.lWord.ipa;
+}
+
+async function handlePlay() {
+  if (state.currentIndex >= ROUND_SIZE || state.roundRevealed) return;
+
+  // Cancel any in-progress speech BEFORE creating new utterances.
+  // Called here (not inside speak()) so speechSynthesis.speak() always
+  // fires within the user-gesture context — no setTimeout, no await.
+  speechSynthesis.cancel();
+
+  state.currentTrial = state.roundItems[state.currentIndex];
+  if (state.stage === 3) updateStage3Buttons();
+
+  // Single voice per question — the same voice is reused across replays of
+  // the same question, and only changes when moving to the next question
+  // (handleNext) or when the user taps the 換語音 button.
+  const trialVoice = state.currentVoice;
+
+  playBtn.classList.add('playing');
+  playbackSeq.style.display = 'none';
+
+  if (state.stage === 1) {
+    // Play two words with a gap
+    playHint.textContent = '播放第 1 個...';
+    await speak(state.currentTrial.word1.word, trialVoice);
+    await delay(600);
+    playHint.textContent = '播放第 2 個...';
+    await speak(state.currentTrial.word2.word, trialVoice);
+  } else if (state.stage === 2) {
+    // Play three words with gaps
+    for (let i = 0; i < 3; i++) {
+      playHint.textContent = `播放第 ${i + 1} 個...`;
+      playbackSeq.style.display = 'block';
+      playbackSeq.textContent = `${i + 1} / 3`;
+      await speak(state.currentTrial.words[i].word, trialVoice);
+      if (i < 2) await delay(500);
+    }
+  } else {
+    // Stage 3: single word
+    playHint.textContent = '播放中...';
+    await speak(state.currentTrial.word, trialVoice);
+  }
+
+  playBtn.classList.remove('playing');
+  playbackSeq.style.display = 'none';
+  playHint.textContent = '點擊重播';
+
+  if (!state.hasPlayed) {
+    playSection.style.display = 'none';
+    roundInfo.style.display = 'block';
+    roundNum.textContent = state.currentIndex + 1;
+    progressWrap.style.display = 'block';
+    updateProgress();
+    replayBtn.style.display = 'block';
+
+    // Show appropriate answer buttons
+    if (state.stage === 1) {
+      sdButtons.style.display = 'flex';
+      sameBtn.disabled = false;
+      diffBtn.disabled = false;
+    } else if (state.stage === 2) {
+      oddballButtons.style.display = 'flex';
+      pos1Btn.disabled = false;
+      pos2Btn.disabled = false;
+      pos3Btn.disabled = false;
+    } else {
+      answerButtons.style.display = 'flex';
+      nBtn.disabled = false;
+      lBtn.disabled = false;
+    }
+    answeredHint.style.display = 'none';
+    nextBtn.style.display = 'none';
+    revealBtnEl.style.display = 'none';
+    revealArea.style.display = 'none';
+    state.currentSelection = null;
+    state.hasPlayed = true;
+  }
+}
+
+// ---- Stage 1 handler ----
+function handleSDAnswer(choice) {
+  if (!state.hasPlayed || state.roundRevealed) return;
+  if (state.currentSelection === choice) {
+    // Deselect
+    state.currentSelection = null;
+    sameBtn.classList.remove('selected-choice', 'unselected-choice');
+    diffBtn.classList.remove('selected-choice', 'unselected-choice');
+    answeredHint.style.display = 'none';
+    nextBtn.style.display = 'none';
+    revealBtnEl.style.display = 'none';
+  } else {
+    // Clear all buttons first, then apply new selection
+    sameBtn.classList.remove('selected-choice', 'unselected-choice');
+    diffBtn.classList.remove('selected-choice', 'unselected-choice');
+    state.currentSelection = choice;
+    if (choice === 'same') {
+      sameBtn.classList.add('selected-choice');
+      diffBtn.classList.add('unselected-choice');
+    } else {
+      diffBtn.classList.add('selected-choice');
+      sameBtn.classList.add('unselected-choice');
+    }
+    showAnsweredState();
+  }
+}
+
+// ---- Stage 2 handler ----
+function handleOddballAnswer(pos) {
+  if (!state.hasPlayed || state.roundRevealed) return;
+  if (state.currentSelection === pos) {
+    state.currentSelection = null;
+    [pos1Btn, pos2Btn, pos3Btn].forEach(b => b.classList.remove('selected-choice', 'unselected-choice'));
+    answeredHint.style.display = 'none';
+    nextBtn.style.display = 'none';
+    revealBtnEl.style.display = 'none';
+  } else {
+    state.currentSelection = pos;
+    [pos1Btn, pos2Btn, pos3Btn].forEach(b => {
+      b.classList.remove('selected-choice', 'unselected-choice');
+      const bp = parseInt(b.dataset.pos);
+      if (bp === pos) b.classList.add('selected-choice');
+      else b.classList.add('unselected-choice');
+    });
+    showAnsweredState();
+  }
+}
+
+// ---- Stage 3 handler ----
+function handleNLAnswer(choice) {
+  if (!state.hasPlayed || state.roundRevealed) return;
+  if (state.currentSelection === choice) {
+    state.currentSelection = null;
+    nBtn.classList.remove('selected-choice', 'unselected-choice');
+    lBtn.classList.remove('selected-choice', 'unselected-choice');
+    answeredHint.style.display = 'none';
+    nextBtn.style.display = 'none';
+    revealBtnEl.style.display = 'none';
+  } else {
+    nBtn.classList.remove('selected-choice', 'unselected-choice');
+    lBtn.classList.remove('selected-choice', 'unselected-choice');
+    state.currentSelection = choice;
+    if (choice === 'n') {
+      nBtn.classList.add('selected-choice');
+      lBtn.classList.add('unselected-choice');
+    } else {
+      lBtn.classList.add('selected-choice');
+      nBtn.classList.add('unselected-choice');
+    }
+    showAnsweredState();
+  }
+}
+
+// ---- Next ----
+function handleNext() {
+  if (state.currentSelection !== null) {
+    state.roundAnswers.push({
+      trial: state.currentTrial,
+      choice: state.currentSelection,
+      correct: isAnswerCorrect(state.currentTrial, state.currentSelection),
+    });
+  }
+  state.currentIndex++;
+  state.hasPlayed = false;
+  state.currentTrial = null;
+  state.currentSelection = null;
+  pickRandomVoice();
+  showPlayState();
+}
+
+function isAnswerCorrect(trial, choice) {
+  if (state.stage === 1) return choice === trial.answer;     // 'same' or 'diff'
+  if (state.stage === 2) return choice === trial.answer;     // 1, 2, or 3
+  return choice === trial.answer;                            // 'n' or 'l'
+}
+
+// ============================================================
+// Reveal
+// ============================================================
+function handleReveal() {
+  if (state.currentSelection !== null) {
+    state.roundAnswers.push({
+      trial: state.currentTrial,
+      choice: state.currentSelection,
+      correct: isAnswerCorrect(state.currentTrial, state.currentSelection),
+    });
+  }
+  state.roundRevealed = true;
+
+  hideAll();
+  saveRoundToStorage();
+
+  const correctCount = state.roundAnswers.filter(a => a.correct).length;
+  buildReviewTable(correctCount);
+}
+
+function buildReviewTable(correctCount) {
+  let html = '<h3>本輪回顧</h3>';
+  html += '<table class="review-table"><thead><tr>';
+  html += '<th>#</th><th>播放內容</th><th></th><th>答案</th><th>你的選擇</th><th></th>';
+  html += '</tr></thead><tbody>';
+
+  state.roundAnswers.forEach((a, i) => {
+    const rowClass = a.correct ? 'row-correct' : 'row-incorrect';
+    const icon = a.correct ? '✓' : '✗';
+    let contentHtml, answerHtml, choiceHtml, playTexts;
+
+    if (state.stage === 1) {
+      const t = a.trial;
+      contentHtml = `<span style="font-weight:600">${t.word1.word}</span> <span style="color:var(--text-muted)">vs</span> <span style="font-weight:600">${t.word2.word}</span>`;
+      answerHtml = t.answer === 'same' ? '相同' : '不同';
+      choiceHtml = a.choice === 'same' ? '相同' : '不同';
+      playTexts = [t.word1.word, t.word2.word];
+    } else if (state.stage === 2) {
+      const t = a.trial;
+      contentHtml = t.words.map(w => `<span style="font-weight:600">${w.word}</span>`).join(' · ');
+      answerHtml = `第 ${t.answer} 個`;
+      choiceHtml = `第 ${a.choice} 個`;
+      playTexts = t.words.map(w => w.word);
+    } else {
+      const t = a.trial;
+      contentHtml = `<span style="font-weight:600">${t.word}</span> <span style="color:var(--text-muted);font-size:0.72rem">${t.ipa}</span>`;
+      answerHtml = `<span style="font-weight:600">${t.word}</span>`;
+      choiceHtml = a.choice === 'n' ? t.pair.nWord.word : t.pair.lWord.word;
+      playTexts = [t.word];
+    }
+
+    // Play button — play first word (or all sequentially)
+    const playData = encodeURIComponent(JSON.stringify(playTexts));
+
+    html += `<tr class="${rowClass}">`;
+    html += `<td>${i + 1}</td>`;
+    html += `<td>${contentHtml}</td>`;
+    html += `<td><button class="review-play-btn" data-play-idx="${i}">▶</button></td>`;
+    html += `<td style="font-weight:600">${answerHtml}</td>`;
+    html += `<td>${choiceHtml}</td>`;
+    html += `<td class="result-icon" style="color:${a.correct ? 'var(--correct)' : 'var(--incorrect)'}">${icon}</td>`;
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  reviewSection.innerHTML = html;
+  reviewSection.style.display = 'block';
+
+  showSummaryAfterReview(correctCount);
+}
+
+function saveRoundToStorage() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `daily_${today}`;
+
+  state.roundAnswers.forEach(a => {
+    const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+    const chosenWord = state.stage === 3
+      ? (a.choice === 'n' ? a.trial.pair.nWord.word : a.trial.pair.lWord.word)
+      : null;
+    dailyScores.push({
+      stage: state.stage,
+      trialType: state.stage === 1 ? 'same-diff' : state.stage === 2 ? 'oddball' : 'identify',
+      correct: a.correct,
+      direction: state.stage === 3 ? a.trial.answer : null,
+      detail: state.stage === 1
+        ? `${a.trial.word1.word}-${a.trial.word2.word}/${a.trial.answer}/${a.choice}`
+        : state.stage === 2
+          ? a.trial.words.map(w => w.word).join('-') + `/odd${a.trial.answer}/chose${a.choice}`
+          : `${a.trial.word} → ${chosenWord}`,
+    });
+    localStorage.setItem(dailyKey, JSON.stringify(dailyScores));
+  });
+}
+
+function showSummaryAfterReview(correctCount) {
+  const pct = Math.round((correctCount / ROUND_SIZE) * 100);
+
+  let streak = 0, maxStreak = 0;
+  for (const a of state.roundAnswers) {
+    if (a.correct) { streak++; maxStreak = Math.max(maxStreak, streak); }
+    else { streak = 0; }
+  }
+
+  const stageNames = ['', '相同或不同？', '找出不同的', '是哪個詞？'];
+
+  summary.style.display = 'block';
+  summary.innerHTML = `
+    <div class="big-score" style="color:${pct >= 80 ? 'var(--correct)' : pct >= 60 ? '#f59e0b' : 'var(--incorrect)'}">
+      ${correctCount} / ${ROUND_SIZE}
+    </div>
+    <div class="score-detail">正確率 ${pct}% — ${stageNames[state.stage]}</div>
+    ${maxStreak >= 4 ? `<div class="streak-badge">🏆 最佳連續：${maxStreak} 題</div>` : ''}
+    ${pct >= 80
+      ? '<p style="color:var(--correct);font-weight:600;margin-bottom:14px">✅ 達標！80%+ 正確率</p>'
+      : '<p style="color:var(--text-muted);margin-bottom:14px">目標是 80% 正確率，再試一輪</p>'}
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="next-btn" onclick="startRound()">再來一輪 →</button>
+      <button class="next-btn secondary" onclick="replayWrongAnswers()">重聽錯題</button>
+    </div>
+  `;
+
+  // Check unlock
+  if (pct >= UNLOCK_THRESHOLD && state.stage < NUM_STAGES) {
+    const nextStage = state.stage + 1;
+    if (!state.unlockedStages.includes(nextStage)) {
+      state.unlockedStages.push(nextStage);
+      state.unlockedStages.sort();
+      saveData();
+      updateStageButtons();
+      summary.innerHTML += `
+        <p style="color:var(--accent);font-weight:600;margin-top:12px">
+          🔓 Stage ${nextStage}「${stageNames[nextStage]}」已解鎖！
+        </p>`;
+    }
+  }
+
+  updateStatsDisplay();
+  updateHistoryDisplay();
+}
+
+// ============================================================
+// Replay wrong answers
+// ============================================================
+async function replayWrongAnswers() {
+  const wrong = state.roundAnswers.filter(a => !a.correct);
+  if (wrong.length === 0) {
+    alert('本輪全部正確，沒有錯題需要重聽！');
+    return;
+  }
+
+  reviewSection.style.display = 'none';
+  summary.style.display = 'none';
+
+  let html = `<h3>重聽錯題（${wrong.length} 題）</h3>`;
+  html += '<div style="text-align:left;font-size:0.85rem;line-height:2">';
+  wrong.forEach((a, i) => {
+    let desc;
+    if (state.stage === 1) {
+      desc = `${a.trial.word1.word} vs ${a.trial.word2.word} — 實際是「${a.trial.answer === 'same' ? '相同' : '不同'}」`;
+    } else if (state.stage === 2) {
+      desc = a.trial.words.map(w => w.word).join(' · ') + ` — 第 ${a.trial.answer} 個不一樣`;
+    } else {
+      const chosenWord = a.choice === 'n' ? a.trial.pair.nWord.word : a.trial.pair.lWord.word;
+      desc = `${a.trial.word} ${a.trial.ipa} — 你選了「${chosenWord}」，實際是「${a.trial.word}」`;
+    }
+    html += `<p><strong>${i + 1}.</strong> ${desc}</p>`;
+  });
+  html += '</div>';
+  html += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:8px">點擊下方按鈕逐一重聽</p>';
+  html += '<button class="next-btn" id="replayNextBtn" style="margin-top:8px">▶ 重聽第 1 題</button>';
+  html += '<br><button class="next-btn secondary" onclick="startRound()" style="margin-top:12px">回到練習</button>';
+
+  reviewSection.innerHTML = html;
+  reviewSection.style.display = 'block';
+
+  let replayIdx = 0;
+  const replayNextBtn = $('replayNextBtn');
+  replayNextBtn.addEventListener('click', async function handler() {
+    if (replayIdx >= wrong.length) {
+      replayNextBtn.textContent = '全部重聽完畢';
+      replayNextBtn.disabled = true;
+      return;
+    }
+    const a = wrong[replayIdx];
+    replayNextBtn.textContent = `播放中...（第 ${replayIdx + 1}/${wrong.length} 題）`;
+    replayNextBtn.disabled = true;
+
+    if (state.stage === 1) {
+      await speak(a.trial.word1.word);
+      await delay(600);
+      await speak(a.trial.word2.word);
+    } else if (state.stage === 2) {
+      for (let i = 0; i < 3; i++) {
+        await speak(a.trial.words[i].word);
+        if (i < 2) await delay(500);
+      }
+    } else {
+      await speak(a.trial.word);
+    }
+
+    replayIdx++;
+    replayNextBtn.disabled = false;
+    if (replayIdx < wrong.length) {
+      replayNextBtn.textContent = `▶ 重聽第 ${replayIdx + 1} 題`;
+    } else {
+      replayNextBtn.textContent = '全部重聽完畢';
+    }
+  });
+}
+
+// ============================================================
+// Stats & History
+// ============================================================
+function updateStatsDisplay() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `daily_${today}`;
+  const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+  const allCorrect = dailyScores.filter(s => s.correct).length;
+  const allTotal = dailyScores.length;
+
+  totalScore.textContent = allTotal;
+  accuracy.textContent = allTotal > 0 ? `${Math.round((allCorrect / allTotal) * 100)}%` : '—';
+
+  let streak = 0;
+  for (let i = dailyScores.length - 1; i >= 0; i--) {
+    if (dailyScores[i].correct) streak++;
+    else break;
+  }
+  streakCount.textContent = streak;
+}
+
+function updateHistoryDisplay() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `daily_${today}`;
+  const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+
+  if (dailyScores.length === 0) {
+    historyList.innerHTML = '<span class="history-empty">尚未作答</span>';
+    historyClear.style.display = 'none';
+    return;
+  }
+
+  historyList.innerHTML = dailyScores.map(s => {
+    const cls = s.correct ? 'correct' : 'incorrect';
+    return `<span class="history-dot ${cls}" title="${s.detail}">${s.correct ? '✓' : '✗'}</span>`;
+  }).join('');
+  historyClear.style.display = 'inline-block';
+}
+
+function clearHistory() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `daily_${today}`;
+  localStorage.removeItem(dailyKey);
+  historyList.innerHTML = '<span class="history-empty">尚未作答</span>';
+  historyClear.style.display = 'none';
+  reportOutput.style.display = 'none';
+  copyReportBtn.style.display = 'none';
+  reportCopied.style.display = 'none';
+  updateStatsDisplay();
+}
+
+// ============================================================
+// Export report
+// ============================================================
+const STAGE_NAMES = {
+  1: '相同或不同？（Same-Different）',
+  2: '找出不同的（Oddball）',
+  3: '是哪個詞？（Word Identification）',
+};
+
+function exportReport() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyKey = `daily_${today}`;
+  const dailyScores = JSON.parse(localStorage.getItem(dailyKey) || '[]');
+
+  if (dailyScores.length === 0) {
+    reportOutput.value = '尚無今日答題記錄。';
+    copyReportBtn.style.display = 'none';
+    reportOutput.style.display = 'block';
+    return;
+  }
+
+  const stages = {};
+  for (const s of dailyScores) {
+    const st = s.stage;
+    if (!stages[st]) stages[st] = { total: 0, correct: 0, errors: [] };
+    stages[st].total++;
+    if (s.correct) stages[st].correct++;
+    else stages[st].errors.push(s);
+  }
+
+  const lines = [];
+  lines.push(`# /n/ vs /l/ 漸進式聽力練習報告 — ${today}`);
+  lines.push('');
+  lines.push('> 退階設計：Stage 1（相同/不同）→ Stage 2（找出不一樣的）→ Stage 3（是哪個詞：night 還是 light？）');
+  lines.push('');
+  lines.push(`總答題數：${dailyScores.length} 題`);
+  const overallCorrect = dailyScores.filter(s => s.correct).length;
+  const overallPct = Math.round((overallCorrect / dailyScores.length) * 100);
+  lines.push(`總正確率：${overallCorrect}/${dailyScores.length} = ${overallPct}%`);
+  lines.push('');
+
+  for (const st of [1, 2, 3]) {
+    if (!stages[st]) continue;
+    const d = stages[st];
+    const pct = Math.round((d.correct / d.total) * 100);
+    lines.push(`## Stage ${st}：${STAGE_NAMES[st]}`);
+    lines.push(`- 答題：${d.total} 題`);
+    lines.push(`- 正確率：${d.correct}/${d.total} = ${pct}%`);
+    if (pct >= 80) lines.push(`- ✅ 達標（80%+）`);
+    else lines.push(`- ❌ 未達標（需 80%+）`);
+
+    if (d.errors.length > 0) {
+      lines.push(`- 錯題（${d.errors.length} 題）：`);
+      for (const e of d.errors) {
+        lines.push(`  - ${e.detail}`);
+      }
+    }
+    lines.push('');
+  }
+
+  // Overall direction analysis (Stage 3 only — word identification)
+  if (stages[3]) {
+    const idErrors = stages[3].errors;
+    let nErr = 0, lErr = 0;
+    for (const e of idErrors) {
+      if (e.direction === 'n') nErr++;
+      else if (e.direction === 'l') lErr++;
+    }
+    if (nErr > 0 || lErr > 0) {
+      lines.push('## 辨識階段錯誤方向');
+      lines.push(`- /n/ → /l/：${nErr} 次`);
+      lines.push(`- /l/ → /n/：${lErr} 次`);
+      if (lErr > nErr * 2) lines.push('- ⚠️ 主方向為 /l/ → /n/，舌側音被誤聽為鼻音');
+      else if (nErr > lErr * 2) lines.push('- ⚠️ 主方向為 /n/ → /l/，鼻音被誤聽為舌側音');
+      else lines.push('- 雙向錯誤大致平衡');
+      lines.push('');
+    }
+  }
+
+  lines.push('---');
+  lines.push('以上報告由 HTML 漸進式聽力練習頁面自動生成。');
+  lines.push('');
+  lines.push('設計說明：');
+  lines.push('- Stage 1（Same-Different）：只判斷兩個詞是否相同，不需知道哪個是 /n/ 哪個是 /l/');
+  lines.push('- Stage 2（Oddball）：三個詞中找出不同的那一個');
+  lines.push('- Stage 3（Word Identification）：聽一個詞，判斷是兩個最小對詞中的哪一個（night 還是 light？）');
+  lines.push('- 每關需達到 80% 正確率才能解鎖下一關');
+
+  const report = lines.join('\n');
+  reportOutput.value = report;
+  reportOutput.style.display = 'block';
+  copyReportBtn.style.display = 'inline-block';
+
+  navigator.clipboard.writeText(report).then(() => {
+    reportCopied.style.display = 'block';
+    setTimeout(() => { reportCopied.style.display = 'none'; }, 3000);
+  }).catch(() => {
+    reportOutput.select();
+  });
+}
+
+// ============================================================
+// Stage switching
+// ============================================================
+function switchStage(stage, force) {
+  if (force && !state.unlockedStages.includes(stage)) {
+    state.unlockedStages.push(stage);
+    state.unlockedStages.sort();
+    saveData();
+    updateStageButtons();
+  }
+  if (!state.unlockedStages.includes(stage)) return;
+  state.stage = stage;
+  saveData();
+  updateStageButtons();
+  startRound();
+}
+
+// ============================================================
+// Event listeners
+// ============================================================
+playBtn.addEventListener('click', handlePlay);
+replayBtn.addEventListener('click', handlePlay);
+voiceRerollBtn.addEventListener('click', () => { pickRandomVoice(); speechSynthesis.cancel(); });
+sameBtn.addEventListener('click', () => handleSDAnswer('same'));
+diffBtn.addEventListener('click', () => handleSDAnswer('diff'));
+pos1Btn.addEventListener('click', () => handleOddballAnswer(1));
+pos2Btn.addEventListener('click', () => handleOddballAnswer(2));
+pos3Btn.addEventListener('click', () => handleOddballAnswer(3));
+nBtn.addEventListener('click', () => handleNLAnswer('n'));
+lBtn.addEventListener('click', () => handleNLAnswer('l'));
+nextBtn.addEventListener('click', handleNext);
+revealBtnEl.addEventListener('click', handleReveal);
+historyClear.addEventListener('click', clearHistory);
+exportReportBtn.addEventListener('click', exportReport);
+copyReportBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(reportOutput.value).then(() => {
+    reportCopied.style.display = 'block';
+    setTimeout(() => { reportCopied.style.display = 'none'; }, 2000);
+  }).catch(() => { reportOutput.select(); });
+});
+
+// Stage selector
+stageSelector.addEventListener('click', (e) => {
+  const card = e.target.closest('.stage-card');
+  if (!card) return;
+  switchStage(parseInt(card.dataset.stage), e.shiftKey);
+});
+
+// Long press for locked stages
+stageSelector.addEventListener('pointerdown', (e) => {
+  const card = e.target.closest('.stage-card');
+  if (!card || !card.classList.contains('locked')) return;
+  longPressTarget = card;
+  card.classList.add('pressing');
+  longPressTimer = setTimeout(() => {
+    if (longPressTarget) {
+      longPressTarget.classList.remove('pressing');
+      switchStage(parseInt(longPressTarget.dataset.stage), true);
+      const el = longPressTarget;
+      el.style.transition = 'all 0.2s';
+      el.style.borderColor = 'var(--accent)';
+      el.style.background = '#eff6ff';
+      el.style.opacity = '1';
+      setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; el.style.opacity = ''; }, 400);
+      longPressTarget = null;
+    }
+  }, 700);
+});
+
+const cancelLongPress = () => {
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  if (longPressTarget) { longPressTarget.classList.remove('pressing'); longPressTarget = null; }
+};
+stageSelector.addEventListener('pointerup', cancelLongPress);
+stageSelector.addEventListener('pointerleave', cancelLongPress);
+stageSelector.addEventListener('pointercancel', cancelLongPress);
+
+// Review play buttons — event delegation (play all words for the selected wrong answer)
+reviewSection.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.review-play-btn');
+  if (!btn) return;
+  if (btn.classList.contains('playing-review')) return;
+  btn.classList.add('playing-review');
+
+  const idx = parseInt(btn.dataset.playIdx);
+  const answer = state.roundAnswers[idx];
+  if (answer) {
+    if (state.stage === 1) {
+      await speak(answer.trial.word1.word);
+      await delay(500);
+      await speak(answer.trial.word2.word);
+    } else if (state.stage === 2) {
+      for (let i = 0; i < 3; i++) {
+        await speak(answer.trial.words[i].word);
+        if (i < 2) await delay(400);
+      }
+    } else {
+      await speak(answer.trial.word);
+    }
+  }
+
+  btn.classList.remove('playing-review');
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA') return;
+
+  if (e.key === ' ') { e.preventDefault(); if (!state.roundRevealed) handlePlay(); }
+  if (e.key === 'ArrowLeft' && state.hasPlayed) {
+    e.preventDefault();
+    if (state.stage === 1) handleSDAnswer('same');
+    else if (state.stage === 3) handleNLAnswer('n');
+  }
+  if (e.key === 'ArrowRight' && state.hasPlayed) {
+    e.preventDefault();
+    if (state.stage === 1) handleSDAnswer('diff');
+    else if (state.stage === 3) handleNLAnswer('l');
+  }
+  if (e.key === 'ArrowUp' && state.hasPlayed && state.stage === 2) { e.preventDefault(); handleOddballAnswer(1); }
+  if (e.key === 'ArrowDown' && state.hasPlayed && state.stage === 2) { e.preventDefault(); handleOddballAnswer(2); }
+  if (e.key === 'ArrowRight' && state.hasPlayed && state.stage === 2) { e.preventDefault(); handleOddballAnswer(3); }
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (state.roundRevealed) return;
+    if (state.currentSelection !== null && state.currentIndex < ROUND_SIZE - 1) { handleNext(); }
+    else if (state.currentSelection !== null && state.currentIndex >= ROUND_SIZE - 1 && !state.roundRevealed) { handleReveal(); }
+  }
+});
+
+// ============================================================
+// Init
+// ============================================================
+loadData();
+updateStageButtons();
+updateStatsDisplay();
+updateHistoryDisplay();
+startRound();
+</script>
+</body>
+</html>
