@@ -236,6 +236,12 @@
     font-weight: 400;
     margin-left: 6px;
   }
+  .preview-word .ipa-hint {
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 500;
+    margin-left: 8px;
+  }
   .preview-word .target-word {
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -836,6 +842,8 @@ const SA_ID = 'n';
 const SB_ID = 'l';
 const SA_LABEL = '/n/';
 const SB_LABEL = '/l/';
+const SA_HINT = '';
+const SB_HINT = '';
 
 // ============================================================
 // State
@@ -1100,7 +1108,9 @@ function showPreviewState() {
 
   const w = state.previewWords[state.previewIndex];
   const isStage3 = (state.stage === 3 && HAS_SENTENCES && w.sentence);
-  const label = isStage3 ? highlightTargetWord(w.sentence, w.word) : (w.sentence || `${w.word} <span class="ipa-sub">${w.ipa}</span>`);
+  const hint = (w.sound === SA_ID ? SA_HINT : SB_HINT);
+  const hintHtml = hint ? `<span class="ipa-hint">${hint}</span>` : '';
+  const label = isStage3 ? highlightTargetWord(w.sentence, w.word) : (w.sentence || `${w.word} <span class="ipa-sub">${w.ipa}</span>${hintHtml}`);
   previewWord.innerHTML = label;
   previewProgress.textContent = `${state.previewIndex + 1} / ${state.previewWords.length}`;
 }

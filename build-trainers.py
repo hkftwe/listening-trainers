@@ -796,6 +796,8 @@ def build_html(config, banks):
         "{{SOUND_B_ID}}": sb["id"],
         "{{SOUND_A_LABEL}}": sa["label"],
         "{{SOUND_B_LABEL}}": sb["label"],
+        "{{SOUND_A_HINT}}": sa.get("hint", ""),
+        "{{SOUND_B_HINT}}": sb.get("hint", ""),
         "{{SOUND_A_EXAMPLE}}": sa["example"],
         "{{SOUND_B_EXAMPLE}}": sb["example"],
         "{{WORD_BANKS}}": word_banks_js,
@@ -849,6 +851,7 @@ def build_index(trainers):
         ]),
         ("母音", [
             ("u-oo", "/ʊ/ vs /uː/"),
+            ("u-oo-training", "/ʊ/ vs /uː/ 訓練模式（逐題即時回饋）"),
             ("vowel-assessment", "Minimal Pair 評估（第 0 天）"),
         ]),
     ]
@@ -888,6 +891,7 @@ def main():
         "v-f": "v-f-listening-trainer.html",
         "vowel-assessment": "vowel-minimal-pairs-assessment.html",
         "nl-training": "nl-listening-trainer-training.html",
+        "u-oo-training": "u-oo-training.html",
     }
     for key, fname in manual_trainers.items():
         src = os.path.join(SCRIPT_DIR, "manual", fname)
@@ -913,6 +917,10 @@ def main():
     all_trainers["vowel-assessment"] = {
         "filename": "vowel-minimal-pairs-assessment.html",
         "h1": "母音 Minimal Pair 聽辨評估（第 0 天評估）",
+    }
+    all_trainers["u-oo-training"] = {
+        "filename": "u-oo-training.html",
+        "h1": "/ʊ/ vs /uː/ 聽力訓練（訓練模式）",
     }
     index_html = build_index(all_trainers)
     with open(os.path.join(SCRIPT_DIR, "index.html"), "w", encoding="utf-8") as f:
