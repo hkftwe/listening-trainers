@@ -952,8 +952,6 @@ function handleNLAnswer(choice) {
       lBtn.classList.add('selected-choice');
       nBtn.classList.add('unselected-choice');
     }
-    // Replay word for auditory confirmation (matches basic trainer behavior)
-    speak(state.currentTrial.word);
     showAnsweredState();
   }
 }
