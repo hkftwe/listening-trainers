@@ -301,6 +301,7 @@
   <div class="voice-info" id="voiceInfo">
     🎤 語音：<span class="voice-name" id="currentVoiceName">載入中...</span>
     <button class="voice-reroll-btn" id="voiceRerollBtn">🔄 換語音</button>
+    <button class="voice-reroll-btn" id="slowToggleBtn" title="慢速＝聽辨輔助腳手架（Stage 1 重建基礎）；正式測試請用正常速度">🐢 0.5× 慢速</button>
   </div>
 
   <!-- Main card -->
@@ -408,6 +409,14 @@ const CORE_PAIRS = [
   { word: "low",  sound: 'l', ipa: "/loʊ/" },
   { word: "nap",  sound: 'n', ipa: "/næp/" },
   { word: "lap",  sound: 'l', ipa: "/læp/" },
+  { word: "nine", sound: 'n', ipa: "/naɪn/" },
+  { word: "line", sound: 'l', ipa: "/laɪn/" },
+  { word: "net",  sound: 'n', ipa: "/net/" },
+  { word: "let",  sound: 'l', ipa: "/let/" },
+  { word: "name", sound: 'n', ipa: "/neɪm/" },
+  { word: "lame", sound: 'l', ipa: "/leɪm/" },
+  { word: "knot", sound: 'n', ipa: "/nɒt/" },
+  { word: "lot",  sound: 'l', ipa: "/lɒt/" },
 ];
 
 // CONTRAST: 每個詞對應它的最小對詞（need↔lead、night↔light、no↔low、nap↔lap）。
@@ -424,6 +433,8 @@ const UNLOCK_THRESHOLD = 0.8;
 // v2: Stage 3 從「/n/ /l/ 音位標籤」改為「最小對詞辨識（night 還是 light？）」——換 key 避免與舊格式每日成績混雜
 const STORAGE_KEY = 'nl-regression-trainer-v2';
 const NUM_STAGES = 3;
+// 🐢 慢速輔助（scaffolding）：0.5× 播速，用於 Stage 1 重建基礎聽辨；正式測試請用正常速度
+let SLOW_MODE = false;
 
 // ============================================================
 // State
@@ -481,6 +492,7 @@ const progressWrap = $('progressWrap');
 const progressFill = $('progressFill');
 const currentVoiceName = $('currentVoiceName');
 const voiceRerollBtn = $('voiceRerollBtn');
+const slowToggleBtn = $('slowToggleBtn');
 const historyList = $('historyList');
 const historyClear = $('historyClear');
 const totalScore = $('totalScore');
@@ -549,7 +561,7 @@ function speak(text, voice) {
     const utt = new SpeechSynthesisUtterance(text);
     const v = voice || state.currentVoice;
     if (v) utt.voice = v;
-    utt.rate = 0.85;
+    utt.rate = SLOW_MODE ? 0.42 : 0.85;
     utt.pitch = 1;
     utt.onend = resolve;
     utt.onerror = resolve;
@@ -1063,6 +1075,7 @@ function saveRoundToStorage() {
       stage: state.stage,
       trialType: state.stage === 1 ? 'same-diff' : state.stage === 2 ? 'oddball' : 'identify',
       correct: a.correct,
+      slow: SLOW_MODE,
       direction: state.stage === 3 ? a.trial.answer : null,
       detail: state.stage === 1
         ? `${a.trial.word1.word}-${a.trial.word2.word}/${a.trial.answer}/${a.choice}`
@@ -1282,6 +1295,12 @@ function exportReport() {
   lines.push(`總正確率：${overallCorrect}/${dailyScores.length} = ${overallPct}%`);
   lines.push('');
 
+  const slowStages = [...new Set(dailyScores.filter(s => s.slow).map(s => s.stage))];
+  if (slowStages.length > 0) {
+    lines.push(`⚠️ 本場 Stage ${slowStages.join('、')} 於慢速輔助（0.5×）下作答——慢速＝scaffolding，分數不與 80% gate 比較；正式測試請用正常速度重測。`);
+    lines.push('');
+  }
+
   for (const st of [1, 2, 3]) {
     if (!stages[st]) continue;
     const d = stages[st];
@@ -1365,6 +1384,13 @@ function switchStage(stage, force) {
 playBtn.addEventListener('click', handlePlay);
 replayBtn.addEventListener('click', handlePlay);
 voiceRerollBtn.addEventListener('click', () => { pickRandomVoice(); speechSynthesis.cancel(); });
+slowToggleBtn.addEventListener('click', () => {
+  SLOW_MODE = !SLOW_MODE;
+  slowToggleBtn.textContent = SLOW_MODE ? '▶ 正常速度' : '🐢 0.5× 慢速';
+  slowToggleBtn.style.borderColor = SLOW_MODE ? '#f59e0b' : '';
+  slowToggleBtn.style.background = SLOW_MODE ? '#fffbeb' : '';
+  slowToggleBtn.style.fontWeight = SLOW_MODE ? '700' : '';
+});
 sameBtn.addEventListener('click', () => handleSDAnswer('same'));
 diffBtn.addEventListener('click', () => handleSDAnswer('diff'));
 pos1Btn.addEventListener('click', () => handleOddballAnswer(1));

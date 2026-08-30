@@ -652,7 +652,7 @@ function speak(text, voice) {
     const utt = new SpeechSynthesisUtterance(text);
     const v = voice || pickVoice();
     if (v) utt.voice = v;
-    utt.rate = 0.85;
+    utt.rate = SLOW_MODE ? 0.42 : 0.85;
     utt.pitch = 1;
     utt.onend = resolve;
     utt.onerror = resolve;
@@ -713,7 +713,7 @@ function speak(text, voice) {
     const utt = new SpeechSynthesisUtterance(text);
     const v = voice || state.currentVoice;
     if (v) utt.voice = v;
-    utt.rate = 0.85;
+    utt.rate = SLOW_MODE ? 0.42 : 0.85;
     utt.pitch = 1;
     utt.onend = resolve;
     utt.onerror = resolve;

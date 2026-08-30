@@ -725,6 +725,10 @@
     <button class="voice-reroll-btn" id="voiceRerollBtn">🔄 換聲</button>
   </div>
 
+  <div class="voice-info" id="slowToggleBar" style="margin-top:6px">
+    <button class="voice-reroll-btn" id="slowToggleBtn" title="慢速＝聽辨輔助腳手架（Stage 1 重建基礎）；正式測試請用正常速度">🐢 0.5× 慢速</button>
+  </div>
+
   <!-- Main card -->
   <div class="main-card" id="mainCard">
 
@@ -879,6 +883,8 @@ const SA_LABEL = '/f/';
 const SB_LABEL = '/θ/';
 const SA_HINT = '';
 const SB_HINT = '';
+// 🐢 慢速輔助（scaffolding）：0.5× 播速，用於 Stage 1 重建基礎聽辨；正式測試請用正常速度
+let SLOW_MODE = false;
 
 // ============================================================
 // State
@@ -931,6 +937,7 @@ const aBtn = $('aBtn');
 const bBtn = $('bBtn');
 const currentVoiceName = $('currentVoiceName');
 const voiceRerollBtn = $('voiceRerollBtn');
+const slowToggleBtn = $('slowToggleBtn');
 const answeredHint = $('answeredHint');
 const nextBtn = $('nextBtn');
 const revealBtn = $('revealBtn');
@@ -998,7 +1005,7 @@ function speak(text, voice) {
     const utt = new SpeechSynthesisUtterance(text);
     const v = voice || state.currentVoice;
     if (v) utt.voice = v;
-    utt.rate = 0.85;
+    utt.rate = SLOW_MODE ? 0.42 : 0.85;
     utt.pitch = 1;
     utt.onend = resolve;
     utt.onerror = resolve;
@@ -1364,7 +1371,8 @@ function saveRoundToStorage() {
       stage: state.stage,
       word: a.item.word || a.item.sentence,
       sound: a.item.sound,
-      correct: a.correct
+      correct: a.correct,
+      slow: SLOW_MODE
     });
     localStorage.setItem(dailyKey, JSON.stringify(dailyScores));
   });
@@ -1558,6 +1566,12 @@ function exportReport() {
   const overallPct = Math.round((overallCorrect / dailyScores.length) * 100);
   lines.push(`總正確率：${overallCorrect}/${dailyScores.length} = ${overallPct}%`);
   lines.push('');
+
+  const slowStages = [...new Set(dailyScores.filter(s => s.slow).map(s => s.stage))];
+  if (slowStages.length > 0) {
+    lines.push(`⚠️ 本場第 ${slowStages.join('、')} 關於慢速輔助（0.5×）下作答——慢速＝scaffolding，分數不與 80% gate 比較；正式測試請用正常速度重測。`);
+    lines.push('');
+  }
 
   for (const st of Object.keys(REPORT_STAGE_NAMES)) {
     if (!stages[st]) continue;
@@ -1755,6 +1769,13 @@ reviewSection.addEventListener('click', async (e) => {
 });
 
 voiceRerollBtn.addEventListener('click', () => { pickRandomVoice(); });
+slowToggleBtn.addEventListener('click', () => {
+  SLOW_MODE = !SLOW_MODE;
+  slowToggleBtn.textContent = SLOW_MODE ? '▶ 正常速度' : '🐢 0.5× 慢速';
+  slowToggleBtn.style.borderColor = SLOW_MODE ? '#f59e0b' : '';
+  slowToggleBtn.style.background = SLOW_MODE ? '#fffbeb' : '';
+  slowToggleBtn.style.fontWeight = SLOW_MODE ? '700' : '';
+});
 
 // Contrast toggle
 function toggleContrast() {
