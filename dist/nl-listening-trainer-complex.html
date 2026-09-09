@@ -24,6 +24,38 @@
     --incorrect-bg: #fef2f2;
     --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
   }
+  /* Dark mode */
+  [data-theme="dark"] {
+    --bg: #0f1115;
+    --card-bg: #1a1d24;
+    --text: #e6e8ee;
+    --text-muted: #9aa3b2;
+    --border: #2c313a;
+    --selected: #818cf8;
+    --selected-bg: #232946;
+    --correct: #34d399;
+    --incorrect: #f87171;
+    --correct-bg: #0d2b22;
+    --incorrect-bg: #3a1518;
+    --shadow: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
+  }
+  [data-theme="dark"] .stage-card:hover:not(.locked),
+  [data-theme="dark"] .answer-btn:hover:not(:disabled) { background: #23272f; }
+  [data-theme="dark"] .stage-card.active { background: #1c2440; }
+  [data-theme="dark"] .stage-card.locked,
+  [data-theme="dark"] .stage-card.locked:hover { background: #14161c; }
+  [data-theme="dark"] .voice-reroll-btn:hover,
+  [data-theme="dark"] .next-btn.secondary:hover,
+  [data-theme="dark"] .report-btn:hover,
+  [data-theme="dark"] .review-play-btn:hover { background: #232946; }
+  [data-theme="dark"] .history-dot.correct { background: #0d2b22; color: #6ee7b7; }
+  [data-theme="dark"] .history-dot.incorrect { background: #3a1518; color: #fca5a5; }
+  [data-theme="dark"] .review-table tr.row-correct { background: #0d2b22; }
+  [data-theme="dark"] .review-table tr.row-incorrect { background: #3a1518; }
+  [data-theme="dark"] .review-table td { border-bottom: 1px solid #2c313a; }
+  [data-theme="dark"] .review-play-btn.playing-review { background: #3a2c10; border-color: #f59e0b; color: #fbbf24; }
+  [data-theme="dark"] .report-output { background: #14161c; }
+  [data-theme="dark"] .play-btn { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -38,9 +70,29 @@
   .container { max-width: 540px; width: 100%; }
 
   .header {
+    position: relative;
     text-align: center;
     margin-bottom: 20px;
   }
+  .theme-toggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    transition: all 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--accent); }
   .header h1 {
     font-size: 1.35rem;
     font-weight: 700;
@@ -362,12 +414,13 @@
   .replay-quiz-btn {
     display: block;
     margin: 8px auto 4px;
-    padding: 5px 14px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
+    padding: 9px 24px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
     background: var(--card-bg);
-    color: var(--text-muted);
-    font-size: 0.76rem;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.15s;
   }
@@ -601,14 +654,22 @@
     color: var(--text-muted);
     font-style: italic;
   }
-  .history-clear {
+  .history-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .history-clear {
     font-size: 0.72rem;
     color: var(--text-muted);
     border: none;
     background: none;
     cursor: pointer;
     text-decoration: underline;
+    white-space: nowrap;
   }
   .history-clear:hover { color: var(--incorrect); }
 
@@ -685,6 +746,7 @@
 <div class="container">
 
   <div class="header">
+    <button class="theme-toggle" id="themeToggle" title="切換深淺色模式">🌙</button>
     <h1>/n/ vs /l/ 複雜環境聽力辨識</h1>
     <p class="subtitle">Listening Discrimination Trainer — Complex Environment (Multi-syllable)</p>
   </div>
@@ -797,10 +859,12 @@
     <div class="history-list" id="historyList">
       <span class="history-empty">尚未作答</span>
     </div>
-    <button class="history-clear" id="historyClear" style="display:none">清除記錄</button>
-    <div class="report-buttons" style="margin-top:10px">
-      <button class="report-btn primary" id="exportReportBtn">📋 匯出報告</button>
-      <button class="report-btn" id="copyReportBtn" style="display:none">📋 複製到剪貼板</button>
+    <div class="history-actions">
+      <div class="report-buttons">
+        <button class="report-btn primary" id="exportReportBtn">📋 匯出報告</button>
+        <button class="report-btn" id="copyReportBtn" style="display:none">📋 複製到剪貼板</button>
+      </div>
+      <button class="history-clear" id="historyClear" style="display:none">清除記錄</button>
     </div>
     <textarea class="report-output" id="reportOutput" style="display:none" readonly
       placeholder="點擊「匯出報告」生成可讀的診斷報告"></textarea>
@@ -948,6 +1012,7 @@ const summary = $('summary');
 const mainCard = $('mainCard');
 const historyList = $('historyList');
 const historyClear = $('historyClear');
+const themeToggle = $('themeToggle');
 const totalScore = $('totalScore');
 const accuracy = $('accuracy');
 const streakCount = $('streakCount');
@@ -1186,6 +1251,7 @@ function skipPreview() {
 }
 
 function showPlayState() {
+  state.currentReplayCount = 0;
   playSection.style.display = 'flex';
   roundInfo.style.display = 'none';
   progressWrap.style.display = 'none';
@@ -1253,6 +1319,12 @@ async function handlePlay() {
   }
 }
 
+function handleReplay() {
+  if (!state.hasPlayed) return;
+  state.currentReplayCount++;
+  handlePlay();
+}
+
 function handleAnswer(choice) {
   if (!state.hasPlayed || state.roundRevealed) return;
 
@@ -1300,7 +1372,7 @@ function handleNext() {
   if (state.currentSelection) {
     const item = state.currentItem;
     const isCorrect = (state.currentSelection === item.sound);
-    state.roundAnswers.push({ choice: state.currentSelection, correct: isCorrect, item });
+    state.roundAnswers.push({ choice: state.currentSelection, correct: isCorrect, item, replay: state.currentReplayCount });
   }
   state.currentIndex++;
   state.hasPlayed = false;
@@ -1316,7 +1388,7 @@ function handleReveal() {
   if (state.currentSelection) {
     const item = state.currentItem;
     const isCorrect = (state.currentSelection === item.sound);
-    state.roundAnswers.push({ choice: state.currentSelection, correct: isCorrect, item });
+    state.roundAnswers.push({ choice: state.currentSelection, correct: isCorrect, item, replay: state.currentReplayCount });
   }
   state.roundRevealed = true;
   playSection.style.display = 'none';
@@ -1386,7 +1458,8 @@ function saveRoundToStorage() {
       word: a.item.word || a.item.sentence,
       sound: a.item.sound,
       correct: a.correct,
-      slow: SLOW_MODE
+      slow: SLOW_MODE,
+      replay: a.replay || 0
     });
     localStorage.setItem(dailyKey, JSON.stringify(dailyScores));
   });
@@ -1395,6 +1468,7 @@ function saveRoundToStorage() {
 
 function showSummaryAfterReview(correctCount) {
   const pct = Math.round((correctCount / ROUND_SIZE) * 100);
+  const roundReplays = state.roundAnswers.reduce((s, a) => s + (a.replay || 0), 0);
 
   let streak = 0;
   let maxStreak = 0;
@@ -1409,6 +1483,7 @@ function showSummaryAfterReview(correctCount) {
       ${correctCount} / ${ROUND_SIZE}
     </div>
     <div class="score-detail">正確率 ${pct}%</div>
+    ${roundReplays > 0 ? `<div class="score-detail">本輪重播 ${roundReplays} 次</div>` : ''}
     ${maxStreak >= 4 ? `<div class="streak-badge">最佳連續：${maxStreak} 題</div>` : ''}
     ${pct >= 80
       ? '<p style="color:var(--correct);font-weight:600;margin-bottom:14px">達標！80%+ 正確率 👏</p>'
@@ -1579,6 +1654,10 @@ function exportReport() {
   const overallCorrect = dailyScores.filter(s => s.correct).length;
   const overallPct = Math.round((overallCorrect / dailyScores.length) * 100);
   lines.push(`總正確率：${overallCorrect}/${dailyScores.length} = ${overallPct}%`);
+  const totalReplays = dailyScores.reduce((s, x) => s + (x.replay || 0), 0);
+  if (totalReplays > 0) {
+    lines.push(`今日重播：${totalReplays} 次（平均 ${(totalReplays / dailyScores.length).toFixed(1)} 次/題）`);
+  }
   lines.push('');
 
   const slowStages = [...new Set(dailyScores.filter(s => s.slow).map(s => s.stage))];
@@ -1630,6 +1709,21 @@ function exportReport() {
     lines.push('- 雙向錯誤大致平衡');
   }
   lines.push('');
+
+  // Most-replayed words (uncertainty signal)
+  const replayByWord = {};
+  for (const s of dailyScores) {
+    if (s.replay) {
+      const w = s.word;
+      replayByWord[w] = (replayByWord[w] || 0) + s.replay;
+    }
+  }
+  const topReplay = Object.entries(replayByWord).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  if (topReplay.length > 0) {
+    lines.push('## 重播最多的詞（不確定度高）');
+    for (const [w, n] of topReplay) lines.push(`- ${w}：重播 ${n} 次`);
+    lines.push('');
+  }
 
   // Top problem words
   const wordErrors = {};
@@ -1693,7 +1787,7 @@ function switchStage(stage, force) {
 playBtn.addEventListener('click', handlePlay);
 previewPlayBtn.addEventListener('click', handlePreviewPlay);
 previewNextBtn.addEventListener('click', handlePreviewNext);
-replayQuizBtn.addEventListener('click', handlePlay);
+replayQuizBtn.addEventListener('click', handleReplay);
 skipPreviewBtn.addEventListener('click', skipPreview);
 aBtn.addEventListener('click', () => handleAnswer(SA_ID));
 bBtn.addEventListener('click', () => handleAnswer(SB_ID));
@@ -1795,6 +1889,23 @@ slowToggleBtn.addEventListener('click', () => {
 function toggleContrast() {
   reviewSection.classList.toggle('show-contrast');
 }
+
+// ============================================================
+// Theme toggle (dark mode)
+// ============================================================
+const THEME_KEY = STORAGE_KEY + '_theme';
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(current);
+  try { localStorage.setItem(THEME_KEY, current); } catch (e) {}
+});
+try {
+  if (localStorage.getItem(THEME_KEY) === 'dark') applyTheme('dark');
+} catch (e) {}
 
 // ============================================================
 // Init

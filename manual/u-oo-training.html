@@ -24,6 +24,44 @@
     --incorrect-bg: #fef2f2;
     --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
   }
+  /* Dark mode */
+  [data-theme="dark"] {
+    --bg: #0f1115;
+    --card-bg: #1a1d24;
+    --text: #e6e8ee;
+    --text-muted: #9aa3b2;
+    --border: #2c313a;
+    --selected: #818cf8;
+    --selected-bg: #232946;
+    --n-color: #22d3ee; --n-bg: #0d2b2b; --n-border: #155e75;
+    --l-color: #fbbf24; --l-bg: #3a2c10; --l-border: #92400e;
+    --correct: #34d399;
+    --incorrect: #f87171;
+    --correct-bg: #0d2b22;
+    --incorrect-bg: #3a1518;
+    --shadow: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
+  }
+  [data-theme="dark"] .stage-card:hover:not(.locked),
+  [data-theme="dark"] .sd-btn:hover:not(:disabled),
+  [data-theme="dark"] .oddball-btn:hover:not(:disabled),
+  [data-theme="dark"] .answer-btn:hover:not(:disabled) { background: #23272f; }
+  [data-theme="dark"] .stage-card.active { background: #1c2440; }
+  [data-theme="dark"] .stage-card.locked,
+  [data-theme="dark"] .stage-card.locked:hover { background: #14161c; }
+  [data-theme="dark"] .voice-reroll-btn:hover,
+  [data-theme="dark"] .next-btn.secondary:hover,
+  [data-theme="dark"] .report-btn:hover,
+  [data-theme="dark"] .review-play-btn:hover { background: #232946; }
+  [data-theme="dark"] .sd-btn.diff-btn:hover:not(:disabled) { background: #3a2c10; }
+  [data-theme="dark"] .history-dot.correct { background: #0d2b22; color: #6ee7b7; }
+  [data-theme="dark"] .history-dot.incorrect { background: #3a1518; color: #fca5a5; }
+  [data-theme="dark"] .review-table tr.row-correct { background: #0d2b22; }
+  [data-theme="dark"] .review-table tr.row-incorrect { background: #3a1518; }
+  [data-theme="dark"] .review-table td { border-bottom: 1px solid #2c313a; }
+  [data-theme="dark"] .review-play-btn.playing-review { background: #3a2c10; border-color: #f59e0b; color: #fbbf24; }
+  [data-theme="dark"] .summary .streak-badge { background: #3a2c10; color: #fbbf24; }
+  [data-theme="dark"] .report-output { background: #14161c; }
+  [data-theme="dark"] .play-btn { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -37,7 +75,14 @@
   }
   .container { max-width: 540px; width: 100%; }
 
-  .header { text-align: center; margin-bottom: 20px; }
+  .header { position: relative; text-align: center; margin-bottom: 20px; }
+  .theme-toggle {
+    position: absolute; top: 0; right: 0; width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--card-bg); color: var(--text);
+    font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow); transition: all 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--accent); }
   .header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; }
   .header .subtitle { font-size: 0.82rem; color: var(--text-muted); }
   .header .method-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; font-style: italic; }
@@ -123,9 +168,9 @@
 
   /* Replay button */
   .replay-btn {
-    display: block; margin: 8px auto 4px; padding: 5px 14px; border-radius: 6px;
-    border: 1px solid var(--border); background: var(--card-bg);
-    color: var(--text-muted); font-size: 0.76rem; cursor: pointer; transition: all 0.15s;
+    display: block; margin: 8px auto 4px; padding: 9px 24px; border-radius: 8px;
+    border: 1.5px solid var(--border); background: var(--card-bg);
+    color: var(--text); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
   }
   .replay-btn:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -171,6 +216,7 @@
   /* Selected / Reveal states */
   .selected-choice { border-color: var(--selected) !important; background: var(--selected-bg) !important; box-shadow: 0 0 0 1px rgba(99,102,241,0.25); }
   .unselected-choice { opacity: 0.45; }
+  .grayed-out { border-color: var(--border) !important; background: var(--bg) !important; color: var(--text-muted) !important; opacity: 0.55; filter: grayscale(0.85); }
   .was-correct { border-color: var(--correct) !important; background: var(--correct-bg) !important; }
   .was-incorrect { border-color: var(--incorrect) !important; background: var(--incorrect-bg) !important; }
 
@@ -193,7 +239,7 @@
     border: 1.5px solid var(--border); background: var(--card-bg); text-align: center;
   }
   .reveal-pos .pos-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-  .reveal-pos.odd-highlight { border-color: var(--incorrect); background: var(--incorrect-bg); box-shadow: 0 0 0 2px rgba(220,38,38,0.2); }
+  .reveal-pos.odd-highlight { border-color: var(--correct); background: var(--correct-bg); box-shadow: 0 0 0 2px rgba(5,150,105,0.2); }
 
   /* Next / Reveal buttons */
   .next-btn {
@@ -239,11 +285,12 @@
   .history-dot.correct { background: #d1fae5; color: #065f46; }
   .history-dot.incorrect { background: #fee2e2; color: #991b1b; }
   .history-empty { font-size: 0.78rem; color: var(--text-muted); font-style: italic; }
-  .history-clear { margin-top: 10px; font-size: 0.72rem; color: var(--text-muted); border: none; background: none; cursor: pointer; text-decoration: underline; }
+  .history-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .history-clear { font-size: 0.72rem; color: var(--text-muted); border: none; background: none; cursor: pointer; text-decoration: underline; white-space: nowrap; }
   .history-clear:hover { color: var(--incorrect); }
 
   /* Report */
-  .report-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .report-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
   .report-btn { padding: 8px 16px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--card-bg); color: var(--text); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
   .report-btn:hover { border-color: var(--accent); background: #eff6ff; }
   .report-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
@@ -256,6 +303,7 @@
 <div class="container">
 
   <div class="header">
+    <button class="theme-toggle" id="themeToggle" title="切換深淺色模式">🌙</button>
     <h1>/ʊ/ vs /uː/ 聽力訓練 · 訓練模式</h1>
     <p class="subtitle">訓練模式 — 逐題即時回饋 · 慢速誇大（rate 0.35）· 分數不計入測驗</p>
     <p class="method-note">⚠️ 這是「訓練」模式：每題作答後立即顯示對錯＋重播正確音。測驗（整輪結束才公布、分數進 SRS）請開 nl-listening-trainer-regression.html</p>
@@ -383,10 +431,12 @@
     <div class="history-list" id="historyList">
       <span class="history-empty">尚未作答</span>
     </div>
-    <button class="history-clear" id="historyClear" style="display:none">清除記錄</button>
-    <div class="report-buttons">
-      <button class="report-btn primary" id="exportReportBtn">📋 匯出報告</button>
-      <button class="report-btn" id="copyReportBtn" style="display:none">📋 複製到剪貼板</button>
+    <div class="history-actions">
+      <div class="report-buttons">
+        <button class="report-btn primary" id="exportReportBtn">📋 匯出報告</button>
+        <button class="report-btn" id="copyReportBtn" style="display:none">📋 複製到剪貼板</button>
+      </div>
+      <button class="history-clear" id="historyClear" style="display:none">清除記錄</button>
     </div>
     <textarea class="report-output" id="reportOutput" style="display:none" readonly
       placeholder="點擊「匯出報告」生成可讀的診斷報告"></textarea>
@@ -492,6 +542,7 @@ const exportReportBtn = $('exportReportBtn');
 const reportOutput = $('reportOutput');
 const reportCopied = $('reportCopied');
 const copyReportBtn = $('copyReportBtn');
+const themeToggle = $('themeToggle');
 
 // ============================================================
 // Voice management (single mode — 換題才換聲)
@@ -755,6 +806,7 @@ function hideAll() {
 
 function showPlayState() {
   hideAll();
+  state.currentReplayCount = 0;
   playSection.style.display = 'flex';
   playBtn.classList.remove('playing');
   playHint.textContent = state.stage === 1 ? '點擊播放兩個詞' : state.stage === 2 ? '點擊播放三個詞' : '點擊播放單詞';
@@ -763,7 +815,7 @@ function showPlayState() {
   // Reset answer buttons
   [sameBtn, diffBtn, pos1Btn, pos2Btn, pos3Btn, nBtn, lBtn].forEach(b => {
     b.disabled = true;
-    b.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect');
+    b.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect', 'grayed-out');
   });
   state.currentSelection = null;
 }
@@ -781,6 +833,7 @@ function showAnsweredState() {
 
   // 訓練模式：逐題即時回饋（標示對錯＋重播正確音）
   showImmediateFeedback();
+  renderReveal();
 
   if (state.currentIndex >= ROUND_SIZE - 1) {
     revealBtnEl.style.display = 'inline-block';
@@ -793,35 +846,75 @@ function showAnsweredState() {
   }
 }
 
-// 訓練模式：逐題即時回饋——標示正確按鈕（綠）與其餘（紅）＋重播正確音
+// 訓練模式：逐題即時回饋——只有被選的按鈕變紅/綠，其餘一律變灰
 function showImmediateFeedback() {
   const trial = state.currentTrial;
   const choice = state.currentSelection;
   const correct = isAnswerCorrect(trial, choice);
 
+  // 先清掉上一題的對錯／灰化 class
+  [sameBtn, diffBtn, pos1Btn, pos2Btn, pos3Btn, nBtn, lBtn].forEach(b => {
+    b.classList.remove('was-correct', 'was-incorrect', 'grayed-out');
+  });
+
   if (state.stage === 1) {
-    const ans = trial.answer; // 'same' | 'diff'
-    sameBtn.classList.add(ans === 'same' ? 'was-correct' : 'was-incorrect');
-    diffBtn.classList.add(ans === 'diff' ? 'was-correct' : 'was-incorrect');
+    const selectedBtn = choice === 'same' ? sameBtn : diffBtn;
+    const otherBtn = choice === 'same' ? diffBtn : sameBtn;
+    selectedBtn.classList.add(correct ? 'was-correct' : 'was-incorrect');
+    otherBtn.classList.add('grayed-out');
   } else if (state.stage === 2) {
-    const ans = trial.answer; // 1|2|3
     [pos1Btn, pos2Btn, pos3Btn].forEach(b => {
-      const bp = parseInt(b.dataset.pos);
-      b.classList.add(bp === ans ? 'was-correct' : 'was-incorrect');
+      if (parseInt(b.dataset.pos) === choice) {
+        b.classList.add(correct ? 'was-correct' : 'was-incorrect');
+      } else {
+        b.classList.add('grayed-out');
+      }
     });
   } else {
-    const ans = trial.answer; // 'u' | 'oo'
-    nBtn.classList.add(ans === 'u' ? 'was-correct' : 'was-incorrect');
-    lBtn.classList.add(ans === 'oo' ? 'was-correct' : 'was-incorrect');
+    const selectedBtn = choice === 'u' ? nBtn : lBtn;
+    const otherBtn = choice === 'u' ? lBtn : nBtn;
+    selectedBtn.classList.add(correct ? 'was-correct' : 'was-incorrect');
+    otherBtn.classList.add('grayed-out');
     (async () => { await speak(trial.word); })();
   }
 
-  answeredHint.textContent = correct ? '✓ 正確' : '✗ 正確答案是綠色選項';
+  answeredHint.textContent = correct ? '✓ 正確' : '✗ 答錯了';
   answeredHint.style.color = correct ? 'var(--correct)' : 'var(--incorrect)';
 
   // 作答即存：不依賴「看本輪回顧」按鈕，資料不遺失；改答案時覆蓋最後一筆（去重）
   saveAnswerToDaily({ trial, choice, correct }, state.answerSaved);
   state.answerSaved = true;
+}
+
+// 作答後在答案下方顯示對應單詞（Stage 1 兩詞、Stage 2 三詞並標出不同者）
+function renderReveal() {
+  const trial = state.currentTrial;
+  if (state.stage === 1) {
+    const w1 = trial.word1, w2 = trial.word2;
+    const w1cls = w1.sound === 'u' ? 'n-word' : 'l-word';
+    const w2cls = w2.sound === 'u' ? 'n-word' : 'l-word';
+    const sep = trial.answer === 'same' ? '=' : '≠';
+    revealArea.innerHTML = `
+      <div class="reveal-words">
+        <span class="reveal-word ${w1cls}">${w1.word} <span class="ipa-sub">${w1.ipa}</span></span>
+        <span class="reveal-separator">${sep}</span>
+        <span class="reveal-word ${w2cls}">${w2.word} <span class="ipa-sub">${w2.ipa}</span></span>
+      </div>`;
+    revealArea.style.display = 'block';
+  } else if (state.stage === 2) {
+    revealArea.innerHTML = `
+      <div class="reveal-triplet">` +
+      trial.words.map((w, i) => {
+        const p = i + 1;
+        const highlight = (p === trial.answer) ? ' odd-highlight' : '';
+        return `<div class="reveal-pos${highlight}"><span class="pos-label">第 ${p} 個</span>${w.word}</div>`;
+      }).join('') + `
+      </div>`;
+    revealArea.style.display = 'block';
+  } else {
+    revealArea.innerHTML = '';
+    revealArea.style.display = 'none';
+  }
 }
 
 function updateProgress() {
@@ -924,11 +1017,12 @@ function handleSDAnswer(choice) {
   if (state.currentSelection === choice) {
     // Deselect
     state.currentSelection = null;
-    sameBtn.classList.remove('selected-choice', 'unselected-choice');
-    diffBtn.classList.remove('selected-choice', 'unselected-choice');
+    sameBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect', 'grayed-out');
+    diffBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect', 'grayed-out');
     answeredHint.style.display = 'none';
     nextBtn.style.display = 'none';
     revealBtnEl.style.display = 'none';
+    revealArea.style.display = 'none';
   } else {
     // Clear all buttons first, then apply new selection
     sameBtn.classList.remove('selected-choice', 'unselected-choice');
@@ -950,10 +1044,11 @@ function handleOddballAnswer(pos) {
   if (!state.hasPlayed || state.roundRevealed) return;
   if (state.currentSelection === pos) {
     state.currentSelection = null;
-    [pos1Btn, pos2Btn, pos3Btn].forEach(b => b.classList.remove('selected-choice', 'unselected-choice'));
+    [pos1Btn, pos2Btn, pos3Btn].forEach(b => b.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect', 'grayed-out'));
     answeredHint.style.display = 'none';
     nextBtn.style.display = 'none';
     revealBtnEl.style.display = 'none';
+    revealArea.style.display = 'none';
   } else {
     state.currentSelection = pos;
     [pos1Btn, pos2Btn, pos3Btn].forEach(b => {
@@ -971,11 +1066,12 @@ function handleUOAnswer(choice) {
   if (!state.hasPlayed || state.roundRevealed) return;
   if (state.currentSelection === choice) {
     state.currentSelection = null;
-    nBtn.classList.remove('selected-choice', 'unselected-choice');
-    lBtn.classList.remove('selected-choice', 'unselected-choice');
+    nBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect', 'grayed-out');
+    lBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect', 'grayed-out');
     answeredHint.style.display = 'none';
     nextBtn.style.display = 'none';
     revealBtnEl.style.display = 'none';
+    revealArea.style.display = 'none';
   } else {
     nBtn.classList.remove('selected-choice', 'unselected-choice');
     lBtn.classList.remove('selected-choice', 'unselected-choice');
@@ -998,6 +1094,7 @@ function handleNext() {
       trial: state.currentTrial,
       choice: state.currentSelection,
       correct: isAnswerCorrect(state.currentTrial, state.currentSelection),
+      replay: state.currentReplayCount,
     });
   }
   state.currentIndex++;
@@ -1024,6 +1121,7 @@ function handleReveal() {
       trial: state.currentTrial,
       choice: state.currentSelection,
       correct: isAnswerCorrect(state.currentTrial, state.currentSelection),
+      replay: state.currentReplayCount,
     });
   }
   state.roundRevealed = true;
@@ -1103,6 +1201,7 @@ function saveAnswerToDaily(a, replaceLast) {
       : state.stage === 2
         ? a.trial.words.map(w => w.word).join('-') + `/odd${a.trial.answer}/chose${a.choice}`
         : `${a.trial.word} → ${chosenWord}`,
+    replay: state.currentReplayCount,
   };
   if (replaceLast && dailyScores.length > 0) {
     dailyScores[dailyScores.length - 1] = entry;
@@ -1114,6 +1213,7 @@ function saveAnswerToDaily(a, replaceLast) {
 
 function showSummaryAfterReview(correctCount) {
   const pct = Math.round((correctCount / ROUND_SIZE) * 100);
+  const roundReplays = state.roundAnswers.reduce((s, a) => s + (a.replay || 0), 0);
 
   let streak = 0, maxStreak = 0;
   for (const a of state.roundAnswers) {
@@ -1129,6 +1229,7 @@ function showSummaryAfterReview(correctCount) {
       ${correctCount} / ${ROUND_SIZE}
     </div>
     <div class="score-detail">正確率 ${pct}% — ${stageNames[state.stage]}</div>
+    ${roundReplays > 0 ? `<div class="score-detail">本輪重播 ${roundReplays} 次</div>` : ''}
     ${maxStreak >= 4 ? `<div class="streak-badge">🏆 最佳連續：${maxStreak} 題</div>` : ''}
     ${pct >= 80
       ? '<p style="color:var(--correct);font-weight:600;margin-bottom:14px">✅ 達標！80%+ 正確率</p>'
@@ -1318,6 +1419,10 @@ function exportReport() {
   const overallCorrect = dailyScores.filter(s => s.correct).length;
   const overallPct = Math.round((overallCorrect / dailyScores.length) * 100);
   lines.push(`總正確率：${overallCorrect}/${dailyScores.length} = ${overallPct}%`);
+  const totalReplays = dailyScores.reduce((s, x) => s + (x.replay || 0), 0);
+  if (totalReplays > 0) {
+    lines.push(`今日重播：${totalReplays} 次（平均 ${(totalReplays / dailyScores.length).toFixed(1)} 次/題）`);
+  }
   lines.push('');
 
   for (const st of [1, 2, 3]) {
@@ -1401,7 +1506,13 @@ function switchStage(stage, force) {
 // Event listeners
 // ============================================================
 playBtn.addEventListener('click', handlePlay);
-replayBtn.addEventListener('click', handlePlay);
+function handleReplay() {
+  if (!state.hasPlayed) return;
+  state.currentReplayCount++;
+  handlePlay();
+}
+
+replayBtn.addEventListener('click', handleReplay);
 voiceRerollBtn.addEventListener('click', () => { pickRandomVoice(); speechSynthesis.cancel(); });
 sameBtn.addEventListener('click', () => handleSDAnswer('same'));
 diffBtn.addEventListener('click', () => handleSDAnswer('diff'));
@@ -1509,6 +1620,23 @@ document.addEventListener('keydown', (e) => {
     else if (state.currentSelection !== null && state.currentIndex >= ROUND_SIZE - 1 && !state.roundRevealed) { handleReveal(); }
   }
 });
+
+// ============================================================
+// Theme toggle (dark mode)
+// ============================================================
+const THEME_KEY = STORAGE_KEY + '_theme';
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(current);
+  try { localStorage.setItem(THEME_KEY, current); } catch (e) {}
+});
+try {
+  if (localStorage.getItem(THEME_KEY) === 'dark') applyTheme('dark');
+} catch (e) {}
 
 // ============================================================
 // Init

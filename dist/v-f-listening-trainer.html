@@ -16,6 +16,33 @@
     --correct-bg: #f0fdf4; --incorrect-bg: #fef2f2;
     --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
   }
+  /* Dark mode */
+  [data-theme="dark"] {
+    --bg: #0f1115; --card-bg: #1a1d24; --text: #e6e8ee; --text-muted: #9aa3b2;
+    --border: #2c313a; --selected: #818cf8; --selected-bg: #232946;
+    --v-color: #a78bfa; --v-bg: #241b3a; --v-border: #6d28d9;
+    --f-color: #fbbf24; --f-bg: #3a2c10; --f-border: #92400e;
+    --correct: #34d399; --incorrect: #f87171;
+    --correct-bg: #0d2b22; --incorrect-bg: #3a1518;
+    --shadow: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
+  }
+  [data-theme="dark"] .stage-card:hover:not(.locked),
+  [data-theme="dark"] .answer-btn:hover:not(:disabled) { background: #23272f; }
+  [data-theme="dark"] .stage-card.active { background: #1c2440; }
+  [data-theme="dark"] .stage-card.locked,
+  [data-theme="dark"] .stage-card.locked:hover { background: #14161c; }
+  [data-theme="dark"] .voice-reroll-btn:hover,
+  [data-theme="dark"] .next-btn.secondary:hover,
+  [data-theme="dark"] .report-btn:hover,
+  [data-theme="dark"] .review-play-btn:hover { background: #232946; }
+  [data-theme="dark"] .history-dot.correct { background: #0d2b22; color: #6ee7b7; }
+  [data-theme="dark"] .history-dot.incorrect { background: #3a1518; color: #fca5a5; }
+  [data-theme="dark"] .review-table tr.row-correct { background: #0d2b22; }
+  [data-theme="dark"] .review-table tr.row-incorrect { background: #3a1518; }
+  [data-theme="dark"] .review-table td { border-bottom: 1px solid #2c313a; }
+  [data-theme="dark"] .review-play-btn.playing-review { background: #3a2c10; border-color: #f59e0b; color: #fbbf24; }
+  [data-theme="dark"] .report-output { background: #14161c; }
+  [data-theme="dark"] .play-btn { box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -24,7 +51,14 @@
   }
   .container { max-width: 560px; width: 100%; }
 
-  .header { text-align: center; margin-bottom: 20px; }
+  .header { position: relative; text-align: center; margin-bottom: 20px; }
+  .theme-toggle {
+    position: absolute; top: 0; right: 0; width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--card-bg); color: var(--text);
+    font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow); transition: all 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--accent); }
   .header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; }
   .header .subtitle { font-size: 0.78rem; color: var(--text-muted); }
 
@@ -136,9 +170,9 @@
   .next-btn.secondary:hover { background: #eff6ff; }
 
   .replay-quiz-btn {
-    display: block; margin: 0 auto; padding: 5px 14px; border-radius: 6px;
-    border: 1px solid var(--border); background: var(--card-bg); color: var(--text-muted);
-    font-size: 0.76rem; cursor: pointer; transition: all 0.15s;
+    display: block; margin: 0 auto; padding: 9px 24px; border-radius: 8px;
+    border: 1.5px solid var(--border); background: var(--card-bg); color: var(--text);
+    font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
   }
   .replay-quiz-btn:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -193,13 +227,14 @@
   .history-dot.correct { background: #d1fae5; color: #065f46; }
   .history-dot.incorrect { background: #fee2e2; color: #991b1b; }
   .history-empty { font-size: 0.78rem; color: var(--text-muted); font-style: italic; }
+  .history-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
   .history-clear {
-    margin-top: 10px; font-size: 0.72rem; color: var(--text-muted);
-    border: none; background: none; cursor: pointer; text-decoration: underline;
+    font-size: 0.72rem; color: var(--text-muted);
+    border: none; background: none; cursor: pointer; text-decoration: underline; white-space: nowrap;
   }
   .history-clear:hover { color: var(--incorrect); }
 
-  .report-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .report-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
   .report-btn {
     padding: 8px 16px; border-radius: 6px; border: 1.5px solid var(--border);
     background: var(--card-bg); color: var(--text); font-size: 0.8rem;
@@ -267,6 +302,7 @@
 <div class="container">
 
   <div class="header">
+    <button class="theme-toggle" id="themeToggle" title="切換深淺色模式">🌙</button>
     <h1>/v/ vs /f/ 聽力訓練 + every 聽覺模板重建</h1>
     <p class="subtitle">三階段：/v/ 震動辨識 → every 正確/錯誤版對比 → 句子中辨識（純聽音，無文字干擾）</p>
   </div>
@@ -371,10 +407,12 @@
     <div class="history-list" id="historyList">
       <span class="history-empty">尚未作答</span>
     </div>
-    <button class="history-clear" id="historyClear" style="display:none">清除記錄</button>
-    <div class="report-buttons">
-      <button class="report-btn primary" id="exportReportBtn">📋 匯出報告</button>
-      <button class="report-btn" id="copyReportBtn" style="display:none">📋 複製到剪貼板</button>
+    <div class="history-actions">
+      <div class="report-buttons">
+        <button class="report-btn primary" id="exportReportBtn">📋 匯出報告</button>
+        <button class="report-btn" id="copyReportBtn" style="display:none">📋 複製到剪貼板</button>
+      </div>
+      <button class="history-clear" id="historyClear" style="display:none">清除記錄</button>
     </div>
     <textarea class="report-output" id="reportOutput" style="display:none" readonly
       placeholder="點擊「匯出報告」生成可讀的診斷報告"></textarea>
@@ -509,6 +547,7 @@ const exportReportBtn = $('exportReportBtn');
 const reportOutput = $('reportOutput');
 const reportCopied = $('reportCopied');
 const copyReportBtn = $('copyReportBtn');
+const themeToggle = $('themeToggle');
 
 // ============================================================
 // Voice management (matching focused trainer)
@@ -1452,6 +1491,23 @@ document.addEventListener('keydown', (e) => {
 function toggleContrast() {
   reviewSection.classList.toggle('show-contrast');
 }
+
+// ============================================================
+// Theme toggle (dark mode)
+// ============================================================
+const THEME_KEY = 'vf_trainer_theme';
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(current);
+  try { localStorage.setItem(THEME_KEY, current); } catch (e) {}
+});
+try {
+  if (localStorage.getItem(THEME_KEY) === 'dark') applyTheme('dark');
+} catch (e) {}
 
 // ============================================================
 // Init
