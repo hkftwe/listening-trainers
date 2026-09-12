@@ -625,13 +625,25 @@ function pickVoice() {
   return state.voicePool[idx];
 }
 
-function pickVoiceDifferentFromLast() {
-  if (state.voicePool.length === 0) return null;
-  if (state.voicePool.length === 1) return state.voicePool[0];
-  const candidates = state.voicePool.filter(v => v !== state.lastReviewVoice);
-  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-  state.lastReviewVoice = chosen;
-  return chosen;
+function pickReviewVoice() {
+  if (!state.voicePool || state.voicePool.length === 0) return null;
+  if (!state.reviewVoice) {
+    state.reviewVoice = state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
+  }
+  return state.reviewVoice;
+}
+
+function switchReviewVoice() {
+  if (!state.voicePool || state.voicePool.length === 0) return null;
+  const others = state.voicePool.filter(v => v !== state.reviewVoice);
+  const pool = others.length ? others : state.voicePool;
+  state.reviewVoice = pool[Math.floor(Math.random() * pool.length)];
+  return state.reviewVoice;
+}
+
+function updateReviewVoiceLabel() {
+  const el = document.getElementById('reviewVoiceName');
+  if (el && state.reviewVoice) el.textContent = state.reviewVoice.name;
 }
 
 function updateVoiceLabel() {
@@ -691,13 +703,25 @@ function pickRandomVoice() {
   updateVoiceLabel();
 }
 
-function pickVoiceDifferentFromLast() {
-  if (state.voicePool.length === 0) return null;
-  if (state.voicePool.length === 1) return state.voicePool[0];
-  const candidates = state.voicePool.filter(v => v !== state.lastReviewVoice);
-  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-  state.lastReviewVoice = chosen;
-  return chosen;
+function pickReviewVoice() {
+  if (!state.voicePool || state.voicePool.length === 0) return null;
+  if (!state.reviewVoice) {
+    state.reviewVoice = state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
+  }
+  return state.reviewVoice;
+}
+
+function switchReviewVoice() {
+  if (!state.voicePool || state.voicePool.length === 0) return null;
+  const others = state.voicePool.filter(v => v !== state.reviewVoice);
+  const pool = others.length ? others : state.voicePool;
+  state.reviewVoice = pool[Math.floor(Math.random() * pool.length)];
+  return state.reviewVoice;
+}
+
+function updateReviewVoiceLabel() {
+  const el = document.getElementById('reviewVoiceName');
+  if (el && state.reviewVoice) el.textContent = state.reviewVoice.name;
 }
 
 function updateVoiceLabel() {
@@ -740,7 +764,7 @@ def js_state(config):
   previewMode: false,
   previewWords: [],
   previewIndex: 0,
-  lastReviewVoice: null,
+  reviewVoice: null,
 };"""
     else:
         return """let state = {
@@ -758,7 +782,7 @@ def js_state(config):
   previewMode: false,
   previewWords: [],
   previewIndex: 0,
-  lastReviewVoice: null,
+  reviewVoice: null,
 };"""
 
 
@@ -866,7 +890,7 @@ def build_index(trainers):
         if links:
             sections.append(f'<h2>{group_title}</h2>' + "\n".join(links))
     body = "\n".join(sections)
-    return f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Listening Trainers</title><style>:root{{color-scheme:light}}body{{font-family:-apple-system,system-ui,sans-serif;max-width:540px;margin:40px auto;padding:0 20px;line-height:1.6}}h1{{font-size:1.3rem;margin-bottom:8px}}h2{{font-size:0.9rem;color:#6b7280;font-weight:600;margin:20px 0 4px;padding-bottom:4px;border-bottom:1px solid #e5e7eb}}a{{display:block;padding:9px 12px;margin:5px 0 5px 12px;border:1px solid #e5e7eb;border-radius:8px;text-decoration:none;color:#1a1a2e;font-weight:500}}a:hover{{background:#f3f4f6}}</style></head><body><h1>Listening Trainers</h1>{body}</body></html>"""
+    return f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Listening Trainers</title><style>:root{{color-scheme:light;--bg:#fff;--text:#1a1a2e;--muted:#6b7280;--border:#e5e7eb;--hover:#f3f4f6}}[data-theme="dark"]{{color-scheme:dark;--bg:#1a1a2e;--text:#e5e7eb;--muted:#9ca3af;--border:#374151;--hover:#232946}}body{{font-family:-apple-system,system-ui,sans-serif;max-width:540px;margin:40px auto;padding:0 20px;line-height:1.6;background:var(--bg);color:var(--text)}}h1{{font-size:1.3rem;margin-bottom:8px}}h2{{font-size:0.9rem;color:var(--muted);font-weight:600;margin:20px 0 4px;padding-bottom:4px;border-bottom:1px solid var(--border)}}a{{display:block;padding:9px 12px;margin:5px 0 5px 12px;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);font-weight:500}}a:hover{{background:var(--hover)}}#themeToggle{{float:right;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text);font-size:1rem}}</style></head><body><button id="themeToggle" aria-label="切換暗黑模式">🌙</button><h1>Listening Trainers</h1>{body}<script>const tg=document.getElementById('themeToggle');const K='lt-index-theme';function ap(t){{document.documentElement.setAttribute('data-theme',t);tg.textContent=(t==='dark')?'☀️':'🌙';}}const sv=localStorage.getItem(K);if(sv){{ap(sv);}}tg.addEventListener('click',function(){{const nx=(document.documentElement.getAttribute('data-theme')==='dark')?'light':'dark';ap(nx);localStorage.setItem(K,nx);}});</script></body></html>"""
 
 
 # ── Main ────────────────────────────────────────────────────────────

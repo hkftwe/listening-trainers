@@ -498,7 +498,7 @@ let state = {
   previewWords: [],
   previewIndex: 0,
   previewMode: false,
-  lastReviewVoice: null,
+  reviewVoice: null,
 };
 
 let longPressTimer = null;
@@ -583,13 +583,25 @@ function pickRandomVoice() {
   updateVoiceLabel();
 }
 
-function pickVoiceDifferentFromLast() {
-  if (state.voicePool.length === 0) return null;
-  if (state.voicePool.length === 1) return state.voicePool[0];
-  const candidates = state.voicePool.filter(v => v !== state.lastReviewVoice);
-  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-  state.lastReviewVoice = chosen;
-  return chosen;
+function pickReviewVoice() {
+  if (!state.voicePool || state.voicePool.length === 0) return null;
+  if (!state.reviewVoice) {
+    state.reviewVoice = state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
+  }
+  return state.reviewVoice;
+}
+
+function switchReviewVoice() {
+  if (!state.voicePool || state.voicePool.length === 0) return null;
+  const others = state.voicePool.filter(v => v !== state.reviewVoice);
+  const pool = others.length ? others : state.voicePool;
+  state.reviewVoice = pool[Math.floor(Math.random() * pool.length)];
+  return state.reviewVoice;
+}
+
+function updateReviewVoiceLabel() {
+  const el = document.getElementById('reviewVoiceName');
+  if (el && state.reviewVoice) el.textContent = state.reviewVoice.name;
 }
 
 function updateVoiceLabel() {
@@ -1035,7 +1047,7 @@ function handleReveal() {
   const correctCount = state.roundAnswers.filter(a => a.correct).length;
 
   let html = '<h3>本輪回顧</h3>';
-  html += '<div class="contrast-toggle-wrap"><label><input type="checkbox" id="contrastToggle" onchange="toggleContrast()"> 顯示對比詞</label></div>';
+  html += '<div class="contrast-toggle-wrap"><label><input type="checkbox" id="contrastToggle" onchange="toggleContrast()"> 顯示對比詞</label> <button type="button" id="reviewVoiceBtn" class="voice-reroll-btn">🔊 換語音</button> <span id="reviewVoiceName" style="font-size:0.72rem;opacity:0.7"></span></div>';
   html += '<table class="review-table"><thead><tr>';
   html += '<th>#</th><th>題目</th><th></th><th class="contrast-col"></th><th>實際</th><th>你的答案</th><th></th>';
   html += '</tr></thead><tbody>';
@@ -1083,6 +1095,11 @@ function handleReveal() {
   reviewSection.innerHTML = html;
   reviewSection.style.display = 'block';
 
+  pickReviewVoice();
+  updateReviewVoiceLabel();
+  const rvBtn = document.getElementById('reviewVoiceBtn');
+  if (rvBtn) rvBtn.addEventListener('click', () => { switchReviewVoice(); updateReviewVoiceLabel(); });
+
   // Bind review play buttons (event delegation — covers contrast-play-btn too)
   reviewSection.addEventListener('click', async (e) => {
     const btn = e.target.closest('.review-play-btn, .contrast-play-btn');
@@ -1090,7 +1107,7 @@ function handleReveal() {
     if (btn.classList.contains('playing-review')) return;
     const text = btn.dataset.play;
     btn.classList.add('playing-review');
-    const voice = pickVoiceDifferentFromLast();
+    const voice = pickReviewVoice();
     await speak(text, voice);
     btn.classList.remove('playing-review');
   });
@@ -1218,7 +1235,7 @@ async function replayWrongAnswers() {
 
     replayBtn.textContent = `播放中...（第 ${replayIdx + 1}/${wrong.length} 題）`;
     replayBtn.disabled = true;
-    const voice = pickVoiceDifferentFromLast();
+    const voice = pickReviewVoice();
     await speak(text, voice);
     replayIdx++;
     replayBtn.disabled = false;
