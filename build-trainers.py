@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
-build-trainers.py — Generate listening trainer HTML files from shared template + CSV data.
+build-trainers.py — 從共用 template + CSV 生成 listening trainer HTML。
 
-Usage:  python3 build-trainers.py
-Output: All trainer HTML files in the current directory, overwriting existing ones.
-        The index.html navigation page is also regenerated.
+用法：python3 build-trainers.py
+輸出：dist/ 下所有 trainer HTML（generated 重建＋manual 複製），並重建 index.html。
+
+⚠️ 改 template.html 後的檢查清單（template 是共用 UI／邏輯，改了不會自動套到非 generated trainer）：
+  1. generated（TRAINERS dict 驅動）→ 跑本腳本即自動重建 ✅
+  2. manual（manual_trainers dict：v-f、vowel-assessment、nl-training、u-oo-training、n-l-regression）
+     → build 只「複製」不「套 template」，template 改了要**手動 port** 到每個 manual/*.html。
+  3. 新增／改名 trainer：`manual_trainers`（複製清單）與 `all_trainers`（index 導航）兩處都要同步。
 """
 
 import csv
@@ -916,6 +921,7 @@ def main():
         "vowel-assessment": "vowel-minimal-pairs-assessment.html",
         "nl-training": "nl-listening-trainer-training.html",
         "u-oo-training": "u-oo-training.html",
+        "n-l-regression": "nl-listening-trainer-regression.html",
     }
     for key, fname in manual_trainers.items():
         src = os.path.join(SCRIPT_DIR, "manual", fname)
