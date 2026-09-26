@@ -883,6 +883,9 @@ def build_index(trainers):
             ("u-oo-training", "/ʊ/ vs /uː/ 訓練模式（逐題即時回饋）"),
             ("vowel-assessment", "Minimal Pair 評估（第 0 天）"),
         ]),
+        ("詞尾／音節", [
+            ("chose-chosen", "chose vs chosen（#23 詞尾 -sen 閘門）"),
+        ]),
     ]
     sections = []
     for group_title, items in groups:
@@ -922,6 +925,7 @@ def main():
         "nl-training": "nl-listening-trainer-training.html",
         "u-oo-training": "u-oo-training.html",
         "n-l-regression": "nl-listening-trainer-regression.html",
+        "chose-chosen": "chose-chosen-assessment.html",
     }
     for key, fname in manual_trainers.items():
         src = os.path.join(SCRIPT_DIR, "manual", fname)
@@ -951,6 +955,10 @@ def main():
     all_trainers["u-oo-training"] = {
         "filename": "u-oo-training.html",
         "h1": "/ʊ/ vs /uː/ 聽力訓練（訓練模式）",
+    }
+    all_trainers["chose-chosen"] = {
+        "filename": "chose-chosen-assessment.html",
+        "h1": "chose vs chosen 聽辨診斷（#23 詞尾 -sen 閘門）",
     }
     index_html = build_index(all_trainers)
     with open(os.path.join(SCRIPT_DIR, "index.html"), "w", encoding="utf-8") as f:
