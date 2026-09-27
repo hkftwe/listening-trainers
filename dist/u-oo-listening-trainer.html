@@ -756,12 +756,12 @@
     <button class="stage-card active" data-stage="1">
       <div class="stage-icon">🎯</div>
       <div class="stage-title">full vs fool</div>
-      <div class="stage-desc">3 組核心詞對<br>full·pull·could</div>
+      <div class="stage-desc">6 組核心詞對<br>full·pull·could·look·wood·stood</div>
     </button>
     <button class="stage-card locked" data-stage="2">
       <div class="stage-icon">🔀</div>
-      <div class="stage-title">4 組混合詞對</div>
-      <div class="stage-desc">look·wood·stood<br>nook …</div>
+      <div class="stage-title">8 組混合詞對</div>
+      <div class="stage-desc">look·wood·stood<br>nook·soot …</div>
       <div class="stage-lock">🔒 第1關 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
     </button>
     <button class="stage-card locked" data-stage="3">
@@ -887,8 +887,20 @@ const WORD_BANKS = {
     { word: "pool", sound: 'oo', ipa: "/pu\u02d0l/" },
     { word: "could", sound: 'u', ipa: "/k\u028ad/" },
     { word: "cooed", sound: 'oo', ipa: "/ku\u02d0d/" },
+    { word: "look", sound: 'u', ipa: "/l\u028ak/" },
+    { word: "Luke", sound: 'oo', ipa: "/lu\u02d0k/" },
+    { word: "wood", sound: 'u', ipa: "/w\u028ad/" },
+    { word: "wooed", sound: 'oo', ipa: "/wu\u02d0d/" },
+    { word: "stood", sound: 'u', ipa: "/st\u028ad/" },
+    { word: "stewed", sound: 'oo', ipa: "/stu\u02d0d/" },
   ],
   2: [
+    { word: "full", sound: 'u', ipa: "/f\u028al/" },
+    { word: "fool", sound: 'oo', ipa: "/fu\u02d0l/" },
+    { word: "pull", sound: 'u', ipa: "/p\u028al/" },
+    { word: "pool", sound: 'oo', ipa: "/pu\u02d0l/" },
+    { word: "could", sound: 'u', ipa: "/k\u028ad/" },
+    { word: "cooed", sound: 'oo', ipa: "/ku\u02d0d/" },
     { word: "look", sound: 'u', ipa: "/l\u028ak/" },
     { word: "Luke", sound: 'oo', ipa: "/lu\u02d0k/" },
     { word: "wood", sound: 'u', ipa: "/w\u028ad/" },
@@ -897,6 +909,8 @@ const WORD_BANKS = {
     { word: "stewed", sound: 'oo', ipa: "/stu\u02d0d/" },
     { word: "nook", sound: 'u', ipa: "/n\u028ak/" },
     { word: "nuke", sound: 'oo', ipa: "/nu\u02d0k/" },
+    { word: "soot", sound: 'u', ipa: "/s\u028at/" },
+    { word: "suit", sound: 'oo', ipa: "/su\u02d0t/" },
   ],
   3: [
     { sentence: "My glass is full of water.", sound: 'u', word: "full" },
@@ -928,7 +942,7 @@ const CONTRAST_MAP = {};
 // Bonus preview words (extra difficult pairs for warm-up)
 const BONUS_PREVIEW = [];
 
-const ROUND_SIZE = 10;
+const ROUND_SIZE = 16;
 const UNLOCK_THRESHOLD = 0.8;
 const STORAGE_KEY = 'u-oo-listening-trainer-v1';
 const NUM_STAGES = 3;
@@ -1627,7 +1641,7 @@ function clearHistory() {
 // ============================================================
 // Export report
 // ============================================================
-const REPORT_STAGE_NAMES = {"1": "full vs fool\uff08\u6838\u5fc3\u8a5e\u5c0d\uff09", "2": "4 \u7d44\u6df7\u5408\u8a5e\u5c0d", "3": "\u53e5\u5b50\u4e2d\u8fa8\u8b58"};
+const REPORT_STAGE_NAMES = {"1": "full vs fool\uff08\u6838\u5fc3\u8a5e\u5c0d\uff09", "2": "8 \u7d44\u6df7\u5408\u8a5e\u5c0d", "3": "\u53e5\u5b50\u4e2d\u8fa8\u8b58"};
 
 function exportReport() {
   const today = new Date().toISOString().slice(0, 10);

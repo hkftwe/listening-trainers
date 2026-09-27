@@ -756,7 +756,7 @@
     <button class="stage-card active" data-stage="1">
       <div class="stage-icon">🎯</div>
       <div class="stage-title">first vs third</div>
-      <div class="stage-desc">3 組核心詞對<br>first·free·fin</div>
+      <div class="stage-desc">5 組核心詞對<br>first·free·fin·deaf·fought</div>
     </button>
     <button class="stage-card locked" data-stage="2">
       <div class="stage-icon">🔀</div>
@@ -885,6 +885,10 @@ const WORD_BANKS = {
     { word: "three", sound: 'th', ipa: "/\u03b8ri\u02d0/" },
     { word: "fin", sound: 'f', ipa: "/f\u026an/" },
     { word: "thin", sound: 'th', ipa: "/\u03b8\u026an/" },
+    { word: "deaf", sound: 'f', ipa: "/def/" },
+    { word: "death", sound: 'th', ipa: "/de\u03b8/" },
+    { word: "fought", sound: 'f', ipa: "/f\u0254\u02d0t/" },
+    { word: "thought", sound: 'th', ipa: "/\u03b8\u0254\u02d0t/" },
   ],
   2: [
     { word: "first", sound: 'f', ipa: "/f\u025c\u02d0rst/" },
@@ -897,6 +901,8 @@ const WORD_BANKS = {
     { word: "thought", sound: 'th', ipa: "/\u03b8\u0254\u02d0t/" },
     { word: "four", sound: 'f', ipa: "/f\u0254\u02d0r/" },
     { word: "thaw", sound: 'th', ipa: "/\u03b8\u0254\u02d0/" },
+    { word: "deaf", sound: 'f', ipa: "/def/" },
+    { word: "death", sound: 'th', ipa: "/de\u03b8/" },
   ],
   3: [
     { sentence: "I was the first person to arrive.", sound: 'f', word: "first" },
@@ -928,7 +934,7 @@ const CONTRAST_MAP = {};
 // Bonus preview words (extra difficult pairs for warm-up)
 const BONUS_PREVIEW = [];
 
-const ROUND_SIZE = 10;
+const ROUND_SIZE = 16;
 const UNLOCK_THRESHOLD = 0.8;
 const STORAGE_KEY = 'f-th-listening-trainer-v3';
 const NUM_STAGES = 3;

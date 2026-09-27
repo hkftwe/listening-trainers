@@ -72,7 +72,7 @@ Focused and core variants skip or combine stages for specific training needs:
 - **core** variants: drill only the highest-frequency, most problematic words from the full trainer
 - **focused** variants: pure-sound discrimination without preview text (words shown only after answering)
 
-Each round is 10 questions. Voices rotate randomly across TTS engines available in your browser (Samantha, Daniel, Karen, Alex, Moira, etc. on macOS/iOS).
+Each round is 16 questions. Voices rotate randomly across TTS engines available in your browser (Samantha, Daniel, Karen, Alex, Moira, etc. on macOS/iOS).
 
 ## Features
 
@@ -80,7 +80,7 @@ Each round is 10 questions. Voices rotate randomly across TTS engines available 
 - **Stage locking** — Stage N+1 unlocks when Stage N reaches 80%+ accuracy
 - **Preview before answering** — see the word (and IPA) before the question begins (standard mode; focused variants hide the preview)
 - **Immediate feedback** — correct/incorrect with IPA shown after each answer
-- **Review table** — all 10 questions with your answers vs correct answers shown after each round
+- **Review table** — all 16 questions with your answers vs correct answers shown after each round
 - **Export report** — generates a structured text report for sharing with a teacher
 - **Keyboard shortcuts** — Space to play, ←/→ to answer, Enter to advance
 - **Mobile-friendly** — responsive layout, works on phone browsers
@@ -91,7 +91,7 @@ Each round is 10 questions. Voices rotate randomly across TTS engines available 
 1. Open any `.html` file from `dist/` in a browser (double-click or `open dist/tr-ch-listening-trainer.html`)
 2. Tap/click the play button or press Space to hear a word
 3. Choose which sound you heard
-4. After 10 questions, review your results
+4. After 16 questions, review your results
 5. Score ≥80% to unlock the next stage (if applicable)
 6. Use "Export Report" to save results
 

@@ -216,7 +216,7 @@ TRAINERS = {
         "sound_b": {"id": "th", "label": "/θ/", "example": "third, three, thin",
                      "color": "#0891b2", "bg": "#ecfeff", "border": "#a5f3fc"},
         "stages": [
-            {"icon": "🎯", "title": "first vs third", "desc": "3 組核心詞對<br>first·free·fin"},
+            {"icon": "🎯", "title": "first vs third", "desc": "5 組核心詞對<br>first·free·fin·deaf·fought"},
             {"icon": "🔀", "title": "6 組混合詞對", "desc": "fought·four<br>thought·thaw …"},
             {"icon": "📻", "title": "完整句子辨識", "desc": "句中找出<br>/f/ 或 /θ/ 音"},
         ],
@@ -338,15 +338,15 @@ TRAINERS = {
                      "hint": "嘴唇收攏、用力（說出來）",
                      "color": "#7c3aed", "bg": "#f5f3ff", "border": "#c4b5fd"},
         "stages": [
-            {"icon": "🎯", "title": "full vs fool", "desc": "3 組核心詞對<br>full·pull·could"},
-            {"icon": "🔀", "title": "4 組混合詞對", "desc": "look·wood·stood<br>nook …"},
+            {"icon": "🎯", "title": "full vs fool", "desc": "6 組核心詞對<br>full·pull·could·look·wood·stood"},
+            {"icon": "🔀", "title": "8 組混合詞對", "desc": "look·wood·stood<br>nook·soot …"},
             {"icon": "📻", "title": "完整句子辨識", "desc": "句中找出<br>/ʊ/ 或 /uː/ 音"},
         ],
         "has_sentences": True,
         "report_title": "/ʊ/ vs /uː/ 聽力練習報告",
         "report_stage_names": {
             1: "full vs fool（核心詞對）",
-            2: "4 組混合詞對",
+            2: "8 組混合詞對",
             3: "句子中辨識",
         },
         "error_direction_a_label": "/ʊ/ → /uː/",

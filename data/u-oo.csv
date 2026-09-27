@@ -5,6 +5,18 @@ stage,text,ipa,sound,target
 1,pool,/puːl/,oo,
 1,could,/kʊd/,u,
 1,cooed,/kuːd/,oo,
+1,look,/lʊk/,u,
+1,Luke,/luːk/,oo,
+1,wood,/wʊd/,u,
+1,wooed,/wuːd/,oo,
+1,stood,/stʊd/,u,
+1,stewed,/stuːd/,oo,
+2,full,/fʊl/,u,
+2,fool,/fuːl/,oo,
+2,pull,/pʊl/,u,
+2,pool,/puːl/,oo,
+2,could,/kʊd/,u,
+2,cooed,/kuːd/,oo,
 2,look,/lʊk/,u,
 2,Luke,/luːk/,oo,
 2,wood,/wʊd/,u,
@@ -13,6 +25,8 @@ stage,text,ipa,sound,target
 2,stewed,/stuːd/,oo,
 2,nook,/nʊk/,u,
 2,nuke,/nuːk/,oo,
+2,soot,/sʊt/,u,
+2,suit,/suːt/,oo,
 3,My glass is full of water.,,u,full
 3,Only a fool would leave the door open.,,oo,fool
 3,Please pull the door closed behind you.,,u,pull
