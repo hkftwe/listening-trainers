@@ -1064,6 +1064,16 @@ function handleToggle(pos) {
   updateToggleUI();
 }
 
+function handleToggleSide(pos, side) {
+  // 點哪一側亮哪一側（灰色時點 /ʊ/ 亮 /ʊ/、點 /uː/ 亮 /uː/）
+  if (!state.hasPlayed || state.roundRevealed) return;
+  if (state.currentSelection !== null) return; // 已送出答案，鎖定
+  const nPos = state.stage === 1 ? 2 : 3;
+  if (pos >= nPos) return;
+  state.toggleVals[pos] = side;
+  updateToggleUI();
+}
+
 function handleConfirm() {
   if (!state.hasPlayed || state.roundRevealed) return;
   if (state.currentSelection !== null) return; // 已送出答案
@@ -1531,7 +1541,9 @@ function handleReplay() {
 replayBtn.addEventListener('click', handleReplay);
 voiceRerollBtn.addEventListener('click', () => { pickRandomVoice(); speechSynthesis.cancel(); });
 toggleBtns.forEach((btn) => {
-  btn.addEventListener('click', () => handleToggle(parseInt(btn.dataset.pos)));
+  const pos = parseInt(btn.dataset.pos);
+  btn.querySelector('.tog-a').addEventListener('click', () => handleToggleSide(pos, SOUND_LEFT));
+  btn.querySelector('.tog-b').addEventListener('click', () => handleToggleSide(pos, SOUND_RIGHT));
 });
 confirmBtn.addEventListener('click', handleConfirm);
 nBtn.addEventListener('click', () => handleUOAnswer('u'));
