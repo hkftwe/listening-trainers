@@ -816,7 +816,7 @@
     </div>
 
     <div class="round-info" id="roundInfo" style="display:none">
-      第 <span class="round-num" id="roundNum">1</span> / 10 題
+      第 <span class="round-num" id="roundNum">1</span> / <span id="roundTotal">16</span> 題
     </div>
 
     <div class="progress-wrap" id="progressWrap" style="display:none">
@@ -1000,6 +1000,8 @@ const reportCopied = $('reportCopied');
 const copyReportBtn = $('copyReportBtn');
 const roundInfo = $('roundInfo');
 const roundNum = $('roundNum');
+const roundTotal = $('roundTotal');
+roundTotal.textContent = ROUND_SIZE;
 const progressWrap = $('progressWrap');
 const progressFill = $('progressFill');
 const answerButtons = $('answerButtons');
