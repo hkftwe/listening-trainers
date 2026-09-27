@@ -197,6 +197,28 @@
   .oddball-btn:disabled { cursor: default; }
   .oddball-btn .pos-num { font-size: 1.4rem; font-weight: 800; }
 
+  /* Stage 1/2: 逐位置單詞辨識 toggle（左 /n/ 右 /l/，各代表一個詞位置） */
+  .pos-toggle-buttons { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .pos-toggle {
+    display: flex; align-items: stretch; width: 100%;
+    border: 2px solid var(--border); border-radius: 10px; overflow: hidden;
+    background: var(--card-bg);
+  }
+  .pos-toggle .pos-idx {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 64px; padding: 12px 10px; font-size: 0.8rem; font-weight: 700;
+    color: var(--text-muted); background: var(--bg); border-right: 1px solid var(--border);
+  }
+  .pos-toggle .tog-side {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 12px 8px; font-size: 1.1rem; font-weight: 700; color: #9ca3af;
+    cursor: pointer; transition: all 0.15s; user-select: none;
+  }
+  .pos-toggle.sel-left .tog-a { background: var(--n-bg); color: var(--n-color); }
+  .pos-toggle.sel-right .tog-b { background: var(--l-bg); color: var(--l-color); }
+  .pos-toggle .tog-side.correct-side { background: var(--correct-bg); color: var(--correct); }
+  .pos-toggle .tog-side.wrong-side { background: var(--incorrect-bg); color: var(--incorrect); }
+
   /* Stage 3: minimal-pair word answer buttons (n-word cyan / l-word orange) */
   .answer-buttons { display: flex; gap: 16px; width: 100%; }
   .answer-btn {
@@ -252,6 +274,7 @@
     background: transparent; color: var(--accent); border: 1.5px solid var(--accent);
   }
   .next-btn.secondary:hover { background: #eff6ff; }
+  .next-btn:disabled { background: #9ca3af; cursor: default; }
 
   /* Review table */
   .review-section { width: 100%; text-align: left; }
@@ -313,13 +336,13 @@
   <div class="stage-selector" id="stageSelector">
     <button class="stage-card active" data-stage="1">
       <div class="stage-icon">👂</div>
-      <div class="stage-title">Stage 1 · 相同或不同？</div>
-      <div class="stage-desc">聽兩個詞<br>判斷是否一樣</div>
+      <div class="stage-title">Stage 1 · 逐個辨識（兩個詞）</div>
+      <div class="stage-desc">聽兩個詞<br>各是 /n/ 還是 /l/？</div>
     </button>
     <button class="stage-card locked" data-stage="2">
       <div class="stage-icon">🔍</div>
-      <div class="stage-title">Stage 2 · 找出不同的</div>
-      <div class="stage-desc">聽三個詞<br>哪一個不一樣？</div>
+      <div class="stage-title">Stage 2 · 逐個辨識（三個詞）</div>
+      <div class="stage-desc">聽三個詞<br>各是 /n/ 還是 /l/？</div>
       <div class="stage-lock">🔒 需 Stage 1 達 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
     </button>
     <button class="stage-card locked" data-stage="3">
@@ -371,27 +394,24 @@
 
     <button class="replay-btn" id="replayBtn" style="display:none">🔁 重播</button>
 
-    <!-- Stage 1: Same / Different -->
-    <div class="sd-buttons" id="sdButtons" style="display:none">
-      <button class="sd-btn same-btn" id="sameBtn" disabled>
-        <span>✅</span> 相同<br><span style="font-size:0.7rem;font-weight:400">Same</span>
-      </button>
-      <button class="sd-btn diff-btn" id="diffBtn" disabled>
-        <span>❌</span> 不同<br><span style="font-size:0.7rem;font-weight:400">Different</span>
-      </button>
-    </div>
-
-    <!-- Stage 2: Oddball position -->
-    <div class="oddball-buttons" id="oddballButtons" style="display:none">
-      <button class="oddball-btn" id="pos1Btn" data-pos="1" disabled>
-        <span class="pos-num">1</span>第 1 個
-      </button>
-      <button class="oddball-btn" id="pos2Btn" data-pos="2" disabled>
-        <span class="pos-num">2</span>第 2 個
-      </button>
-      <button class="oddball-btn" id="pos3Btn" data-pos="3" disabled>
-        <span class="pos-num">3</span>第 3 個
-      </button>
+    <!-- Stage 1/2: 逐位置單詞辨識（toggle：左 /n/ 右 /l/，各代表一個詞位置） -->
+    <div class="pos-toggle-buttons" id="posToggleButtons" style="display:none">
+      <div class="pos-toggle" id="pt0" data-pos="0">
+        <span class="pos-idx">第 1 個</span>
+        <span class="tog-side tog-a">/n/</span>
+        <span class="tog-side tog-b">/l/</span>
+      </div>
+      <div class="pos-toggle" id="pt1" data-pos="1">
+        <span class="pos-idx">第 2 個</span>
+        <span class="tog-side tog-a">/n/</span>
+        <span class="tog-side tog-b">/l/</span>
+      </div>
+      <div class="pos-toggle" id="pt2" data-pos="2">
+        <span class="pos-idx">第 3 個</span>
+        <span class="tog-side tog-a">/n/</span>
+        <span class="tog-side tog-b">/l/</span>
+      </div>
+      <button class="next-btn" id="confirmBtn" disabled style="margin-top:4px">回答 ✓</button>
     </div>
 
     <!-- Stage 3: 哪個詞？ -->
@@ -475,6 +495,12 @@ const UNLOCK_THRESHOLD = 0.8;
 const STORAGE_KEY = 'nl-training-trainer-v1';
 const NUM_STAGES = 3;
 
+// 逐位置單詞辨識（Day 106 起，Stage 1/2 用）：左／右音位與顯示標籤
+const SOUND_LEFT = 'n';
+const SOUND_RIGHT = 'l';
+const LABEL_LEFT = '/n/';
+const LABEL_RIGHT = '/l/';
+
 // ============================================================
 // State
 // ============================================================
@@ -487,7 +513,8 @@ let state = {
   currentIndex: 0,
   currentTrial: null,
   hasPlayed: false,
-  currentSelection: null,  // string: 'same'|'diff', or 1|2|3, or 'n'|'l'
+  currentSelection: null,  // string: 'n'|'l'（Stage 3）；array（Stage 1/2 逐位置音位）
+  toggleVals: [null, null, null],  // Stage 1/2 逐位置選擇（null=未作答、其餘 SOUND_LEFT/SOUND_RIGHT）
   roundAnswers: [],        // { trial, choice, correct }
   roundRevealed: false,
   answerSaved: false,      // 當題是否已存（改答案時覆蓋而非重複追加）
@@ -505,13 +532,9 @@ const playHint = $('playHint');
 const playbackSeq = $('playbackSeq');
 const playSection = $('playSection');
 const replayBtn = $('replayBtn');
-const sdButtons = $('sdButtons');
-const sameBtn = $('sameBtn');
-const diffBtn = $('diffBtn');
-const oddballButtons = $('oddballButtons');
-const pos1Btn = $('pos1Btn');
-const pos2Btn = $('pos2Btn');
-const pos3Btn = $('pos3Btn');
+const posToggleButtons = $('posToggleButtons');
+const toggleBtns = [$('pt0'), $('pt1'), $('pt2')];
+const confirmBtn = $('confirmBtn');
 const answerButtons = $('answerButtons');
 const nBtn = $('nBtn');
 const lBtn = $('lBtn');
@@ -543,6 +566,10 @@ const reportOutput = $('reportOutput');
 const reportCopied = $('reportCopied');
 const copyReportBtn = $('copyReportBtn');
 const themeToggle = $('themeToggle');
+
+// 音位 ↔ 顯示標籤／CSS class 的映射（Stage 1/2 逐位置用）
+function soundLabel(sound) { return sound === SOUND_LEFT ? LABEL_LEFT : LABEL_RIGHT; }
+function soundClass(w) { return w.sound === SOUND_LEFT ? 'n-word' : 'l-word'; }
 
 // ============================================================
 // Voice management (single mode — 換題才換聲)
@@ -673,33 +700,37 @@ function shuffle(arr) {
 // ============================================================
 
 function generateStage1Round() {
-  // Stage 1: Same-Different. Generate 10 trials, half "same", half "different".
+  // Stage 1: 逐位置單詞辨識（兩個詞）。答案＝每個位置各自的音位（'n' 或 'l'）。
+  // 相同／不同採隨機配比，但各至少 3 題（10 題：same 3-7、different 3-7）。
   const pairs = [];
   for (let i = 0; i < CORE_PAIRS.length - 1; i += 2) {
     const a = CORE_PAIRS[i];
     const b = CORE_PAIRS[i + 1];
     pairs.push({ a, b });
   }
-  // 4 contrast pairs. We need 10 trials.
-  const trials = [];
-  // 5 "same" trials
-  for (let i = 0; i < 5; i++) {
-    const pair = pairs[Math.floor(Math.random() * pairs.length)];
-    const sameWord = Math.random() < 0.5 ? pair.a : pair.b;
-    trials.push({ type: 'same', word1: sameWord, word2: sameWord, answer: 'same' });
+  const sameCount = 3 + Math.floor(Math.random() * 5); // 3..7
+  const types = [];
+  for (let i = 0; i < ROUND_SIZE; i++) types.push(i < sameCount ? 'same' : 'different');
+  for (let i = types.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [types[i], types[j]] = [types[j], types[i]];
   }
-  // 5 "different" trials
-  for (let i = 0; i < 5; i++) {
+  const trials = [];
+  for (const type of types) {
     const pair = pairs[Math.floor(Math.random() * pairs.length)];
-    // Randomize order
-    const order = Math.random() < 0.5 ? [pair.a, pair.b] : [pair.b, pair.a];
-    trials.push({ type: 'different', word1: order[0], word2: order[1], answer: 'diff' });
+    if (type === 'same') {
+      const w = Math.random() < 0.5 ? pair.a : pair.b;
+      trials.push({ word1: w, word2: w, answer: [w.sound, w.sound] });
+    } else {
+      const order = Math.random() < 0.5 ? [pair.a, pair.b] : [pair.b, pair.a];
+      trials.push({ word1: order[0], word2: order[1], answer: [order[0].sound, order[1].sound] });
+    }
   }
   return shuffle(trials);
 }
 
 function generateStage2Round() {
-  // Stage 2: Oddball. 10 triplets, the odd one can be at position 1, 2, or 3.
+  // Stage 2: 逐位置單詞辨識（三個詞）。保持 oddball 結構（2 同 1 異），答案＝每個位置各自的音位。
   const pairs = [];
   for (let i = 0; i < CORE_PAIRS.length - 1; i += 2) {
     pairs.push({ a: CORE_PAIRS[i], b: CORE_PAIRS[i + 1] });
@@ -709,7 +740,7 @@ function generateStage2Round() {
   const positions = [1,1,1, 2,2,2, 3,3,3,3];
   const shuffledPositions = shuffle(positions);
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < ROUND_SIZE; i++) {
     const pair = pairs[Math.floor(Math.random() * pairs.length)];
     const oddPos = shuffledPositions[i];
     const isAOdd = Math.random() < 0.5;
@@ -723,9 +754,8 @@ function generateStage2Round() {
       words: triplet,
       oddPosition: oddPos,
       oddWord: oddWord,
+      answer: triplet.map(w => w.sound),
     });
-    // answer is the position (1, 2, or 3)
-    trials[trials.length - 1].answer = oddPos;
   }
   return trials;
 }
@@ -774,6 +804,7 @@ function generateRound() {
   state.roundRevealed = false;
   state.hasPlayed = false;
   state.currentSelection = null;
+  state.toggleVals = [null, null, null];
   state.currentTrial = null;
   showPlayState();
 }
@@ -792,8 +823,7 @@ function hideAll() {
   roundInfo.style.display = 'none';
   progressWrap.style.display = 'none';
   replayBtn.style.display = 'none';
-  sdButtons.style.display = 'none';
-  oddballButtons.style.display = 'none';
+  posToggleButtons.style.display = 'none';
   answerButtons.style.display = 'none';
   answeredHint.style.display = 'none';
   revealArea.style.display = 'none';
@@ -812,20 +842,21 @@ function showPlayState() {
   playHint.textContent = state.stage === 1 ? '點擊播放兩個詞' : state.stage === 2 ? '點擊播放三個詞' : '點擊播放單詞';
   playbackSeq.style.display = 'none';
   progressFill.style.width = '0%';
-  // Reset answer buttons
-  [sameBtn, diffBtn, pos1Btn, pos2Btn, pos3Btn, nBtn, lBtn].forEach(b => {
+  // Reset Stage 3 buttons
+  [nBtn, lBtn].forEach(b => {
     b.disabled = true;
     b.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect', 'grayed-out');
   });
+  // Reset Stage 1/2 toggle
+  state.toggleVals = [null, null, null];
   state.currentSelection = null;
 }
 
 function showAnsweredState() {
   // Show buttons for current stage
-  if (state.stage === 1) {
-    sdButtons.style.display = 'flex';
-  } else if (state.stage === 2) {
-    oddballButtons.style.display = 'flex';
+  if (state.stage === 1 || state.stage === 2) {
+    posToggleButtons.style.display = 'flex';
+    confirmBtn.style.display = 'none';
   } else {
     answerButtons.style.display = 'flex';
   }
@@ -852,24 +883,27 @@ function showImmediateFeedback() {
   const choice = state.currentSelection;
   const correct = isAnswerCorrect(trial, choice);
 
-  // 先清掉上一題的對錯／灰化 class
-  [sameBtn, diffBtn, pos1Btn, pos2Btn, pos3Btn, nBtn, lBtn].forEach(b => {
+  // 先清掉上一題的對錯／灰化 class（Stage 3 用）
+  [nBtn, lBtn].forEach(b => {
     b.classList.remove('was-correct', 'was-incorrect', 'grayed-out');
   });
 
-  if (state.stage === 1) {
-    const selectedBtn = choice === 'same' ? sameBtn : diffBtn;
-    const otherBtn = choice === 'same' ? diffBtn : sameBtn;
-    selectedBtn.classList.add(correct ? 'was-correct' : 'was-incorrect');
-    otherBtn.classList.add('grayed-out');
-  } else if (state.stage === 2) {
-    [pos1Btn, pos2Btn, pos3Btn].forEach(b => {
-      if (parseInt(b.dataset.pos) === choice) {
-        b.classList.add(correct ? 'was-correct' : 'was-incorrect');
-      } else {
-        b.classList.add('grayed-out');
+  if (state.stage === 1 || state.stage === 2) {
+    // 逐位置：每個 toggle 的「正確邊」標綠；選錯的邊標紅
+    const nPos = state.stage === 1 ? 2 : 3;
+    for (let p = 0; p < nPos; p++) {
+      const btn = toggleBtns[p];
+      const correctSound = trial.answer[p];
+      const chosen = choice[p];
+      const sideA = btn.querySelector('.tog-a');
+      const sideB = btn.querySelector('.tog-b');
+      sideA.classList.remove('correct-side', 'wrong-side');
+      sideB.classList.remove('correct-side', 'wrong-side');
+      (correctSound === SOUND_LEFT ? sideA : sideB).classList.add('correct-side');
+      if (chosen !== correctSound) {
+        (chosen === SOUND_LEFT ? sideA : sideB).classList.add('wrong-side');
       }
-    });
+    }
   } else {
     const selectedBtn = choice === 'n' ? nBtn : lBtn;
     const otherBtn = choice === 'n' ? lBtn : nBtn;
@@ -891,23 +925,18 @@ function renderReveal() {
   const trial = state.currentTrial;
   if (state.stage === 1) {
     const w1 = trial.word1, w2 = trial.word2;
-    const w1cls = w1.sound === 'n' ? 'n-word' : 'l-word';
-    const w2cls = w2.sound === 'n' ? 'n-word' : 'l-word';
-    const sep = trial.answer === 'same' ? '=' : '≠';
     revealArea.innerHTML = `
       <div class="reveal-words">
-        <span class="reveal-word ${w1cls}">${w1.word} <span class="ipa-sub">${w1.ipa}</span></span>
-        <span class="reveal-separator">${sep}</span>
-        <span class="reveal-word ${w2cls}">${w2.word} <span class="ipa-sub">${w2.ipa}</span></span>
+        <span class="reveal-word ${soundClass(w1)}">${w1.word} <span class="ipa-sub">${w1.ipa}</span></span>
+        <span class="reveal-separator">·</span>
+        <span class="reveal-word ${soundClass(w2)}">${w2.word} <span class="ipa-sub">${w2.ipa}</span></span>
       </div>`;
     revealArea.style.display = 'block';
   } else if (state.stage === 2) {
     revealArea.innerHTML = `
       <div class="reveal-triplet">` +
       trial.words.map((w, i) => {
-        const p = i + 1;
-        const highlight = (p === trial.answer) ? ' odd-highlight' : '';
-        return `<div class="reveal-pos${highlight}"><span class="pos-label">第 ${p} 個</span>${w.word}</div>`;
+        return `<div class="reveal-pos"><span class="pos-label">第 ${i + 1} 個</span>${w.word}</div>`;
       }).join('') + `
       </div>`;
     revealArea.style.display = 'block';
@@ -988,15 +1017,10 @@ async function handlePlay() {
     replayBtn.style.display = 'block';
 
     // Show appropriate answer buttons
-    if (state.stage === 1) {
-      sdButtons.style.display = 'flex';
-      sameBtn.disabled = false;
-      diffBtn.disabled = false;
-    } else if (state.stage === 2) {
-      oddballButtons.style.display = 'flex';
-      pos1Btn.disabled = false;
-      pos2Btn.disabled = false;
-      pos3Btn.disabled = false;
+    if (state.stage === 1 || state.stage === 2) {
+      posToggleButtons.style.display = 'flex';
+      state.toggleVals = [null, null, null];
+      updateToggleUI();
     } else {
       answerButtons.style.display = 'flex';
       nBtn.disabled = false;
@@ -1011,54 +1035,43 @@ async function handlePlay() {
   }
 }
 
-// ---- Stage 1 handler ----
-function handleSDAnswer(choice) {
-  if (!state.hasPlayed || state.roundRevealed) return;
-  if (state.currentSelection === choice) {
-    // Deselect
-    state.currentSelection = null;
-    sameBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect', 'grayed-out');
-    diffBtn.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect', 'grayed-out');
-    answeredHint.style.display = 'none';
-    nextBtn.style.display = 'none';
-    revealBtnEl.style.display = 'none';
-    revealArea.style.display = 'none';
-  } else {
-    // Clear all buttons first, then apply new selection
-    sameBtn.classList.remove('selected-choice', 'unselected-choice');
-    diffBtn.classList.remove('selected-choice', 'unselected-choice');
-    state.currentSelection = choice;
-    if (choice === 'same') {
-      sameBtn.classList.add('selected-choice');
-      diffBtn.classList.add('unselected-choice');
-    } else {
-      diffBtn.classList.add('selected-choice');
-      sameBtn.classList.add('unselected-choice');
-    }
-    showAnsweredState();
+// ---- Stage 1/2 handler：逐位置 toggle ----
+function updateToggleUI() {
+  const nPos = state.stage === 1 ? 2 : 3;
+  confirmBtn.style.display = ''; // 恢復顯示（showAnsweredState 曾隱藏）
+  for (let p = 0; p < 3; p++) {
+    const btn = toggleBtns[p];
+    if (p >= nPos) { btn.style.display = 'none'; continue; }
+    btn.style.display = 'flex';
+    const v = state.toggleVals[p];
+    btn.classList.remove('sel-left', 'sel-right');
+    btn.querySelector('.tog-a').classList.remove('correct-side', 'wrong-side');
+    btn.querySelector('.tog-b').classList.remove('correct-side', 'wrong-side');
+    if (v === SOUND_LEFT) btn.classList.add('sel-left');
+    else if (v === SOUND_RIGHT) btn.classList.add('sel-right');
   }
+  const allAnswered = state.toggleVals.slice(0, nPos).every(v => v !== null);
+  confirmBtn.disabled = !allAnswered;
 }
 
-// ---- Stage 2 handler ----
-function handleOddballAnswer(pos) {
+function handleToggle(pos) {
   if (!state.hasPlayed || state.roundRevealed) return;
-  if (state.currentSelection === pos) {
-    state.currentSelection = null;
-    [pos1Btn, pos2Btn, pos3Btn].forEach(b => b.classList.remove('selected-choice', 'unselected-choice', 'was-correct', 'was-incorrect', 'grayed-out'));
-    answeredHint.style.display = 'none';
-    nextBtn.style.display = 'none';
-    revealBtnEl.style.display = 'none';
-    revealArea.style.display = 'none';
-  } else {
-    state.currentSelection = pos;
-    [pos1Btn, pos2Btn, pos3Btn].forEach(b => {
-      b.classList.remove('selected-choice', 'unselected-choice');
-      const bp = parseInt(b.dataset.pos);
-      if (bp === pos) b.classList.add('selected-choice');
-      else b.classList.add('unselected-choice');
-    });
-    showAnsweredState();
-  }
+  if (state.currentSelection !== null) return; // 已送出答案，鎖定
+  const nPos = state.stage === 1 ? 2 : 3;
+  if (pos >= nPos) return;
+  const cur = state.toggleVals[pos];
+  state.toggleVals[pos] = (cur === SOUND_LEFT) ? SOUND_RIGHT : SOUND_LEFT; // null → SOUND_LEFT
+  updateToggleUI();
+}
+
+function handleConfirm() {
+  if (!state.hasPlayed || state.roundRevealed) return;
+  if (state.currentSelection !== null) return; // 已送出答案
+  const nPos = state.stage === 1 ? 2 : 3;
+  const sel = state.toggleVals.slice(0, nPos);
+  if (sel.some(v => v === null)) return;
+  state.currentSelection = sel;
+  showAnsweredState();
 }
 
 // ---- Stage 3 handler ----
@@ -1107,8 +1120,11 @@ function handleNext() {
 }
 
 function isAnswerCorrect(trial, choice) {
-  if (state.stage === 1) return choice === trial.answer;     // 'same' or 'diff'
-  if (state.stage === 2) return choice === trial.answer;     // 1, 2, or 3
+  if (Array.isArray(trial.answer)) {
+    // Stage 1/2：逐位置音位陣列比對
+    if (!Array.isArray(choice) || choice.length !== trial.answer.length) return false;
+    return trial.answer.every((s, i) => choice[i] === s);
+  }
   return choice === trial.answer;                            // 'n' or 'l'
 }
 
@@ -1145,15 +1161,15 @@ function buildReviewTable(correctCount) {
 
     if (state.stage === 1) {
       const t = a.trial;
-      contentHtml = `<span style="font-weight:600">${t.word1.word}</span> <span style="color:var(--text-muted)">vs</span> <span style="font-weight:600">${t.word2.word}</span>`;
-      answerHtml = t.answer === 'same' ? '相同' : '不同';
-      choiceHtml = a.choice === 'same' ? '相同' : '不同';
+      contentHtml = `<span style="font-weight:600">${t.word1.word}</span> <span style="color:var(--text-muted)">·</span> <span style="font-weight:600">${t.word2.word}</span>`;
+      answerHtml = t.answer.map(s => `<span style="font-weight:600">${soundLabel(s)}</span>`).join(' · ');
+      choiceHtml = a.choice.map(s => `<span style="font-weight:600">${soundLabel(s)}</span>`).join(' · ');
       playTexts = [t.word1.word, t.word2.word];
     } else if (state.stage === 2) {
       const t = a.trial;
       contentHtml = t.words.map(w => `<span style="font-weight:600">${w.word}</span>`).join(' · ');
-      answerHtml = `第 ${t.answer} 個`;
-      choiceHtml = `第 ${a.choice} 個`;
+      answerHtml = t.answer.map(s => `<span style="font-weight:600">${soundLabel(s)}</span>`).join(' · ');
+      choiceHtml = a.choice.map(s => `<span style="font-weight:600">${soundLabel(s)}</span>`).join(' · ');
       playTexts = t.words.map(w => w.word);
     } else {
       const t = a.trial;
@@ -1193,13 +1209,13 @@ function saveAnswerToDaily(a, replaceLast) {
     : null;
   const entry = {
     stage: state.stage,
-    trialType: state.stage === 1 ? 'same-diff' : state.stage === 2 ? 'oddball' : 'identify',
+    trialType: state.stage === 1 ? 'identify-2' : state.stage === 2 ? 'identify-3' : 'identify',
     correct: a.correct,
     direction: state.stage === 3 ? a.trial.answer : null,
     detail: state.stage === 1
-      ? `${a.trial.word1.word}-${a.trial.word2.word}/${a.trial.answer}/${a.choice}`
+      ? `${a.trial.word1.word}-${a.trial.word2.word}/${a.trial.answer.join('/')}/${a.choice.join('/')}`
       : state.stage === 2
-        ? a.trial.words.map(w => w.word).join('-') + `/odd${a.trial.answer}/chose${a.choice}`
+        ? a.trial.words.map(w => w.word).join('-') + `/${a.trial.answer.join('/')}/${a.choice.join('/')}`
         : `${a.trial.word} → ${chosenWord}`,
     replay: state.currentReplayCount,
   };
@@ -1221,7 +1237,7 @@ function showSummaryAfterReview(correctCount) {
     else { streak = 0; }
   }
 
-  const stageNames = ['', '相同或不同？', '找出不同的', '是哪個詞？'];
+  const stageNames = ['', '逐個辨識（兩個詞）', '逐個辨識（三個詞）', '是哪個詞？'];
 
   summary.style.display = 'block';
   summary.innerHTML = `
@@ -1277,9 +1293,9 @@ async function replayWrongAnswers() {
   wrong.forEach((a, i) => {
     let desc;
     if (state.stage === 1) {
-      desc = `${a.trial.word1.word} vs ${a.trial.word2.word} — 實際是「${a.trial.answer === 'same' ? '相同' : '不同'}」`;
+      desc = `${a.trial.word1.word} · ${a.trial.word2.word} — 正確是「${a.trial.answer.map(soundLabel).join(' · ')}」，你選「${a.choice.map(soundLabel).join(' · ')}」`;
     } else if (state.stage === 2) {
-      desc = a.trial.words.map(w => w.word).join(' · ') + ` — 第 ${a.trial.answer} 個不一樣`;
+      desc = a.trial.words.map(w => w.word).join(' · ') + ` — 正確是「${a.trial.answer.map(soundLabel).join(' · ')}」，你選「${a.choice.map(soundLabel).join(' · ')}」`;
     } else {
       const chosenWord = a.choice === 'n' ? a.trial.pair.nWord.word : a.trial.pair.lWord.word;
       desc = `${a.trial.word} ${a.trial.ipa} — 你選了「${chosenWord}」，實際是「${a.trial.word}」`;
@@ -1384,8 +1400,8 @@ function clearHistory() {
 // Export report
 // ============================================================
 const STAGE_NAMES = {
-  1: '相同或不同？（Same-Different）',
-  2: '找出不同的（Oddball）',
+  1: '逐個辨識（兩個詞）',
+  2: '逐個辨識（三個詞）',
   3: '是哪個詞？（Word Identification）',
 };
 
@@ -1413,7 +1429,7 @@ function exportReport() {
   const lines = [];
   lines.push(`# /n/ vs /l/ 漸進式聽力練習報告 — ${today}`);
   lines.push('');
-  lines.push('> 退階設計：Stage 1（相同/不同）→ Stage 2（找出不一樣的）→ Stage 3（是哪個詞：night 還是 light？）');
+  lines.push('> 設計：Stage 1（兩個詞逐個辨識）→ Stage 2（三個詞逐個辨識）→ Stage 3（是哪個詞：night 還是 light？）');
   lines.push('');
   lines.push(`總答題數：${dailyScores.length} 題`);
   const overallCorrect = dailyScores.filter(s => s.correct).length;
@@ -1467,8 +1483,8 @@ function exportReport() {
   lines.push('以上報告由 HTML 漸進式聽力練習頁面自動生成。');
   lines.push('');
   lines.push('設計說明：');
-  lines.push('- Stage 1（Same-Different）：只判斷兩個詞是否相同，不需知道哪個是 /n/ 哪個是 /l/');
-  lines.push('- Stage 2（Oddball）：三個詞中找出不同的那一個');
+  lines.push('- Stage 1（逐個辨識·兩個詞）：聽兩個詞，每個位置各自判斷是 /n/ 還是 /l/');
+  lines.push('- Stage 2（逐個辨識·三個詞）：聽三個詞，每個位置各自判斷是 /n/ 還是 /l/');
   lines.push('- Stage 3（Word Identification）：聽一個詞，判斷是兩個最小對詞中的哪一個（night 還是 light？）');
   lines.push('- 每關需達到 80% 正確率才能解鎖下一關');
 
@@ -1514,11 +1530,10 @@ function handleReplay() {
 
 replayBtn.addEventListener('click', handleReplay);
 voiceRerollBtn.addEventListener('click', () => { pickRandomVoice(); speechSynthesis.cancel(); });
-sameBtn.addEventListener('click', () => handleSDAnswer('same'));
-diffBtn.addEventListener('click', () => handleSDAnswer('diff'));
-pos1Btn.addEventListener('click', () => handleOddballAnswer(1));
-pos2Btn.addEventListener('click', () => handleOddballAnswer(2));
-pos3Btn.addEventListener('click', () => handleOddballAnswer(3));
+toggleBtns.forEach((btn) => {
+  btn.addEventListener('click', () => handleToggle(parseInt(btn.dataset.pos)));
+});
+confirmBtn.addEventListener('click', handleConfirm);
 nBtn.addEventListener('click', () => handleNLAnswer('n'));
 lBtn.addEventListener('click', () => handleNLAnswer('l'));
 nextBtn.addEventListener('click', handleNext);
@@ -1600,24 +1615,25 @@ document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA') return;
 
   if (e.key === ' ') { e.preventDefault(); if (!state.roundRevealed) handlePlay(); }
-  if (e.key === 'ArrowLeft' && state.hasPlayed) {
+
+  const isToggleStage = (state.stage === 1 || state.stage === 2);
+  if (isToggleStage && state.hasPlayed && !state.roundRevealed && ['1', '2', '3'].includes(e.key)) {
     e.preventDefault();
-    if (state.stage === 1) handleSDAnswer('same');
-    else if (state.stage === 3) handleNLAnswer('n');
+    handleToggle(parseInt(e.key) - 1);
   }
-  if (e.key === 'ArrowRight' && state.hasPlayed) {
-    e.preventDefault();
-    if (state.stage === 1) handleSDAnswer('diff');
-    else if (state.stage === 3) handleNLAnswer('l');
-  }
-  if (e.key === 'ArrowUp' && state.hasPlayed && state.stage === 2) { e.preventDefault(); handleOddballAnswer(1); }
-  if (e.key === 'ArrowDown' && state.hasPlayed && state.stage === 2) { e.preventDefault(); handleOddballAnswer(2); }
-  if (e.key === 'ArrowRight' && state.hasPlayed && state.stage === 2) { e.preventDefault(); handleOddballAnswer(3); }
+  if (e.key === 'ArrowLeft' && state.hasPlayed && state.stage === 3) { e.preventDefault(); handleNLAnswer('n'); }
+  if (e.key === 'ArrowRight' && state.hasPlayed && state.stage === 3) { e.preventDefault(); handleNLAnswer('l'); }
+
   if (e.key === 'Enter') {
     e.preventDefault();
     if (state.roundRevealed) return;
-    if (state.currentSelection !== null && state.currentIndex < ROUND_SIZE - 1) { handleNext(); }
-    else if (state.currentSelection !== null && state.currentIndex >= ROUND_SIZE - 1 && !state.roundRevealed) { handleReveal(); }
+    if (isToggleStage && state.hasPlayed && state.currentSelection === null) {
+      handleConfirm();  // 全部 toggle 作答才送出；未答齊則 no-op
+    } else if (state.currentSelection !== null && state.currentIndex < ROUND_SIZE - 1) {
+      handleNext();
+    } else if (state.currentSelection !== null && state.currentIndex >= ROUND_SIZE - 1 && !state.roundRevealed) {
+      handleReveal();
+    }
   }
 });
 
