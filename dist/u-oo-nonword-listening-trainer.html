@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{TITLE_TAG}}</title>
+<title>/ʊ/ vs /uː/ Nonword 聽力辨識（假詞）</title>
 <style>
   :root {
     color-scheme: light;
@@ -12,11 +12,12 @@
     --text: #1a1a2e;
     --text-muted: #6b7280;
     --border: #e5e7eb;
-    --accent: {{ACCENT_COLOR}};
-    --accent-hover: {{ACCENT_HOVER}};
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
     --selected: #6366f1;
     --selected-bg: #eef2ff;
-    {{CSS_SOUND_VARS}}
+    --sa-color: #d97706; --sa-bg: #fffbeb; --sa-border: #fcd34d;
+      --sb-color: #7c3aed; --sb-bg: #f5f3ff; --sb-border: #c4b5fd;
     --correct: #059669;
     --incorrect: #dc2626;
     --correct-bg: #f0fdf4;
@@ -364,7 +365,10 @@
     color: var(--text);
     font-weight: 600;
   }
-  {{CSS_ANSWER_BUTTONS}}
+    .answer-btn.u-btn { border-color: var(--sa-border); background: var(--sa-bg); }
+  .answer-btn.u-btn:hover:not(:disabled) { border-color: #d97706; }
+  .answer-btn.oo-btn { border-color: var(--sb-border); background: var(--sb-bg); }
+  .answer-btn.oo-btn:hover:not(:disabled) { border-color: #7c3aed; }
 
   /* Selected state */
   .answer-btn.selected-choice {
@@ -743,13 +747,17 @@
 
   <div class="header">
     <button class="theme-toggle" id="themeToggle" title="切換深淺色模式">🌙</button>
-    <h1>{{H1}}</h1>
-    <p class="subtitle">{{SUBTITLE}}</p>
+    <h1>/ʊ/ vs /uː/ 假詞聽辨</h1>
+    <p class="subtitle">Nonword ID — 純音位辨識（無詞彙支撐）</p>
   </div>
 
   <!-- Stage selector -->
   <div class="stage-selector" id="stageSelector">
-{{STAGE_CARDS}}
+    <button class="stage-card active" data-stage="1">
+      <div class="stage-icon">🎯</div>
+      <div class="stage-title">假詞辨識</div>
+      <div class="stage-desc">聽假詞<br>選 /ʊ/ 或 /uː/</div>
+    </button>
   </div>
 
   <!-- Stats bar -->
@@ -768,7 +776,7 @@
     </div>
   </div>
 
-{{VOICE_UI}}
+  <div class="voice-info" id="voiceInfo">載入語音引擎中...</div>
 
   <div class="voice-info" id="slowToggleBar" style="margin-top:6px">
     <button class="voice-reroll-btn" id="slowToggleBtn" title="慢速＝聽辨輔助腳手架（Stage 1 重建基礎）；正式測試請用正常速度">🐢 0.5× 慢速</button>
@@ -806,7 +814,16 @@
     <button class="replay-quiz-btn" id="replayQuizBtn" style="display:none">🔁 重播</button>
 
     <div class="answer-buttons" id="answerButtons" style="display:none">
-{{ANSWER_BUTTONS}}
+      <button class="answer-btn u-btn" id="aBtn" disabled>
+        <span class="sound-label">/ʊ/ 音</span>
+        <span class="sound-example">像 像 full, pull</span>
+        <span class="sound-hint">短促、放鬆</span>
+      </button>
+      <button class="answer-btn oo-btn" id="bBtn" disabled>
+        <span class="sound-label">/uː/ 音</span>
+        <span class="sound-example">像 像 fool, pool</span>
+        <span class="sound-hint">拉長、收攏</span>
+      </button>
     </div>
 
     <!-- Answer confirmed indicator -->
@@ -850,35 +867,73 @@
 // ============================================================
 // Word bank — generated from CSV data
 // ============================================================
-{{WORD_BANKS}}
+const WORD_BANKS = {
+  1: [
+    { word: "fook", sound: 'u', ipa: "/f\u028ak/" },
+    { word: "pook", sound: 'u', ipa: "/p\u028ak/" },
+    { word: "dook", sound: 'u', ipa: "/d\u028ak/" },
+    { word: "sook", sound: 'u', ipa: "/s\u028ak/" },
+    { word: "vook", sound: 'u', ipa: "/v\u028ak/" },
+    { word: "foom", sound: 'oo', ipa: "/fu\u02d0m/" },
+    { word: "poon", sound: 'oo', ipa: "/pu\u02d0n/" },
+    { word: "sood", sound: 'oo', ipa: "/su\u02d0d/" },
+    { word: "fuke", sound: 'oo', ipa: "/fu\u02d0k/" },
+    { word: "fude", sound: 'oo', ipa: "/fju\u02d0d/" },
+  ],
+};
 
 // Build contrast-pair map from adjacent entries in word banks
-{{CONTRAST_MAP}}
+const CONTRAST_MAP = {};
+(function buildContrastMap() {
+  for (const stageData of Object.values(WORD_BANKS)) {
+    for (let i = 0; i < stageData.length - 1; i += 2) {
+      const a = stageData[i], b = stageData[i + 1];
+      if (a.sound === b.sound) continue;
+      CONTRAST_MAP[a.word || a.sentence] = { word: b.word || b.sentence, ipa: b.ipa || '', sentence: b.sentence || '' };
+      CONTRAST_MAP[b.word || b.sentence] = { word: a.word || a.sentence, ipa: a.ipa || '', sentence: a.sentence || '' };
+    }
+  }
+})();
 
 // Bonus preview words (extra difficult pairs for warm-up)
-{{BONUS_PREVIEW}}
+const BONUS_PREVIEW = [];
 
 const ROUND_SIZE = 16;
 const UNLOCK_THRESHOLD = 0.8;
-const STORAGE_KEY = '{{STORAGE_KEY}}';
-const NUM_STAGES = {{NUM_STAGES}};
-const HAS_SENTENCES = {{HAS_SENTENCES}};
-const HAS_STAGE3 = {{HAS_STAGE3}};
-const HIDE_WORD_TEXT = {{HIDE_WORD_TEXT}};
-const VOICE_MODE = '{{VOICE_MODE}}';
-const SA_ID = '{{SOUND_A_ID}}';
-const SB_ID = '{{SOUND_B_ID}}';
-const SA_LABEL = '{{SOUND_A_LABEL}}';
-const SB_LABEL = '{{SOUND_B_LABEL}}';
-const SA_HINT = '{{SOUND_A_HINT}}';
-const SB_HINT = '{{SOUND_B_HINT}}';
+const STORAGE_KEY = 'u-oo-nonword-trainer-v1';
+const NUM_STAGES = 1;
+const HAS_SENTENCES = false;
+const HAS_STAGE3 = false;
+const HIDE_WORD_TEXT = true;
+const VOICE_MODE = 'pool';
+const SA_ID = 'u';
+const SB_ID = 'oo';
+const SA_LABEL = '/ʊ/';
+const SB_LABEL = '/uː/';
+const SA_HINT = '短促、放鬆';
+const SB_HINT = '拉長、收攏';
 // 🐢 慢速輔助（scaffolding）：0.5× 播速，用於 Stage 1 重建基礎聽辨；正式測試請用正常速度
 let SLOW_MODE = false;
 
 // ============================================================
 // State
 // ============================================================
-{{STATE_OBJ}}
+let state = {
+  stage: 1,
+  unlockedStages: [1],
+  roundWords: [],
+  currentIndex: 0,
+  currentItem: null,
+  hasPlayed: false,
+  currentSelection: null,
+  roundAnswers: [],
+  roundRevealed: false,
+  voicePool: [],
+  previewMode: false,
+  previewWords: [],
+  previewIndex: 0,
+  reviewVoice: null,
+};
 
 let longPressTimer = null;
 let longPressTarget = null;
@@ -906,7 +961,9 @@ const roundNum = $('roundNum');
 const progressWrap = $('progressWrap');
 const progressFill = $('progressFill');
 const answerButtons = $('answerButtons');
-{{VOICE_DOM_REFS}}
+const aBtn = $('aBtn');
+const bBtn = $('bBtn');
+const voiceInfo = $('voiceInfo');
 const slowToggleBtn = $('slowToggleBtn');
 const answeredHint = $('answeredHint');
 const nextBtn = $('nextBtn');
@@ -925,7 +982,88 @@ const stageSelector = $('stageSelector');
 // ============================================================
 // Voice management
 // ============================================================
-{{VOICE_JS}}
+function buildVoicePool() {
+  const all = speechSynthesis.getVoices();
+  if (all.length === 0) return;
+  const english = all.filter(v => v.lang.startsWith('en'));
+  const preferred = [];
+  const names = new Set();
+  for (const v of english) {
+    if (v.name === 'Samantha' && !names.has('Samantha')) { preferred.push(v); names.add('Samantha'); }
+    if (v.name === 'Daniel' && !names.has('Daniel')) { preferred.push(v); names.add('Daniel'); }
+    if (v.name === 'Karen' && !names.has('Karen')) { preferred.push(v); names.add('Karen'); }
+    if (v.name === 'Alex' && !names.has('Alex')) { preferred.push(v); names.add('Alex'); }
+    if (v.name === 'Moira' && !names.has('Moira')) { preferred.push(v); names.add('Moira'); }
+    if (v.name === 'Fiona' && !names.has('Fiona')) { preferred.push(v); names.add('Fiona'); }
+    if (v.name === 'Veena' && !names.has('Veena')) { preferred.push(v); names.add('Veena'); }
+    if (v.name === 'Tom' && !names.has('Tom')) { preferred.push(v); names.add('Tom'); }
+  }
+  for (const v of english) {
+    if (preferred.length >= 5) break;
+    if (!names.has(v.name)) { preferred.push(v); names.add(v.name); }
+  }
+  if (preferred.length < 3) {
+    for (const v of all) {
+      if (preferred.length >= 3) break;
+      if (!names.has(v.name)) { preferred.push(v); names.add(v.name); }
+    }
+  }
+  state.voicePool = preferred;
+  updateVoiceLabel();
+}
+
+function pickVoice() {
+  if (state.voicePool.length === 0) return null;
+  const idx = Math.floor(Math.random() * state.voicePool.length);
+  return state.voicePool[idx];
+}
+
+function pickReviewVoice() {
+  if (!state.voicePool || state.voicePool.length === 0) return null;
+  if (!state.reviewVoice) {
+    state.reviewVoice = state.voicePool[Math.floor(Math.random() * state.voicePool.length)];
+  }
+  return state.reviewVoice;
+}
+
+function switchReviewVoice() {
+  if (!state.voicePool || state.voicePool.length === 0) return null;
+  const others = state.voicePool.filter(v => v !== state.reviewVoice);
+  const pool = others.length ? others : state.voicePool;
+  state.reviewVoice = pool[Math.floor(Math.random() * pool.length)];
+  return state.reviewVoice;
+}
+
+function updateReviewVoiceLabel() {
+  const el = document.getElementById('reviewVoiceName');
+  if (el && state.reviewVoice) el.textContent = state.reviewVoice.name;
+}
+
+function updateVoiceLabel() {
+  if (state.voicePool.length === 0) {
+    voiceInfo.innerHTML = '語音引擎載入中...';
+    return;
+  }
+  const names = state.voicePool.map(v => `<span class="voice-name">${v.name}</span>`).join(' · ');
+  voiceInfo.innerHTML = `語音：${names}<br><span style="font-size:0.65rem;opacity:0.7">每題隨機輪換</span>`;
+}
+
+speechSynthesis.onvoiceschanged = () => { buildVoicePool(); };
+buildVoicePool();
+
+function speak(text, voice) {
+  return new Promise((resolve) => {
+    speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    const v = voice || pickVoice();
+    if (v) utt.voice = v;
+    utt.rate = SLOW_MODE ? 0.42 : 0.85;
+    utt.pitch = 1;
+    utt.onend = resolve;
+    utt.onerror = resolve;
+    speechSynthesis.speak(utt);
+  });
+}
 
 // ============================================================
 // Persistence (localStorage)
@@ -1460,7 +1598,7 @@ function clearHistory() {
 // ============================================================
 // Export report
 // ============================================================
-const REPORT_STAGE_NAMES = {{REPORT_STAGE_NAMES}};
+const REPORT_STAGE_NAMES = {"1": "\u5047\u8a5e\u8fa8\u8b58"};
 
 function exportReport() {
   const today = new Date().toISOString().slice(0, 10);
@@ -1488,7 +1626,7 @@ function exportReport() {
   }
 
   const lines = [];
-  lines.push(`# {{REPORT_TITLE}} — ${today}`);
+  lines.push(`# /ʊ/ vs /uː/ 假詞聽辨報告 — ${today}`);
   lines.push('');
   lines.push(`總答題數：${dailyScores.length} 題`);
   const overallCorrect = dailyScores.filter(s => s.correct).length;
@@ -1530,7 +1668,7 @@ function exportReport() {
     const aErr = Object.values(d.errors).filter(e => e.sound === SA_ID).reduce((s, e) => s + e.count, 0);
     const bErr = Object.values(d.errors).filter(e => e.sound === SB_ID).reduce((s, e) => s + e.count, 0);
     if (aErr > 0 || bErr > 0) {
-      lines.push(`- 錯誤方向：{{ERROR_A_LABEL}} ${aErr} 次　{{ERROR_B_LABEL}} ${bErr} 次`);
+      lines.push(`- 錯誤方向：/ʊ/ → /uː/ ${aErr} 次　/uː/ → /ʊ/ ${bErr} 次`);
     }
     lines.push('');
   }
@@ -1539,12 +1677,12 @@ function exportReport() {
   const totalAErr = allErrors.filter(e => e.sound === SA_ID).reduce((s, e) => s + e.count, 0);
   const totalBErr = allErrors.filter(e => e.sound === SB_ID).reduce((s, e) => s + e.count, 0);
   lines.push('## 整體錯誤方向');
-  lines.push(`- {{ERROR_A_LABEL}}：${totalAErr} 次`);
-  lines.push(`- {{ERROR_B_LABEL}}：${totalBErr} 次`);
+  lines.push(`- /ʊ/ → /uː/：${totalAErr} 次`);
+  lines.push(`- /uː/ → /ʊ/：${totalBErr} 次`);
   if (totalAErr > totalBErr * 2) {
-    lines.push('- {{ERROR_NOTE_A}}');
+    lines.push('- ⚠️ 主方向為 /ʊ/ → /uː/');
   } else if (totalBErr > totalAErr * 2) {
-    lines.push('- {{ERROR_NOTE_B}}');
+    lines.push('- ⚠️ 主方向為 /uː/ → /ʊ/');
   } else {
     lines.push('- 雙向錯誤大致平衡');
   }
@@ -1716,7 +1854,7 @@ reviewSection.addEventListener('click', async (e) => {
   btn.textContent = '▶';
 });
 
-{{VOICE_EVENT_LISTENERS}}
+
 slowToggleBtn.addEventListener('click', () => {
   SLOW_MODE = !SLOW_MODE;
   slowToggleBtn.textContent = SLOW_MODE ? '▶ 正常速度' : '🐢 0.5× 慢速';

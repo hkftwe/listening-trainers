@@ -354,6 +354,64 @@ TRAINERS = {
         "error_direction_note_a": "⚠️ 主方向為 /ʊ/ → /uː/",
         "error_direction_note_b": "⚠️ 主方向為 /uː/ → /ʊ/",
     },
+
+    "f-th-nonword": {
+        "filename": "f-th-nonword-listening-trainer.html",
+        "title_tag": "/f/ vs /θ/ Nonword 聽力辨識（假詞）",
+        "h1": "/f/ vs /θ/ 假詞聽辨",
+        "subtitle": "Nonword ID — 純音位辨識（無詞彙支撐）",
+        "storage_key": "f-th-nonword-trainer-v1",
+        "accent_color": "#2563eb",
+        "accent_hover": "#1d4ed8",
+        "voice_mode": "pool",
+        "sound_a": {"id": "f", "label": "/f/", "example": "像 first, free, fin",
+                     "color": "#d97706", "bg": "#fffbeb", "border": "#fcd34d"},
+        "sound_b": {"id": "th", "label": "/θ/", "example": "像 third, three, thin",
+                     "color": "#0891b2", "bg": "#ecfeff", "border": "#a5f3fc"},
+        "stages": [
+            {"icon": "🎯", "title": "假詞辨識", "desc": "聽假詞<br>選 /f/ 或 /θ/"},
+        ],
+        "has_sentences": False,
+        "hide_word_text": True,
+        "report_title": "/f/ vs /θ/ 假詞聽辨報告",
+        "report_stage_names": {
+            1: "假詞辨識",
+        },
+        "error_direction_a_label": "/f/ → /θ/",
+        "error_direction_b_label": "/θ/ → /f/",
+        "error_direction_note_a": "⚠️ 主方向為 /f/ → /θ/",
+        "error_direction_note_b": "⚠️ 主方向為 /θ/ → /f/",
+    },
+
+    "u-oo-nonword": {
+        "filename": "u-oo-nonword-listening-trainer.html",
+        "title_tag": "/ʊ/ vs /uː/ Nonword 聽力辨識（假詞）",
+        "h1": "/ʊ/ vs /uː/ 假詞聽辨",
+        "subtitle": "Nonword ID — 純音位辨識（無詞彙支撐）",
+        "storage_key": "u-oo-nonword-trainer-v1",
+        "accent_color": "#2563eb",
+        "accent_hover": "#1d4ed8",
+        "voice_mode": "pool",
+        "sound_a": {"id": "u", "label": "/ʊ/", "example": "像 full, pull",
+                     "hint": "短促、放鬆",
+                     "color": "#d97706", "bg": "#fffbeb", "border": "#fcd34d"},
+        "sound_b": {"id": "oo", "label": "/uː/", "example": "像 fool, pool",
+                     "hint": "拉長、收攏",
+                     "color": "#7c3aed", "bg": "#f5f3ff", "border": "#c4b5fd"},
+        "stages": [
+            {"icon": "🎯", "title": "假詞辨識", "desc": "聽假詞<br>選 /ʊ/ 或 /uː/"},
+        ],
+        "has_sentences": False,
+        "hide_word_text": True,
+        "report_title": "/ʊ/ vs /uː/ 假詞聽辨報告",
+        "report_stage_names": {
+            1: "假詞辨識",
+        },
+        "error_direction_a_label": "/ʊ/ → /uː/",
+        "error_direction_b_label": "/uː/ → /ʊ/",
+        "error_direction_note_a": "⚠️ 主方向為 /ʊ/ → /uː/",
+        "error_direction_note_b": "⚠️ 主方向為 /uː/ → /ʊ/",
+    },
 }
 
 
@@ -836,6 +894,7 @@ def build_html(config, banks):
         "{{NUM_STAGES}}": str(num_stages),
         "{{HAS_SENTENCES}}": "true" if has_sentences else "false",
         "{{HAS_STAGE3}}": "true" if num_stages >= 3 else "false",
+        "{{HIDE_WORD_TEXT}}": "true" if config.get("hide_word_text") else "false",
         "{{VOICE_DOM_REFS}}": js_dom_refs(config),
         "{{VOICE_JS}}": js_voice_management(config),
         "{{STATE_OBJ}}": js_state(config),
@@ -871,6 +930,7 @@ def build_index(trainers):
             ("f-th", "基本辨識（3 關含句子）"),
             ("f-th-simple", "簡短版（無句子）"),
             ("f-th-focused", "純聽音（不顯示文字）"),
+            ("f-th-nonword", "假詞辨識（純音位）"),
         ]),
         ("其他子音對", [
             ("tr-ch", "/tr/ vs /tʃ/"),
@@ -880,6 +940,7 @@ def build_index(trainers):
         ]),
         ("母音", [
             ("u-oo", "/ʊ/ vs /uː/"),
+            ("u-oo-nonword", "/ʊ/ vs /uː/ 假詞辨識（純音位）"),
             ("u-oo-training", "/ʊ/ vs /uː/ 訓練模式（逐題即時回饋）"),
             ("vowel-assessment", "Minimal Pair 評估（第 0 天）"),
         ]),

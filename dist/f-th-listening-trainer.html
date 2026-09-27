@@ -940,6 +940,7 @@ const STORAGE_KEY = 'f-th-listening-trainer-v3';
 const NUM_STAGES = 3;
 const HAS_SENTENCES = true;
 const HAS_STAGE3 = true;
+const HIDE_WORD_TEXT = false;
 const VOICE_MODE = 'pool';
 const SA_ID = 'f';
 const SB_ID = 'th';
@@ -1229,7 +1230,7 @@ function showPreviewState() {
   const isStage3 = (state.stage === 3 && HAS_SENTENCES && w.sentence);
   const hint = (w.sound === SA_ID ? SA_HINT : SB_HINT);
   const hintHtml = hint ? `<span class="ipa-hint">${hint}</span>` : '';
-  const label = isStage3 ? highlightTargetWord(w.sentence, w.word) : (w.sentence || `${w.word} <span class="ipa-sub">${w.ipa}</span>${hintHtml}`);
+  const label = HIDE_WORD_TEXT ? '🔊 純聽音（按 ▶ 播放）' : (isStage3 ? highlightTargetWord(w.sentence, w.word) : (w.sentence || `${w.word} <span class="ipa-sub">${w.ipa}</span>${hintHtml}`));
   previewWord.innerHTML = label;
   previewProgress.textContent = `${state.previewIndex + 1} / ${state.previewWords.length}`;
 }
