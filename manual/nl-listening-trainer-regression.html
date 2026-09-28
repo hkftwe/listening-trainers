@@ -305,7 +305,7 @@
     <button class="theme-toggle" id="themeToggle" title="切換深淺色模式">🌙</button>
     <h1>/n/ vs /l/ 漸進式聽力訓練</h1>
     <p class="subtitle">Progressive Listening — 從「聽出差異」開始，不從「辨識音位」開始</p>
-    <p class="method-note">退階設計：Stage 1（相同/不同）→ Stage 2（找出不一樣的那個）→ Stage 3（聽出是哪個詞：night 還是 light？）</p>
+    <p class="method-note">退階設計：Stage 1（相同/不同）→ Stage 2（找出不一樣的那個）→ Stage 3（聽出是哪個音：/n/ 還是 /l/？）</p>
   </div>
 
   <!-- Stage selector -->
@@ -323,8 +323,8 @@
     </button>
     <button class="stage-card locked" data-stage="3">
       <div class="stage-icon">🎯</div>
-      <div class="stage-title">Stage 3 · 是哪個詞？</div>
-      <div class="stage-desc">聽一個詞<br>night 還是 light？</div>
+      <div class="stage-title">Stage 3 · 是哪個音？</div>
+      <div class="stage-desc">聽一個詞<br>選 /n/ 還是 /l/？</div>
       <div class="stage-lock">🔒 需 Stage 2 達 80% 解鎖<br><span style="font-size:0.6rem;opacity:0.7">Shift+點擊／長按 強制解鎖</span></div>
     </button>
   </div>
@@ -394,7 +394,7 @@
       </button>
     </div>
 
-    <!-- Stage 3: 哪個詞？ -->
+    <!-- Stage 3: 哪個音？ -->
     <div class="answer-buttons" id="answerButtons" style="display:none">
       <button class="answer-btn n-btn" id="nBtn" disabled>
         <span class="sound-label" id="nWordLabel">—</span>
@@ -479,8 +479,8 @@ for (let i = 0; i < CORE_PAIRS.length - 1; i += 2) {
 
 const ROUND_SIZE = 16;
 const UNLOCK_THRESHOLD = 0.8;
-// v2: Stage 3 從「/n/ /l/ 音位標籤」改為「最小對詞辨識（night 還是 light？）」——換 key 避免與舊格式每日成績混雜
-const STORAGE_KEY = 'nl-regression-trainer-v2';
+// v3: Stage 3 從「night/light 拼字」改回「/n/ /l/ 音位標籤」——修拼字干擾（④），換 key 避免與 v2 拼字成績混雜
+const STORAGE_KEY = 'nl-regression-trainer-v3';
 const NUM_STAGES = 3;
 // 🐢 慢速輔助（scaffolding）：0.5× 播速，用於 Stage 1 重建基礎聽辨；正式測試請用正常速度
 let SLOW_MODE = false;
@@ -743,7 +743,7 @@ function generateStage2Round() {
 }
 
 function generateStage3Round() {
-  // Stage 3: Word Identification（最小對詞辨識）——聽一個詞，判斷是兩個最小對詞中的哪一個。
+  // Stage 3: Phoneme Identification（音位辨識）——聽一個詞，判斷是哪個音位。
   const bank = CORE_PAIRS;
   let pool = [];
   while (pool.length < ROUND_SIZE) {
@@ -865,9 +865,9 @@ function updateProgress() {
 function updateStage3Buttons() {
   // Stage 3: 兩個按鈕顯示當題的最小對詞（左 = /n/ 詞、右 = /l/ 詞）
   const pair = state.currentTrial.pair;
-  nWordLabel.textContent = pair.nWord.word;
+  nWordLabel.textContent = '/n/';
   nIpaLabel.textContent = pair.nWord.ipa;
-  lWordLabel.textContent = pair.lWord.word;
+  lWordLabel.textContent = '/l/';
   lIpaLabel.textContent = pair.lWord.ipa;
 }
 
@@ -1153,7 +1153,7 @@ function showSummaryAfterReview(correctCount) {
     else { streak = 0; }
   }
 
-  const stageNames = ['', '相同或不同？', '找出不同的', '是哪個詞？'];
+  const stageNames = ['', '相同或不同？', '找出不同的', '是哪個音？'];
 
   summary.style.display = 'block';
   summary.innerHTML = `
@@ -1318,7 +1318,7 @@ function clearHistory() {
 const STAGE_NAMES = {
   1: '相同或不同？（Same-Different）',
   2: '找出不同的（Oddball）',
-  3: '是哪個詞？（Word Identification）',
+  3: '是哪個音？（Phoneme Identification）',
 };
 
 function exportReport() {
@@ -1345,7 +1345,7 @@ function exportReport() {
   const lines = [];
   lines.push(`# /n/ vs /l/ 漸進式聽力練習報告 — ${today}`);
   lines.push('');
-  lines.push('> 退階設計：Stage 1（相同/不同）→ Stage 2（找出不一樣的）→ Stage 3（是哪個詞：night 還是 light？）');
+  lines.push('> 退階設計：Stage 1（相同/不同）→ Stage 2（找出不一樣的）→ Stage 3（是哪個音：/n/ 還是 /l/？）');
   lines.push('');
   lines.push(`總答題數：${dailyScores.length} 題`);
   const overallCorrect = dailyScores.filter(s => s.correct).length;
@@ -1407,7 +1407,7 @@ function exportReport() {
   lines.push('設計說明：');
   lines.push('- Stage 1（Same-Different）：只判斷兩個詞是否相同，不需知道哪個是 /n/ 哪個是 /l/');
   lines.push('- Stage 2（Oddball）：三個詞中找出不同的那一個');
-  lines.push('- Stage 3（Word Identification）：聽一個詞，判斷是兩個最小對詞中的哪一個（night 還是 light？）');
+  lines.push('- Stage 3（Phoneme Identification）：聽一個詞，判斷是 /n/ 還是 /l/');
   lines.push('- 每關需達到 80% 正確率才能解鎖下一關');
 
   const report = lines.join('\n');
