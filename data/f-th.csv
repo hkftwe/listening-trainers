@@ -1,6 +1,6 @@
 stage,text,ipa,sound,target
 1,first,/fɜːrst/,f,
-1,third,/θɜːrd/,th,
+1,thirst,/θɜːrst/,th,
 1,free,/friː/,f,
 1,three,/θriː/,th,
 1,fin,/fɪn/,f,
@@ -10,7 +10,7 @@ stage,text,ipa,sound,target
 1,fought,/fɔːt/,f,
 1,thought,/θɔːt/,th,
 2,first,/fɜːrst/,f,
-2,third,/θɜːrd/,th,
+2,thirst,/θɜːrst/,th,
 2,free,/friː/,f,
 2,three,/θriː/,th,
 2,fin,/fɪn/,f,
@@ -22,11 +22,11 @@ stage,text,ipa,sound,target
 2,deaf,/def/,f,
 2,death,/deθ/,th,
 3,I was the first person to arrive.,,f,first
-3,He is the third child in his family.,,th,third
+3,He had a strong thirst after the game.,,th,thirst
 3,She won first place in the race.,,f,first
-3,I live on the third floor.,,th,third
+3,I felt a strong thirst after running.,,th,thirst
 3,This is my first time here.,,f,first
-3,She finished third in the contest.,,th,third
+3,The hot day gave him a strong thirst.,,th,thirst
 3,The water is free at this restaurant.,,f,free
 3,I have three cats at home.,,th,three
 3,I am free this afternoon.,,f,free

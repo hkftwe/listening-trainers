@@ -755,7 +755,7 @@
   <div class="stage-selector" id="stageSelector">
     <button class="stage-card active" data-stage="1">
       <div class="stage-icon">🎯</div>
-      <div class="stage-title">first vs third</div>
+      <div class="stage-title">first vs thirst</div>
       <div class="stage-desc">5 組核心詞對<br>first·free·fin·deaf·fought</div>
     </button>
     <button class="stage-card locked" data-stage="2">
@@ -832,7 +832,7 @@
       </button>
       <button class="answer-btn th-btn" id="bBtn" disabled>
         <span class="sound-label">/θ/ 音</span>
-        <span class="sound-example">像 third, three, thin</span>
+        <span class="sound-example">像 thirst, three, thin</span>
       </button>
     </div>
 
@@ -880,7 +880,7 @@
 const WORD_BANKS = {
   1: [
     { word: "first", sound: 'f', ipa: "/f\u025c\u02d0rst/" },
-    { word: "third", sound: 'th', ipa: "/\u03b8\u025c\u02d0rd/" },
+    { word: "thirst", sound: 'th', ipa: "/\u03b8\u025c\u02d0rst/" },
     { word: "free", sound: 'f', ipa: "/fri\u02d0/" },
     { word: "three", sound: 'th', ipa: "/\u03b8ri\u02d0/" },
     { word: "fin", sound: 'f', ipa: "/f\u026an/" },
@@ -892,7 +892,7 @@ const WORD_BANKS = {
   ],
   2: [
     { word: "first", sound: 'f', ipa: "/f\u025c\u02d0rst/" },
-    { word: "third", sound: 'th', ipa: "/\u03b8\u025c\u02d0rd/" },
+    { word: "thirst", sound: 'th', ipa: "/\u03b8\u025c\u02d0rst/" },
     { word: "free", sound: 'f', ipa: "/fri\u02d0/" },
     { word: "three", sound: 'th', ipa: "/\u03b8ri\u02d0/" },
     { word: "fin", sound: 'f', ipa: "/f\u026an/" },
@@ -906,11 +906,11 @@ const WORD_BANKS = {
   ],
   3: [
     { sentence: "I was the first person to arrive.", sound: 'f', word: "first" },
-    { sentence: "He is the third child in his family.", sound: 'th', word: "third" },
+    { sentence: "He had a strong thirst after the game.", sound: 'th', word: "thirst" },
     { sentence: "She won first place in the race.", sound: 'f', word: "first" },
-    { sentence: "I live on the third floor.", sound: 'th', word: "third" },
+    { sentence: "I felt a strong thirst after running.", sound: 'th', word: "thirst" },
     { sentence: "This is my first time here.", sound: 'f', word: "first" },
-    { sentence: "She finished third in the contest.", sound: 'th', word: "third" },
+    { sentence: "The hot day gave him a strong thirst.", sound: 'th', word: "thirst" },
     { sentence: "The water is free at this restaurant.", sound: 'f', word: "free" },
     { sentence: "I have three cats at home.", sound: 'th', word: "three" },
     { sentence: "I am free this afternoon.", sound: 'f', word: "free" },
@@ -1662,7 +1662,7 @@ function clearHistory() {
 // ============================================================
 // Export report
 // ============================================================
-const REPORT_STAGE_NAMES = {"1": "first vs third\uff08\u6838\u5fc3\u8a5e\u5c0d\uff09", "2": "6 \u7d44\u6df7\u5408\u8a5e\u5c0d", "3": "\u53e5\u5b50\u4e2d\u8fa8\u8b58"};
+const REPORT_STAGE_NAMES = {"1": "first vs thirst\uff08\u6838\u5fc3\u8a5e\u5c0d\uff09", "2": "6 \u7d44\u6df7\u5408\u8a5e\u5c0d", "3": "\u53e5\u5b50\u4e2d\u8fa8\u8b58"};
 
 function exportReport() {
   const today = new Date().toISOString().slice(0, 10);

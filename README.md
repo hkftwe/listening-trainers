@@ -10,7 +10,7 @@ Self-contained, single-file HTML trainers for English phoneme discrimination. Op
 | `fr-fire-listening-trainer.html` | /fr/ vs /f/ | fry–fire, free–fee, fresh–flesh | 3 |
 | `nl-listening-trainer.html` | /n/ vs /l/ | need–lead, night–light, name–lame | 3 |
 | `nl-listening-trainer-core.html` | /n/ vs /l/ (核心詞對) | light, low, life, lead, need … | 1 |
-| `f-th-listening-trainer.html` | /f/ vs /θ/ | first–third, free–three, fought–thought | 3 |
+| `f-th-listening-trainer.html` | /f/ vs /θ/ | first–thirst, free–three, fought–thought | 3 |
 | `f-th-listening-trainer-focused.html` | /f/ vs /θ/ (純聽音) | fought/thought, free/three, deaf/death | 1 |
 | `f-th-listening-trainer-simple.html` | /f/ vs /θ/ (簡化) | 混合詞對 + 句中辨識 | 2 |
 | `v-f-listening-trainer.html` | /v/ vs /f/ + every 聽覺重建 | very–ferry, save–safe, vine–fine | 1 |
