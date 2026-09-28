@@ -21,6 +21,8 @@ All generated trainers live in `dist/`. Variant trainers target specific trainin
 
 The index page (`index.html`) links all trainers for easy access on mobile.
 
+The voice audition page (`voice-audition.html`) lists all available browser TTS voices with a play button for each, so you can find which voices sound best before committing them to training.
+
 ## Architecture
 
 Trainers are built from a shared template, not maintained as independent copies:

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>語音試聽 — Voice Audition</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --good: #16a34a;
+    --bad: #dc2626;
+    --playing: #fff7ed;
+    --playing-border: #f59e0b;
+  }
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1a1a2e;
+    --card: #232946;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --border: #374151;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --playing: #3a2e12;
+    --playing-border: #d97706;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, system-ui, "PingFang TC", "Noto Sans TC", sans-serif;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+    line-height: 1.6;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header { display: flex; align-items: center; justify-content: space-between; margin: 20px 0 4px; }
+  h1 { font-size: 1.3rem; margin: 0; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin: 0 0 16px; }
+  #themeToggle {
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 10px; cursor: pointer; color: var(--text); font-size: 1rem;
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 14px;
+  }
+  .card h2 { font-size: 0.9rem; color: var(--muted); font-weight: 600; margin: 0 0 8px; }
+  .sentence {
+    font-size: 1.05rem; line-height: 1.7; margin: 0 0 10px; padding: 10px 12px;
+    background: var(--bg); border-radius: 8px; border: 1px solid var(--border);
+  }
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  input[type="text"], input[type="search"] {
+    flex: 1; min-width: 0; padding: 9px 10px; font-size: 0.95rem;
+    border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text);
+  }
+  .btn {
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px;
+    cursor: pointer; background: var(--card); color: var(--text); font-size: 0.9rem;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: var(--accent-hover); }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    border: none; padding: 8px 14px; cursor: pointer; background: var(--card); color: var(--text); font-size: 0.9rem;
+  }
+  .seg button.active { background: var(--accent); color: #fff; }
+  .seg + .seg { margin-left: 8px; }
+  .voice-group-title {
+    font-size: 0.8rem; color: var(--muted); font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; margin: 16px 0 4px;
+  }
+  .voice {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 10px; margin-bottom: 6px; background: var(--card);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .voice.playing { background: var(--playing); border-color: var(--playing-border); }
+  .play {
+    flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--card); color: var(--accent);
+    font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .play:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .voice.playing .play { background: var(--accent); color: #fff; }
+  .voice-info { flex: 1; min-width: 0; }
+  .voice-name { font-size: 0.95rem; font-weight: 500; }
+  .voice-lang { font-size: 0.75rem; color: var(--muted); }
+  .mark {
+    flex: 0 0 auto; width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card); cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center;
+  }
+  .mark.good.on { background: var(--good); border-color: var(--good); }
+  .mark.bad.on { background: var(--bad); border-color: var(--bad); }
+  .mark:hover { border-color: var(--accent); }
+  .empty { color: var(--muted); text-align: center; padding: 20px 0; font-size: 0.9rem; }
+  .hint { color: var(--muted); font-size: 0.8rem; margin-top: 6px; }
+  #resultArea { white-space: pre-wrap; font-size: 0.9rem; margin: 8px 0 0; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <h1>語音試聽（Voice Audition）</h1>
+  <button id="themeToggle" aria-label="切換暗黑模式">🌙</button>
+</header>
+<p class="subtitle">找出適合 TTS 練習的語音——逐一點 ▶ 播放同一句固定例句，把好用／不好用的語音標起來。</p>
+
+<div class="card">
+  <h2>固定例句（每個語音都播這句）</h2>
+  <p class="sentence" id="fixedSentence">First, three friends thought they could find the full moon at night, but every light looked very strange.</p>
+  <div class="row">
+    <input type="text" id="customSentence" placeholder="自訂句子／詞對（選填），例如：night light night light">
+    <button class="btn primary" id="useCustom">試聽自訂</button>
+  </div>
+  <p class="hint">自訂輸入後按「試聽自訂」，之後點 ▶ 就會播你輸入的內容（清除則恢復固定例句）。</p>
+</div>
+
+<div class="card">
+  <h2>播放設定</h2>
+  <div class="row">
+    <span style="color:var(--muted);font-size:0.9rem">語速</span>
+    <div class="seg" id="rateSeg">
+      <button data-rate="0.5">0.5×</button>
+      <button data-rate="0.7">0.7×</button>
+      <button data-rate="1.0" class="active">1.0×</button>
+    </div>
+    <span style="color:var(--muted);font-size:0.9rem">顯示</span>
+    <div class="seg" id="filterSeg">
+      <button data-filter="en" class="active">只英文</button>
+      <button data-filter="all">全部</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>語音列表 <span id="voiceCount" style="color:var(--muted);font-weight:400"></span></h2>
+  <div id="voiceList"><p class="empty">載入語音中…（若遲遲沒有，請確認瀏覽器允許語音合成）</p></div>
+</div>
+
+<div class="card">
+  <h2>匯出結果</h2>
+  <div class="row">
+    <button class="btn primary" id="copyResult">複製好用／不好用名單</button>
+    <button class="btn" id="clearMarks">清除標記</button>
+  </div>
+  <pre id="resultArea"></pre>
+</div>
+
+<script>
+(function () {
+  var voices = [];
+  var marks = {};           // { voiceName: 'good' | 'bad' }
+  var currentRate = 1.0;
+  var currentFilter = 'en';
+  var marksKey = 'voice-audition-marks';
+  var themeKey = 'voice-audition-theme';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var fixedSentence = $('fixedSentence').textContent.trim();
+
+  // ── 深色模式 ──
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    $('themeToggle').textContent = (t === 'dark') ? '☀️' : '🌙';
+  }
+  var savedTheme = localStorage.getItem(themeKey);
+  if (savedTheme) applyTheme(savedTheme);
+  $('themeToggle').addEventListener('click', function () {
+    var next = (document.documentElement.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem(themeKey, next);
+  });
+
+  // ── 標記（localStorage）──
+  function loadMarks() {
+    try { marks = JSON.parse(localStorage.getItem(marksKey)) || {}; } catch (e) { marks = {}; }
+  }
+  function saveMarks() { localStorage.setItem(marksKey, JSON.stringify(marks)); }
+  loadMarks();
+
+  // ── 語音載入 ──
+  function loadVoices() {
+    voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+    if (!voices.length) return; // 等 voiceschanged
+    renderVoices();
+  }
+  if (window.speechSynthesis) {
+    speechSynthesis.onvoiceschanged = loadVoices;
+  }
+  loadVoices();
+
+  function currentSentence() {
+    var c = $('customSentence').value.trim();
+    return c || fixedSentence;
+  }
+
+  function playVoice(voice) {
+    if (!window.speechSynthesis) { alert('此瀏覽器不支援語音合成'); return; }
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(currentSentence());
+    u.voice = voice;
+    u.lang = voice.lang;
+    u.rate = currentRate;
+    u.onstart = function () { markPlaying(voice.name, true); };
+    u.onend = function () { markPlaying(voice.name, false); };
+    u.onerror = function () { markPlaying(voice.name, false); };
+    speechSynthesis.speak(u);
+  }
+
+  function markPlaying(name, on) {
+    var nodes = document.querySelectorAll('.voice');
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].getAttribute('data-name') === name) nodes[i].classList.toggle('playing', on);
+    }
+  }
+
+  function renderVoices() {
+    var en = [], other = [];
+    for (var i = 0; i < voices.length; i++) {
+      var v = voices[i];
+      (v.lang && v.lang.toLowerCase().indexOf('en') === 0 ? en : other).push(v);
+    }
+    en.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    other.sort(function (a, b) {
+      var l = (a.lang || '').localeCompare(b.lang || '');
+      return l !== 0 ? l : a.name.localeCompare(b.name);
+    });
+
+    var list = $('voiceList');
+    list.innerHTML = '';
+
+    var shown = 0;
+    if (currentFilter === 'en') {
+      shown = renderGroup(list, '英文 English', en);
+      if (!en.length) list.insertAdjacentHTML('beforeend', '<p class="empty">沒有偵測到英文語音。切到「全部」看看。</p>');
+    } else {
+      shown = renderGroup(list, '英文 English', en) + renderGroup(list, '其他語言 Other', other);
+    }
+    $('voiceCount').textContent = '（' + shown + ' 個）';
+  }
+
+  function renderGroup(list, title, group) {
+    if (!group.length) return 0;
+    var html = '<div class="voice-group-title">' + title + '</div>';
+    for (var i = 0; i < group.length; i++) {
+      var v = group[i];
+      var m = marks[v.name];
+      html +=
+        '<div class="voice" data-name="' + escAttr(v.name) + '">' +
+          '<button class="play" title="播放">▶</button>' +
+          '<div class="voice-info">' +
+            '<div class="voice-name">' + escHtml(v.name) + '</div>' +
+            '<div class="voice-lang">' + escHtml(v.lang || '—') + (v.default ? ' · 預設' : '') + '</div>' +
+          '</div>' +
+          '<button class="mark good' + (m === 'good' ? ' on' : '') + '" title="好用">👍</button>' +
+          '<button class="mark bad' + (m === 'bad' ? ' on' : '') + '" title="不好用">👎</button>' +
+        '</div>';
+    }
+    list.insertAdjacentHTML('beforeend', html);
+    return group.length;
+  }
+
+  function escHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function escAttr(s) { return String(s).replace(/"/g, '&quot;'); }
+
+  // 事件委派
+  $('voiceList').addEventListener('click', function (e) {
+    var voiceEl = e.target.closest ? e.target.closest('.voice') : null;
+    if (!voiceEl) return;
+    var name = voiceEl.getAttribute('data-name');
+    var target = e.target;
+    if (target.classList.contains('play')) {
+      var v = findVoice(name);
+      if (v) playVoice(v);
+    } else if (target.classList.contains('mark')) {
+      var kind = target.classList.contains('good') ? 'good' : 'bad';
+      if (marks[name] === kind) { delete marks[name]; } else { marks[name] = kind; }
+      saveMarks();
+      renderVoices();
+    }
+  });
+
+  function findVoice(name) {
+    for (var i = 0; i < voices.length; i++) if (voices[i].name === name) return voices[i];
+    return null;
+  }
+
+  // 設定控件
+  $('rateSeg').addEventListener('click', function (e) {
+    if (e.target.tagName !== 'BUTTON') return;
+    currentRate = parseFloat(e.target.getAttribute('data-rate'));
+    var btns = $('rateSeg').querySelectorAll('button');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i] === e.target);
+  });
+  $('filterSeg').addEventListener('click', function (e) {
+    if (e.target.tagName !== 'BUTTON') return;
+    currentFilter = e.target.getAttribute('data-filter');
+    var btns = $('filterSeg').querySelectorAll('button');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i] === e.target);
+    renderVoices();
+  });
+  $('useCustom').addEventListener('click', function () {
+    if (!$('customSentence').value.trim()) { $('customSentence').focus(); return; }
+    renderVoices();
+  });
+  $('customSentence').addEventListener('input', function () {
+    if (!$('customSentence').value.trim()) renderVoices();
+  });
+
+  // 匯出
+  $('copyResult').addEventListener('click', function () {
+    var good = [], bad = [];
+    for (var name in marks) {
+      if (marks[name] === 'good') good.push(name);
+      else if (marks[name] === 'bad') bad.push(name);
+    }
+    good.sort(); bad.sort();
+    var total = voices.length;
+    var lines = [];
+    lines.push('語音試聽結果（' + new Date().toLocaleString() + '）');
+    lines.push('');
+    lines.push('好用（' + good.length + '）：');
+    lines.push(good.length ? good.join('\n') : '（無）');
+    lines.push('');
+    lines.push('不好用（' + bad.length + '）：');
+    lines.push(bad.length ? bad.join('\n') : '（無）');
+    lines.push('');
+    lines.push('共 ' + total + ' 個語音，未標記 ' + (total - good.length - bad.length) + ' 個。');
+    var text = lines.join('\n');
+    $('resultArea').textContent = text;
+    copyText(text);
+  });
+  $('clearMarks').addEventListener('click', function () {
+    marks = {};
+    saveMarks();
+    renderVoices();
+    $('resultArea').textContent = '';
+  });
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(function () { fallbackCopy(text); });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+})();
+</script>
+</body>
+</html>
