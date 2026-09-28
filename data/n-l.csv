@@ -25,17 +25,49 @@ stage,text,ipa,sound,target
 2,line,/laɪn/,l,
 3,I need a glass of water.,,n,need
 3,She will lead the team meeting.,,l,lead
+3,We need to buy some milk on the way home.,,n,need
+3,Can you lead the way to the station?,,l,lead
+3,You need to rest after a long day.,,n,need
+3,He will lead the class in a song.,,l,lead
 3,He used a sharp knife to cut the bread.,,n,knife
 3,She has a busy life in the city.,,l,life
-3,No, I don't want any more food.,,n,no
+3,Please put the knife back in the drawer.,,n,knife
+3,My life changed a lot last year.,,l,life
+3,She cut the apple with a small knife.,,n,knife
+3,He wants a quiet life in the country.,,l,life
+3,I said no to more food.,,n,no
 3,The chair is too low for the desk.,,l,low
+3,There is no milk left in the fridge.,,n,no
+3,Please speak in a low voice in the library.,,l,low
+3,She said no to the extra work.,,n,no
+3,The sun is low in the sky at sunset.,,l,low
 3,I slept well last night.,,n,night
 3,Please turn on the light.,,l,light
+3,We watched a movie last night.,,n,night
+3,The light in the kitchen is very bright.,,l,light
+3,The baby woke up twice at night.,,n,night
+3,Turn off the light before you leave.,,l,light
 3,I took a short nap after lunch.,,n,nap
 3,The cat sat on my lap.,,l,lap
+3,The baby needs a nap in the afternoon.,,n,nap
+3,She held the baby on her lap.,,l,lap
+3,He felt better after a quick nap.,,n,nap
+3,The dog jumped onto my lap.,,l,lap
 3,What is your name?,,n,name
 3,He is lame and needs a walking stick.,,l,lame
+3,Please write your name on the paper.,,n,name
+3,The horse was lame after the race.,,l,lame
+3,I forgot the name of the street.,,n,name
+3,She felt bad for the lame dog.,,l,lame
 3,The fisherman cast his net into the sea.,,n,net
 3,Please let me help you.,,l,let
+3,He caught three fish in his net.,,n,net
+3,Let the children play outside.,,l,let
+3,The ball hit the net during the game.,,n,net
+3,She let me borrow her book.,,l,let
 3,I have nine apples in the basket.,,n,nine
 3,Please draw a straight line.,,l,line
+3,The shop opens at nine in the morning.,,n,nine
+3,We waited in a long line for tickets.,,l,line
+3,There are nine students in my class.,,n,nine
+3,Read the first line of the page.,,l,line
