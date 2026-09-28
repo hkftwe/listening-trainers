@@ -7,7 +7,7 @@ build-trainers.py — 從共用 template + CSV 生成 listening trainer HTML。
 
 ⚠️ 改 template.html 後的檢查清單（template 是共用 UI／邏輯，改了不會自動套到非 generated trainer）：
   1. generated（TRAINERS dict 驅動）→ 跑本腳本即自動重建 ✅
-  2. manual（manual_trainers dict：v-f、vowel-assessment、nl-training、u-oo-training、n-l-regression）
+  2. manual（manual_trainers dict：nl-training、u-oo-training、n-l-regression、chose-chosen）
      → build 只「複製」不「套 template」，template 改了要**手動 port** 到每個 manual/*.html。
   3. 新增／改名 trainer：`manual_trainers`（複製清單）與 `all_trainers`（index 導航）兩處都要同步。
 """
@@ -132,76 +132,6 @@ TRAINERS = {
         "error_direction_note_b": "⚠️ 主方向為 /l/ → /n/，舌側音被誤聽為鼻音",
     },
 
-    "n-l-complex": {
-        "filename": "nl-listening-trainer-complex.html",
-        "title_tag": "/n/ vs /l/ 複雜環境聽力訓練",
-        "h1": "/n/ vs /l/ 複雜環境聽力辨識",
-        "subtitle": "Listening Discrimination Trainer — Complex Environment (Multi-syllable)",
-        "storage_key": "nl-complex-listening-trainer-v1",
-        "accent_color": "#2563eb",
-        "accent_hover": "#1d4ed8",
-        "voice_mode": "pool",
-        "sound_a": {"id": "n", "label": "/n/", "example": "needing, nightly, nearly",
-                     "color": "#0891b2", "bg": "#ecfeff", "border": "#a5f3fc"},
-        "sound_b": {"id": "l", "label": "/l/", "example": "leading, lightly, really",
-                     "color": "#d97706", "bg": "#fffbeb", "border": "#fcd34d"},
-        "stages": [
-            {"icon": "🎯", "title": "needing vs leading", "desc": "2 組核心詞對<br>needing·nightly<br>（多音節複雜環境）"},
-            {"icon": "🔀", "title": "6 組混合詞對", "desc": "nearly·nothing·nervous<br>really·learning·lighter …"},
-            {"icon": "📻", "title": "完整句子辨識", "desc": "句中找出<br>/n/ 或 /l/ 音<br>含 medial /l/ 詞"},
-        ],
-        "bonus_preview": [
-            {"word": "narrow", "sound": "n", "ipa": "/ˈnær.oʊ/"},
-            {"word": "living", "sound": "l", "ipa": "/ˈlɪ.vɪŋ/"},
-            {"word": "lonely", "sound": "l", "ipa": "/ˈloʊn.li/"},
-            {"word": "lovely", "sound": "l", "ipa": "/ˈlʌv.li/"},
-        ],
-        "has_sentences": True,
-        "report_title": "/n/ vs /l/ 複雜環境聽力練習報告",
-        "report_stage_names": {
-            1: "needing vs leading（核心詞對）",
-            2: "6 組混合詞對",
-            3: "句子中辨識（含 medial /l/）",
-        },
-        "error_direction_a_label": "/n/ → /l/",
-        "error_direction_b_label": "/l/ → /n/",
-        "error_direction_note_a": "⚠️ 主方向為 /n/ → /l/，鼻音被誤聽為舌側音",
-        "error_direction_note_b": "⚠️ 主方向為 /l/ → /n/，舌側音被誤聽為鼻音",
-    },
-
-    "n-l-core": {
-        "filename": "nl-listening-trainer-core.html",
-        "title_tag": "/n/ vs /l/ 核心聽力訓練",
-        "h1": "/n/ vs /l/ 核心聽力辨識",
-        "subtitle": "Listening Discrimination Trainer — Core Pairs Only",
-        "storage_key": "nl-core-listening-trainer-v2",
-        "accent_color": "#2563eb",
-        "accent_hover": "#1d4ed8",
-        "voice_mode": "pool",
-        "sound_a": {"id": "n", "label": "/n/", "example": "need, night, no",
-                     "color": "#0891b2", "bg": "#ecfeff", "border": "#a5f3fc"},
-        "sound_b": {"id": "l", "label": "/l/", "example": "lead, light, low",
-                     "color": "#d97706", "bg": "#fffbeb", "border": "#fcd34d"},
-        "stages": [
-            {"icon": "🎯", "title": "need vs lead", "desc": "4 組核心詞對<br>need·night·no·nap"},
-        ],
-        "bonus_preview": [
-            {"word": "knot", "sound": "n", "ipa": "/nɒt/"},
-            {"word": "lot",  "sound": "l", "ipa": "/lɒt/"},
-            {"word": "snow", "sound": "n", "ipa": "/snoʊ/"},
-            {"word": "slow", "sound": "l", "ipa": "/sloʊ/"},
-        ],
-        "has_sentences": False,
-        "report_title": "/n/ vs /l/ 核心聽力練習報告",
-        "report_stage_names": {
-            1: "need vs lead（核心詞對）",
-        },
-        "error_direction_a_label": "/n/ → /l/",
-        "error_direction_b_label": "/l/ → /n/",
-        "error_direction_note_a": "⚠️ 主方向為 /n/ → /l/",
-        "error_direction_note_b": "⚠️ 主方向為 /l/ → /n/",
-    },
-
     "f-th": {
         "filename": "f-th-listening-trainer.html",
         "title_tag": "/f/ vs /θ/ Listening Trainer",
@@ -260,37 +190,6 @@ TRAINERS = {
         "error_direction_b_label": "/θ/ → /f/",
         "error_direction_note_a": "⚠️ 主方向為 /f/ → /θ/",
         "error_direction_note_b": "⚠️ 主方向為 /θ/ → /f/",
-    },
-
-    "thr-tr": {
-        "filename": "thr-tr-listening-trainer.html",
-        "title_tag": "/θr/ vs /tr/ Listening Trainer",
-        "h1": "/θr/ vs /tr/ 聽力辨識",
-        "subtitle": "Listening Discrimination Trainer — /θ/ in Cluster",
-        "storage_key": "thr-tr-listening-trainer-v1",
-        "accent_color": "#2563eb",
-        "accent_hover": "#1d4ed8",
-        "voice_mode": "pool",
-        "sound_a": {"id": "thr", "label": "/θr/", "example": "three, through, thrill",
-                     "color": "#0891b2", "bg": "#ecfeff", "border": "#a5f3fc"},
-        "sound_b": {"id": "tr", "label": "/tr/", "example": "tree, true, trill",
-                     "color": "#7c3aed", "bg": "#f5f3ff", "border": "#c4b5fd"},
-        "stages": [
-            {"icon": "🎯", "title": "three vs tree", "desc": "3 組核心詞對<br>three·through·thrill"},
-            {"icon": "🔀", "title": "4 組混合詞對", "desc": "thread·tread<br>加入擴充詞"},
-            {"icon": "📻", "title": "完整句子辨識", "desc": "句中找出<br>/θr/ 或 /tr/ 音"},
-        ],
-        "has_sentences": True,
-        "report_title": "/θr/ vs /tr/ 聽力練習報告",
-        "report_stage_names": {
-            1: "three vs tree（核心詞對）",
-            2: "4 組混合詞對",
-            3: "句子中辨識",
-        },
-        "error_direction_a_label": "/θr/ → /tr/",
-        "error_direction_b_label": "/tr/ → /θr/",
-        "error_direction_note_a": "⚠️ 主方向為 /θr/ → /tr/，/θ/ 在叢集中被聽成 /t/",
-        "error_direction_note_b": "⚠️ 主方向為 /tr/ → /θr/，與產出方向相反——值得注意",
     },
 
     "u-oo": {
@@ -892,8 +791,6 @@ def build_index(trainers):
     groups = [
         ("/n/ vs /l/", [
             ("n-l", "基本辨識（含句子）"),
-            ("n-l-core", "核心詞對（4 對）"),
-            ("n-l-complex", "複雜環境"),
             ("nl-training", "訓練模式（逐題即時回饋）"),
             ("n-l-regression", "測驗（退階三關）"),
         ]),
@@ -905,14 +802,11 @@ def build_index(trainers):
         ("其他子音對", [
             ("tr-ch", "/tr/ vs /tʃ/"),
             ("fr-fire", "/fr/ vs /f/"),
-            ("thr-tr", "/θr/ vs /tr/"),
-            ("v-f", "/v/ vs /f/（+ every 重建）"),
         ]),
         ("母音", [
             ("u-oo", "/ʊ/ vs /uː/"),
             ("u-oo-nonword", "/ʊ/ vs /uː/ 假詞辨識（純音位）"),
             ("u-oo-training", "/ʊ/ vs /uː/ 訓練模式（逐題即時回饋）"),
-            ("vowel-assessment", "Minimal Pair 評估（第 0 天）"),
         ]),
         ("詞尾／音節", [
             ("chose-chosen", "chose vs chosen（#23 詞尾 -sen 閘門）"),
@@ -951,8 +845,6 @@ def main():
     # Copy hand-maintained trainers into dist/
     import shutil
     manual_trainers = {
-        "v-f": "v-f-listening-trainer.html",
-        "vowel-assessment": "vowel-minimal-pairs-assessment.html",
         "nl-training": "nl-listening-trainer-training.html",
         "u-oo-training": "u-oo-training.html",
         "n-l-regression": "nl-listening-trainer-regression.html",
@@ -974,14 +866,6 @@ def main():
     all_trainers["nl-training"] = {
         "filename": "nl-listening-trainer-training.html",
         "h1": "/n/ vs /l/ 聽力訓練（訓練模式）",
-    }
-    all_trainers["v-f"] = {
-        "filename": "v-f-listening-trainer.html",
-        "h1": "/v/ vs /f/ 聽力辨識 + every 聽覺重建",
-    }
-    all_trainers["vowel-assessment"] = {
-        "filename": "vowel-minimal-pairs-assessment.html",
-        "h1": "母音 Minimal Pair 聽辨評估（第 0 天評估）",
     }
     all_trainers["u-oo-training"] = {
         "filename": "u-oo-training.html",
