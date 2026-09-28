@@ -262,35 +262,6 @@ TRAINERS = {
         "error_direction_note_b": "⚠️ 主方向為 /θ/ → /f/",
     },
 
-    "f-th-simple": {
-        "filename": "f-th-listening-trainer-simple.html",
-        "title_tag": "/f/ vs /θ/ 聽力訓練",
-        "h1": "/f/ vs /θ/ 簡短版（無句子）",
-        "subtitle": "Listening Discrimination Trainer",
-        "storage_key": "f-th-simple-trainer-v4",
-        "accent_color": "#2563eb",
-        "accent_hover": "#1d4ed8",
-        "voice_mode": "single",
-        "sound_a": {"id": "f", "label": "/f/", "example": "first, free, fin",
-                     "color": "#d97706", "bg": "#fffbeb", "border": "#fcd34d"},
-        "sound_b": {"id": "th", "label": "/θ/", "example": "third, three, thin",
-                     "color": "#0891b2", "bg": "#ecfeff", "border": "#a5f3fc"},
-        "stages": [
-            {"icon": "🎯", "title": "first vs third", "desc": "4 組核心詞對<br>first·free·fin·fought"},
-            {"icon": "🔀", "title": "6 組混合詞對", "desc": "four·Fred<br>thaw·thread …"},
-        ],
-        "has_sentences": False,
-        "report_title": "/f/ vs /θ/ 聽力練習報告",
-        "report_stage_names": {
-            1: "first vs third（核心詞對）",
-            2: "6 組混合詞對",
-        },
-        "error_direction_a_label": "/f/ → /θ/",
-        "error_direction_b_label": "/θ/ → /f/",
-        "error_direction_note_a": "⚠️ 主方向為 /f/ → /θ/",
-        "error_direction_note_b": "⚠️ 主方向為 /θ/ → /f/",
-    },
-
     "thr-tr": {
         "filename": "thr-tr-listening-trainer.html",
         "title_tag": "/θr/ vs /tr/ Listening Trainer",
@@ -928,7 +899,6 @@ def build_index(trainers):
         ]),
         ("/f/ vs /θ/", [
             ("f-th", "基本辨識（3 關含句子）"),
-            ("f-th-simple", "簡短版（無句子）"),
             ("f-th-focused", "純聽音（不顯示文字）"),
             ("f-th-nonword", "假詞辨識（純音位）"),
         ]),
