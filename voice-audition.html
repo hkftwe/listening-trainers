@@ -95,6 +95,13 @@
   .voice-info { flex: 1; min-width: 0; }
   .voice-name { font-size: 0.95rem; font-weight: 500; }
   .voice-lang { font-size: 0.75rem; color: var(--muted); }
+  .qtag { font-size: 0.72rem; font-weight: 600; padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: 1px; }
+  .qtag.low { background: #fee2e2; color: #b91c1c; }
+  .qtag.high { background: #dcfce7; color: #15803d; }
+  .qtag.neural { background: #dbeafe; color: #1d4ed8; }
+  [data-theme="dark"] .qtag.low { background: #7f1d1d; color: #fecaca; }
+  [data-theme="dark"] .qtag.high { background: #14532d; color: #bbf7d0; }
+  [data-theme="dark"] .qtag.neural { background: #1e3a8a; color: #bfdbfe; }
   .mark {
     flex: 0 0 auto; width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--border);
     background: var(--card); cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center;
@@ -156,7 +163,7 @@
 
 <div class="card">
   <h2>語音列表 <span id="voiceCount" style="color:var(--muted);font-weight:400"></span></h2>
-  <p class="hint">已自動隱藏新奇／音效語音（Albert、Bells、Bubbles、Trinoids…等）。</p>
+  <p class="hint">已自動隱藏新奇／音效語音（Albert、Bells、Bubbles、Trinoids…等）。品質標籤（🔴 低品質／🟢 高品質／🟦 神經）依 voiceURI 粗判，僅供第一輪過濾，最終以耳朵為準。</p>
   <div id="voiceList"><p class="empty">載入語音中…（若遲遲沒有，請確認瀏覽器允許語音合成）</p></div>
 </div>
 
@@ -187,6 +194,15 @@
     'Deranged': 1, 'Good News': 1, 'Hysterical': 1, 'Pipe Organ': 1, 'Trinoids': 1, 'Whisper': 1, 'Wobble': 1, 'Zarvox': 1
   };
   function isBlocked(name) { return BLOCKED_VOICES[name] === 1; }
+
+  // ── 語音品質粗判（依 voiceURI／name 子字串；僅第一輪過濾，最終以耳朵為準）──
+  function voiceQuality(v) {
+    var s = ((v.voiceURI || '') + ' ' + (v.name || '')).toLowerCase();
+    if (s.indexOf('compact') !== -1) return ['低品質', 'low'];
+    if (s.indexOf('siri') !== -1 || s.indexOf('natural') !== -1) return ['神經', 'neural'];
+    if (s.indexOf('premium') !== -1 || s.indexOf('enhanced') !== -1) return ['高品質', 'high'];
+    return null;
+  }
 
   // ── 深色模式 ──
   function applyTheme(t) {
@@ -276,11 +292,13 @@
     for (var i = 0; i < group.length; i++) {
       var v = group[i];
       var m = marks[v.name];
+      var q = voiceQuality(v);
+      var qtag = q ? '<span class="qtag ' + q[1] + '">' + q[0] + '</span>' : '';
       html +=
         '<div class="voice" data-name="' + escAttr(v.name) + '">' +
           '<button class="play" title="播放">▶</button>' +
           '<div class="voice-info">' +
-            '<div class="voice-name">' + escHtml(v.name) + '</div>' +
+            '<div class="voice-name">' + escHtml(v.name) + qtag + '</div>' +
             '<div class="voice-lang">' + escHtml(v.lang || '—') + (v.default ? ' · 預設' : '') + '</div>' +
           '</div>' +
           '<button class="mark good' + (m === 'good' ? ' on' : '') + '" title="好用">👍</button>' +
