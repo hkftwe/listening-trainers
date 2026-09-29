@@ -127,6 +127,17 @@
 </div>
 
 <div class="card">
+  <h2>重音測試句（點一下即設為試聽句——找「標重音清楚」的語音）</h2>
+  <div class="row" id="stressPresets" style="gap:6px;">
+    <button class="btn" data-s="Please present the present.">① 詞重音</button>
+    <button class="btn" data-s="Tom wants to buy some milk and bread.">② 句子重音</button>
+    <button class="btn" data-s="Kids play games.">③ 短句</button>
+    <button class="btn" data-s="The kids are playing games.">④ 長句（對照③）</button>
+  </div>
+  <p class="hint">判斷：① 名詞「PRE-sent」vs 動詞「pre-SENT」唸得不一樣＝有標詞重音（最銳利）。② wants／buy／milk／bread 突出、to／some／and 弱化縮短＝有句子重音＋弱讀。③④ 同一語音連播，兩句時長越接近＝越有重音節奏。選出標重音清楚的語音當日後跟讀／延遲跟讀的 TTS。建議先「清除標記」再測，避免與先前音素測試的標記混在一起。</p>
+</div>
+
+<div class="card">
   <h2>播放設定</h2>
   <div class="row">
     <span style="color:var(--muted);font-size:0.9rem">語速</span>
@@ -313,6 +324,12 @@
   $('useCustom').addEventListener('click', function () {
     if (!$('customSentence').value.trim()) { $('customSentence').focus(); return; }
     renderVoices();
+  });
+  $('stressPresets').addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('button[data-s]') : null;
+    if (!btn) return;
+    $('customSentence').value = btn.getAttribute('data-s');
+    $('customSentence').focus();
   });
   $('customSentence').addEventListener('input', function () {
     if (!$('customSentence').value.trim()) renderVoices();
