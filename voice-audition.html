@@ -156,6 +156,7 @@
 
 <div class="card">
   <h2>語音列表 <span id="voiceCount" style="color:var(--muted);font-weight:400"></span></h2>
+  <p class="hint">已自動隱藏新奇／音效語音（Albert、Bells、Bubbles、Trinoids…等）。</p>
   <div id="voiceList"><p class="empty">載入語音中…（若遲遲沒有，請確認瀏覽器允許語音合成）</p></div>
 </div>
 
@@ -179,6 +180,13 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var fixedSentence = $('fixedSentence').textContent.trim();
+
+  // ── 封鎖語音（macOS 新奇／音效語音，對語言學習無用）──
+  var BLOCKED_VOICES = {
+    'Albert': 1, 'Bad News': 1, 'Bahh': 1, 'Bells': 1, 'Boing': 1, 'Bubbles': 1, 'Cellos': 1,
+    'Deranged': 1, 'Good News': 1, 'Hysterical': 1, 'Pipe Organ': 1, 'Trinoids': 1, 'Whisper': 1, 'Wobble': 1, 'Zarvox': 1
+  };
+  function isBlocked(name) { return BLOCKED_VOICES[name] === 1; }
 
   // ── 深色模式 ──
   function applyTheme(t) {
@@ -240,6 +248,7 @@
     var en = [], other = [];
     for (var i = 0; i < voices.length; i++) {
       var v = voices[i];
+      if (isBlocked(v.name)) continue;
       (v.lang && v.lang.toLowerCase().indexOf('en') === 0 ? en : other).push(v);
     }
     en.sort(function (a, b) { return a.name.localeCompare(b.name); });
