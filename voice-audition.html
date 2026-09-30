@@ -163,7 +163,7 @@
 
 <div class="card">
   <h2>語音列表 <span id="voiceCount" style="color:var(--muted);font-weight:400"></span></h2>
-  <p class="hint">已自動隱藏新奇／音效語音（Albert、Bells、Bubbles、Trinoids…等）。品質標籤（🔴 低品質／🟢 高品質／🟦 神經）依 voiceURI 粗判，僅供第一輪過濾，最終以耳朵為準。</p>
+  <p class="hint">已自動隱藏新奇／音效＋低品質語音（Albert、Bells、Shelley、Rocko…等）。品質標籤（🔴 低品質／🟢 高品質／🟦 神經）依 voiceURI 粗判，僅供第一輪過濾，最終以耳朵為準。</p>
   <div id="voiceList"><p class="empty">載入語音中…（若遲遲沒有，請確認瀏覽器允許語音合成）</p></div>
 </div>
 
@@ -188,10 +188,11 @@
   var $ = function (id) { return document.getElementById(id); };
   var fixedSentence = $('fixedSentence').textContent.trim();
 
-  // ── 封鎖語音（macOS 新奇／音效語音，對語言學習無用）──
+  // ── 封鎖語音（macOS 新奇／音效語音＋低品質語音——唸 "Kids play games." 會糊掉）──
   var BLOCKED_VOICES = {
-    'Albert': 1, 'Bad News': 1, 'Bahh': 1, 'Bells': 1, 'Boing': 1, 'Bubbles': 1, 'Cellos': 1,
-    'Deranged': 1, 'Good News': 1, 'Hysterical': 1, 'Jester': 1, 'Pipe Organ': 1, 'Trinoids': 1, 'Whisper': 1, 'Wobble': 1, 'Zarvox': 1
+    'Albert': 1, 'Bad News': 1, 'Bahh': 1, 'Bells': 1, 'Boing': 1, 'Bubbles': 1, 'Cellos': 1, 'Deranged': 1,
+    'Eddy': 1, 'Flo': 1, 'Good News': 1, 'Grandma': 1, 'Grandpa': 1, 'Hysterical': 1, 'Jester': 1, 'Organ': 1,
+    'Pipe Organ': 1, 'Reed': 1, 'Rocko': 1, 'Sandy': 1, 'Shelley': 1, 'Trinoids': 1, 'Whisper': 1, 'Wobble': 1, 'Zarvox': 1
   };
   function isBlocked(name) { return BLOCKED_VOICES[name] === 1; }
 
