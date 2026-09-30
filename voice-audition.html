@@ -158,6 +158,11 @@
       <button data-filter="en" class="active">只英文</button>
       <button data-filter="all">全部</button>
     </div>
+    <span style="color:var(--muted);font-size:0.9rem">排序</span>
+    <div class="seg" id="sortSeg">
+      <button data-sort="quality" class="active">品質</button>
+      <button data-sort="name">名稱</button>
+    </div>
   </div>
 </div>
 
@@ -182,6 +187,7 @@
   var marks = {};           // { voiceName: 'good' | 'bad' }
   var currentRate = 1.0;
   var currentFilter = 'en';
+  var currentSort = 'quality';
   var marksKey = 'voice-audition-marks';
   var themeKey = 'voice-audition-theme';
 
@@ -203,6 +209,29 @@
     if (s.indexOf('siri') !== -1 || s.indexOf('natural') !== -1) return ['神經', 'neural'];
     if (s.indexOf('premium') !== -1 || s.indexOf('enhanced') !== -1) return ['高品質', 'high'];
     return null;
+  }
+  function qualityRank(v) {
+    var q = voiceQuality(v);
+    if (!q) return 1;                    // 未知（legacy）
+    if (q[1] === 'neural') return 3;     // 神經
+    if (q[1] === 'high') return 2;       // 高品質
+    return 0;                            // 低品質（已封鎖，理論不進）
+  }
+  function sortVoices(arr, isOther) {
+    if (currentSort === 'quality') {
+      arr.sort(function (a, b) {
+        var r = qualityRank(b) - qualityRank(a);
+        if (r !== 0) return r;
+        return a.name.localeCompare(b.name);
+      });
+    } else if (isOther) {
+      arr.sort(function (a, b) {
+        var l = (a.lang || '').localeCompare(b.lang || '');
+        return l !== 0 ? l : a.name.localeCompare(b.name);
+      });
+    } else {
+      arr.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    }
   }
 
   // ── 深色模式 ──
@@ -268,11 +297,8 @@
       if (isBlocked(v.name)) continue;
       (v.lang && v.lang.toLowerCase().indexOf('en') === 0 ? en : other).push(v);
     }
-    en.sort(function (a, b) { return a.name.localeCompare(b.name); });
-    other.sort(function (a, b) {
-      var l = (a.lang || '').localeCompare(b.lang || '');
-      return l !== 0 ? l : a.name.localeCompare(b.name);
-    });
+    sortVoices(en, false);
+    sortVoices(other, true);
 
     var list = $('voiceList');
     list.innerHTML = '';
@@ -346,6 +372,13 @@
     if (e.target.tagName !== 'BUTTON') return;
     currentFilter = e.target.getAttribute('data-filter');
     var btns = $('filterSeg').querySelectorAll('button');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i] === e.target);
+    renderVoices();
+  });
+  $('sortSeg').addEventListener('click', function (e) {
+    if (e.target.tagName !== 'BUTTON') return;
+    currentSort = e.target.getAttribute('data-sort');
+    var btns = $('sortSeg').querySelectorAll('button');
     for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i] === e.target);
     renderVoices();
   });
