@@ -168,7 +168,7 @@
 
 <div class="card">
   <h2>語音列表 <span id="voiceCount" style="color:var(--muted);font-weight:400"></span></h2>
-  <p class="hint">已自動隱藏新奇／音效＋唸不準語音（Albert、Bells、Shelley、Rocko…等）。品質標籤（🟡 精簡／🟢 高品質／🟦 神經）依 voiceURI 粗判，僅供第一輪過濾，最終以耳朵為準——🟡 精簡＝音質較低但唸得準，可接受。</p>
+  <p class="hint">已自動隱藏新奇／音效＋唸不準語音（Albert、Bells、Shelley、Rocko…等）。品質標籤（🟡 精簡／🟢 高品質／🟦 自然）依 voiceURI 粗判，僅供第一輪過濾，最終以耳朵為準——🟡 精簡＝音質較低但唸得準；🟦 自然＝最接近真人語調。</p>
   <div id="voiceList"><p class="empty">載入語音中…（若遲遲沒有，請確認瀏覽器允許語音合成）</p></div>
 </div>
 
@@ -207,14 +207,14 @@
   function voiceQuality(v) {
     var s = ((v.voiceURI || '') + ' ' + (v.name || '')).toLowerCase();
     if (s.indexOf('compact') !== -1) return ['精簡', 'compact'];
-    if (s.indexOf('siri') !== -1 || s.indexOf('natural') !== -1) return ['神經', 'neural'];
+    if (s.indexOf('siri') !== -1 || s.indexOf('natural') !== -1) return ['自然', 'neural'];
     if (s.indexOf('premium') !== -1 || s.indexOf('enhanced') !== -1) return ['高品質', 'high'];
     return null;
   }
   function qualityRank(v) {
     var q = voiceQuality(v);
     if (!q) return 0;                    // 未知（legacy／無標記）
-    if (q[1] === 'neural') return 3;     // 神經
+    if (q[1] === 'neural') return 3;     // 自然（siri/natural，最接近真人語調）
     if (q[1] === 'high') return 2;       // 高品質
     return 1;                            // 精簡（compact，音質較低但唸得準）
   }
