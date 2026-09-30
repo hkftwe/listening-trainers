@@ -95,6 +95,7 @@
   .voice-info { flex: 1; min-width: 0; }
   .voice-name { font-size: 0.95rem; font-weight: 500; }
   .voice-lang { font-size: 0.75rem; color: var(--muted); }
+  .voice-uri { font-size: 0.68rem; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; line-height: 1.3; margin-top: 2px; }
   .mark {
     flex: 0 0 auto; width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--border);
     background: var(--card); cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center;
@@ -151,6 +152,9 @@
       <button data-filter="en" class="active">只英文</button>
       <button data-filter="all">全部</button>
     </div>
+    <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;color:var(--muted);font-size:0.9rem">
+      <input type="checkbox" id="showUri"> 顯示 voiceURI
+    </label>
   </div>
 </div>
 
@@ -175,6 +179,7 @@
   var marks = {};           // { voiceName: 'good' | 'bad' }
   var currentRate = 1.0;
   var currentFilter = 'en';
+  var showUri = false;      // 除錯：顯示每個語音的 voiceURI
   var marksKey = 'voice-audition-marks';
   var themeKey = 'voice-audition-theme';
 
@@ -277,12 +282,17 @@
     for (var i = 0; i < group.length; i++) {
       var v = group[i];
       var m = marks[v.name];
+      var uri = showUri
+        ? '<div class="voice-uri">' + escHtml(v.voiceURI || '（無 voiceURI）') +
+          (typeof v.localService === 'boolean' ? ' · ' + (v.localService ? 'local' : 'network') : '') + '</div>'
+        : '';
       html +=
         '<div class="voice" data-name="' + escAttr(v.name) + '">' +
           '<button class="play" title="播放">▶</button>' +
           '<div class="voice-info">' +
             '<div class="voice-name">' + escHtml(v.name) + '</div>' +
             '<div class="voice-lang">' + escHtml(v.lang || '—') + (v.default ? ' · 預設' : '') + '</div>' +
+            uri +
           '</div>' +
           '<button class="mark good' + (m === 'good' ? ' on' : '') + '" title="好用">👍</button>' +
           '<button class="mark bad' + (m === 'bad' ? ' on' : '') + '" title="不好用">👎</button>' +
@@ -329,6 +339,10 @@
     currentFilter = e.target.getAttribute('data-filter');
     var btns = $('filterSeg').querySelectorAll('button');
     for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i] === e.target);
+    renderVoices();
+  });
+  $('showUri').addEventListener('change', function () {
+    showUri = this.checked;
     renderVoices();
   });
   $('useCustom').addEventListener('click', function () {
