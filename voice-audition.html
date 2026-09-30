@@ -194,7 +194,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var fixedSentence = $('fixedSentence').textContent.trim();
 
-  // ── 封鎖語音（macOS 新奇／音效語音＋低品質語音——唸 "Kids play games." 會糊掉）──
+  // ── 封鎖語音（macOS 新奇／音效語音＋唸不準的 legacy 語音——唸 "Kids play games." 會糊掉）──
   var BLOCKED_VOICES = {
     'Albert': 1, 'Bad News': 1, 'Bahh': 1, 'Bells': 1, 'Boing': 1, 'Bubbles': 1, 'Cellos': 1, 'Deranged': 1,
     'Eddy': 1, 'Flo': 1, 'Good News': 1, 'Grandma': 1, 'Grandpa': 1, 'Hysterical': 1, 'Jester': 1, 'Organ': 1,
