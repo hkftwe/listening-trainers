@@ -613,7 +613,7 @@ def _voice_js_single():
   const english = all.filter(v => v.lang.startsWith('en'));
   const pool = [];
   const names = new Set();
-  const allowed = ['Karen', 'Daniel', 'Moira', 'Samantha', 'Rocko'];
+  const allowed = ['Karen', 'Daniel', 'Moira', 'Samantha'];
   for (const name of allowed) {
     const match = english.find(v => v.name === name);
     if (match && !names.has(match.name)) { pool.push(match); names.add(match.name); }
