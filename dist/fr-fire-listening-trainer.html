@@ -1042,16 +1042,6 @@ function buildVoicePool() {
     if (v.name === 'Veena' && !names.has('Veena')) { preferred.push(v); names.add('Veena'); }
     if (v.name === 'Tom' && !names.has('Tom')) { preferred.push(v); names.add('Tom'); }
   }
-  for (const v of english) {
-    if (preferred.length >= 5) break;
-    if (!names.has(v.name)) { preferred.push(v); names.add(v.name); }
-  }
-  if (preferred.length < 3) {
-    for (const v of all) {
-      if (preferred.length >= 3) break;
-      if (!names.has(v.name)) { preferred.push(v); names.add(v.name); }
-    }
-  }
   state.voicePool = preferred;
   updateVoiceLabel();
 }

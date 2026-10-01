@@ -155,10 +155,6 @@ function buildVoicePool() {
     const v = english.find(x => x.name === name);
     if (v && !seen.has(v.name)) { preferred.push(v); seen.add(v.name); }
   }
-  for (const v of english) {
-    if (preferred.length >= 6) break;
-    if (!seen.has(v.name)) { preferred.push(v); seen.add(v.name); }
-  }
   voicePool = preferred;
 }
 
